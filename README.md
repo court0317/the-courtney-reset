@@ -11,3 +11,15 @@ Deploy every file in this folder to GitHub Pages, then open once with `?v=rooted
 - Replaced unsupported instant scrolling for better iPhone compatibility.
 
 Rooted 2.0 recovery build: rebuilt home UI from stable v8.1.3 while preserving app logic.
+
+
+## Rooted 9 Interactive Living World
+- Time-aware greeting and gentle streak
+- Daily mood check-in and monthly mood history
+- Australian seasonal garden, time-of-day ambience and daily visitors
+- Unlockable featured flowers and habit celebrations
+- Optional generated garden sounds (no external audio files)
+- Guided journal prompts
+- Interactive Memory Tree with locally saved moments
+
+All Rooted 9 data is additive and stored separately under `rooted-v9-interactive`. Existing planner data and features are unchanged.

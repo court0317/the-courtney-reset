@@ -1442,3 +1442,96 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('click',e=>{if(e.target.closest('[data-go="world"],[data-go="journey-map"],[data-go="memory"]'))setTimeout(renderAllV8,30)},true);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderAllV8,{once:true});else renderAllV8();
 })();
+
+
+// Rooted 9 — Interactive Living World. Isolated storage and additive rendering.
+(() => {
+  'use strict';
+  const KEY='rooted-v9-interactive';
+  const defaults={moods:{},featuredFlower:'🌼',memories:[],ambient:'off',lastCelebratedPoints:0};
+  const load=()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return {...defaults}}};
+  const save=x=>localStorage.setItem(KEY,JSON.stringify(x));
+  const dayKey=(date=new Date())=>{const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');return `${y}-${m}-${d}`};
+  const $=id=>document.getElementById(id);
+  const escapeHtml=s=>String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const moodIcons=['','😔','😕','😐','🙂','😁'];
+  const flowerLevels=[{icon:'🌼',name:'Daisy',need:0},{icon:'🌸',name:'Blossom',need:7},{icon:'🌷',name:'Tulip',need:15},{icon:'🌻',name:'Sunflower',need:30},{icon:'🌺',name:'Hibiscus',need:50},{icon:'🌹',name:'Rose',need:75}];
+  const prompts=['Today I’m proud of…','One thing I survived today was…','Something my body needed today was…','A tiny win I do not want to forget is…','Tomorrow I want to give myself…','One thing that felt lighter today was…'];
+  let audioCtx=null,ambientNodes=[];
+  function points(){try{return typeof gardenCounts==='function'?gardenCounts().total:0}catch{return 0}}
+  function gentleStreak(){
+    try{if(typeof calcStreak==='function')return Number(calcStreak())||0}catch{}
+    const data=load(),dates=Object.keys(data.moods||{}).sort().reverse();let n=0,cursor=new Date();
+    for(let i=0;i<365;i++){if(data.moods[dayKey(cursor)])n++;else if(i>0)break;cursor.setDate(cursor.getDate()-1)}return n;
+  }
+  function renderGreeting(){
+    const h=new Date().getHours(),p=points(),name=(typeof rootedProfile==='function'&&rootedProfile()?.name)||'Courtney';
+    const greeting=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+    const lines=p===0?'Your garden is ready for one tiny beginning.':p<10?'Your roots are waking up—one little choice is enough.':p<25?'Your consistency is turning into new leaves.':'Come see what your kindness to yourself has grown.';
+    if($('rootedGreeting'))$('rootedGreeting').textContent=`${greeting}, ${name}.`;
+    if($('rootedDailyLine'))$('rootedDailyLine').textContent=lines;
+    const streak=gentleStreak();if($('interactiveStreak'))$('interactiveStreak').textContent=`${streak} ${streak===1?'day':'days'}`;
+    $('interactiveStreakIcon')?.classList.toggle('sleeping',streak===0);
+  }
+  function renderMood(){
+    const data=load(),today=data.moods[dayKey()];
+    document.querySelectorAll('#homeMoodPicker [data-mood]').forEach(b=>b.classList.toggle('selected',Number(b.dataset.mood)===Number(today)));
+    const wrap=$('moodHistory'),empty=$('moodHistoryEmpty');if(!wrap)return;
+    wrap.innerHTML='';const now=new Date();const start=new Date(now.getFullYear(),now.getMonth(),1);const end=new Date(now.getFullYear(),now.getMonth()+1,0);
+    for(let i=1;i<=end.getDate();i++){const date=new Date(now.getFullYear(),now.getMonth(),i),val=data.moods[dayKey(date)]||0;const cell=document.createElement('div');cell.className='mood-day';cell.title=date.toLocaleDateString('en-AU',{day:'numeric',month:'short'});cell.innerHTML=`${val?moodIcons[val]:'·'}<small>${i}</small>`;wrap.appendChild(cell)}
+    if(empty)empty.hidden=Object.keys(data.moods||{}).length>0;
+  }
+  function seasonInfo(){
+    const m=new Date().getMonth()+1; // Australian seasons
+    if([12,1,2].includes(m))return ['Summer','summer','☀️'];
+    if([3,4,5].includes(m))return ['Autumn','autumn','🍂'];
+    if([6,7,8].includes(m))return ['Winter','winter','❄️'];
+    return ['Spring','spring','🌸'];
+  }
+  function dailyVisitor(){const visitors=['🐞','🐝','🦋','🐦','🐸'];const seed=Number(dayKey().replaceAll('-',''));return visitors[seed%visitors.length]}
+  function renderGardenWorld(){
+    const [label,season,icon]=seasonInfo(),h=new Date().getHours(),sky=$('gardenSky');
+    if($('gardenSeasonBadge'))$('gardenSeasonBadge').textContent=`${icon} ${label}`;
+    if($('gardenWeatherLine'))$('gardenWeatherLine').textContent=h<6||h>=19?`A quiet ${label.toLowerCase()} night has settled over your garden.`:h<9?`Soft ${label.toLowerCase()} morning light is helping everything wake up.`:`Your garden is enjoying a gentle ${label.toLowerCase()} day.`;
+    if(sky){sky.classList.remove('season-summer','season-autumn','season-winter','night-garden','dawn-garden','rain-garden');if(season!=='spring')sky.classList.add(`season-${season}`);if(h<6||h>=19)sky.classList.add('night-garden');else if(h<9)sky.classList.add('dawn-garden');if((Number(dayKey().slice(-2))+new Date().getMonth())%5===0)sky.classList.add('rain-garden');}
+    const visitor=$('gardenVisitors');if(visitor&&!visitor.querySelector('.daily-special-visitor'))visitor.insertAdjacentHTML('beforeend',`<span class="daily-special-visitor" style="left:78%;top:50%" title="Today's visitor">${dailyVisitor()}</span>`);
+  }
+  function renderFlowers(){
+    const data=load(),total=points(),unlocked=flowerLevels.filter(f=>total>=f.need);if(!unlocked.some(f=>f.icon===data.featuredFlower)){data.featuredFlower=unlocked[0].icon;save(data)}
+    const box=$('flowerUnlocks');if(box)box.innerHTML=flowerLevels.map(f=>`<span class="flower-chip ${total>=f.need?'':'locked'}">${total>=f.need?f.icon:'🔒'} ${f.name}${total>=f.need?'':` · ${f.need}`}</span>`).join('');
+    const select=$('featuredFlowerSelect');if(select){select.innerHTML=unlocked.map(f=>`<option value="${f.icon}" ${f.icon===data.featuredFlower?'selected':''}>${f.icon} ${f.name}</option>`).join('')}
+    document.querySelectorAll('#gardenFlowers span,#homeGardenFlowers span').forEach((el,i)=>{if(i%2===0)el.textContent=data.featuredFlower});
+  }
+  function celebrate(){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const wrap=document.createElement('div');wrap.className='rooted-celebration';const bits=['🍃','🌿','✨','🌸'];for(let i=0;i<18;i++){const s=document.createElement('span');s.textContent=bits[i%bits.length];s.style.left=`${Math.random()*100}%`;s.style.setProperty('--drift',`${(Math.random()-.5)*160}px`);s.style.animationDelay=`${Math.random()*.35}s`;wrap.appendChild(s)}document.body.appendChild(wrap);setTimeout(()=>wrap.remove(),2200);
+  }
+  function checkCelebration(){const data=load(),p=points();if(data.lastCelebratedPoints&&p>data.lastCelebratedPoints)celebrate();data.lastCelebratedPoints=p;save(data)}
+  function renderPrompt(){const el=$('journalPrompt');if(el)el.textContent=prompts[(new Date().getDate()-1)%prompts.length]}
+  function stopAmbient(){ambientNodes.forEach(n=>{try{n.stop?.();n.disconnect?.()}catch{}});ambientNodes=[];document.querySelectorAll('[data-ambient]').forEach(b=>b.classList.remove('playing'));const d=load();d.ambient='off';save(d)}
+  function startAmbient(kind){
+    stopAmbient();audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const master=audioCtx.createGain();master.gain.value=.035;master.connect(audioCtx.destination);ambientNodes.push(master);
+    const osc=(freq,type='sine',gain=.12)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.value=gain;o.connect(g).connect(master);o.start();ambientNodes.push(o,g)};
+    if(kind==='rain'){for(let i=0;i<4;i++)osc(160+i*55,'triangle',.08)}
+    if(kind==='forest'){osc(220,'sine',.08);osc(330,'sine',.04);osc(440,'sine',.025)}
+    if(kind==='ocean'){osc(90,'sine',.13);osc(125,'triangle',.06)}
+    document.querySelector(`[data-ambient="${kind}"]`)?.classList.add('playing');const d=load();d.ambient=kind;save(d)
+  }
+  function renderMemoryTree(){
+    const data=load(),crown=$('memoryTreeCrown'),list=$('memoryLeavesList');if(crown){crown.querySelectorAll('.memory-leaf').forEach(x=>x.remove());data.memories.slice(-18).forEach((m,i)=>{const b=document.createElement('button');b.className='memory-leaf';b.type='button';b.textContent=['🍃','🌿','🌸','✨'][i%4];b.style.left=`${18+(i*31)%65}%`;b.style.top=`${12+(i*23)%58}%`;b.title=`${m.title} — ${m.note}`;b.onclick=()=>alert(`${m.title}\n\n${m.note}\n\n${new Date(m.date).toLocaleDateString('en-AU')}`);crown.appendChild(b)})}
+    if(list)list.innerHTML=data.memories.slice().reverse().map((m,i)=>`<article class="memory-leaf-entry"><span>🍃</span><div><b>${escapeHtml(m.title)}</b><small>${new Date(m.date).toLocaleDateString('en-AU')} · ${escapeHtml(m.note)}</small></div><button type="button" data-delete-memory="${data.memories.length-1-i}" aria-label="Delete memory">×</button></article>`).join('')||'<p class="sub">Your first planted memory will appear as a leaf on the tree.</p>';
+  }
+  function renderAll(){renderGreeting();renderMood();renderGardenWorld();renderFlowers();renderPrompt();renderMemoryTree();checkCelebration()}
+  function bind(){
+    document.querySelectorAll('#homeMoodPicker [data-mood]').forEach(b=>b.addEventListener('click',()=>{const d=load();d.moods[dayKey()]=Number(b.dataset.mood);save(d);renderMood();renderGreeting()}));
+    $('featuredFlowerSelect')?.addEventListener('change',e=>{const d=load();d.featuredFlower=e.target.value;save(d);renderFlowers()});
+    document.querySelectorAll('[data-ambient]').forEach(b=>b.addEventListener('click',()=>startAmbient(b.dataset.ambient)));$('stopAmbient')?.addEventListener('click',stopAmbient);
+    $('newJournalPrompt')?.addEventListener('click',()=>{const el=$('journalPrompt');if(el){const cur=prompts.indexOf(el.textContent);el.textContent=prompts[(cur+1)%prompts.length]}});
+    $('plantMemoryBtn')?.addEventListener('click',()=>{const title=$('memoryTitleInput')?.value.trim(),note=$('memoryNoteInput')?.value.trim();if(!title||!note){alert('Add a title and a little note first.');return}const d=load();d.memories.push({title,note,date:new Date().toISOString()});save(d);$('memoryTitleInput').value='';$('memoryNoteInput').value='';renderMemoryTree();celebrate()});
+    $('memoryLeavesList')?.addEventListener('click',e=>{const b=e.target.closest('[data-delete-memory]');if(!b)return;const d=load();d.memories.splice(Number(b.dataset.deleteMemory),1);save(d);renderMemoryTree()});
+    document.addEventListener('rooted:pagechange',e=>{if(e.detail.pageId!=='garden')stopAmbient();setTimeout(renderAll,50)});
+    document.addEventListener('change',()=>setTimeout(renderAll,120));document.addEventListener('click',e=>{if(!e.target.closest('#homeMoodPicker,.ambient-buttons,.memory-form,.memory-leaves-list'))setTimeout(renderAll,120)});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAmbient()});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind();renderAll()},{once:true});else{bind();renderAll()}
+})();
