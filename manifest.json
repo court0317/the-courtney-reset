@@ -1,7 +1,7 @@
 {
   "name": "Rooted",
   "short_name": "Rooted",
-  "description": "A calm, personalised habit, movement and nourishment app.",
+  "description": "A calm personalised wellness app for movement, nourishment and lasting habits.",
   "start_url": "./?v=4",
   "display": "standalone",
   "background_color": "#f7f1e7",

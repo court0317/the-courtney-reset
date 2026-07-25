@@ -405,3 +405,148 @@ if(originalSave){
     return result;
   }
 }
+
+// Rooted Build 2: onboarding, progress rings and Today's Root
+const ROOTED_PROFILE_KEY='rooted-profile-v2';
+const ROOTED_ROOTS_KEY='rooted-daily-roots-v2';
+
+function rootedProfile(){
+  try{return JSON.parse(localStorage.getItem(ROOTED_PROFILE_KEY))||null}catch(e){return null}
+}
+function saveRootedProfile(profile){
+  localStorage.setItem(ROOTED_PROFILE_KEY,JSON.stringify(profile));
+}
+function rootedDailyRoots(){
+  try{return JSON.parse(localStorage.getItem(ROOTED_ROOTS_KEY))||{}}catch(e){return {}}
+}
+function rootedTodayKey(){
+  return new Date().toISOString().slice(0,10);
+}
+
+function setupRootedOnboarding(){
+  const shell=document.getElementById('rootedOnboarding');
+  if(!shell)return;
+  const profile=rootedProfile();
+  if(!profile){
+    shell.hidden=false;
+    requestAnimationFrame(()=>shell.classList.add('show'));
+  }
+
+  let step=1;
+  const showStep=n=>{
+    step=Math.max(1,Math.min(4,n));
+    shell.querySelectorAll('.onboarding-step').forEach(s=>s.classList.toggle('active',Number(s.dataset.step)===step));
+    shell.querySelectorAll('.onboarding-dots span').forEach((dot,i)=>dot.classList.toggle('active',i===step-1));
+  };
+  shell.querySelectorAll('.onboarding-next').forEach(btn=>btn.addEventListener('click',()=>showStep(step+1)));
+  shell.querySelectorAll('.onboarding-back').forEach(btn=>btn.addEventListener('click',()=>showStep(step-1)));
+  shell.querySelectorAll('[data-choice-group]').forEach(btn=>btn.addEventListener('click',()=>{
+    shell.querySelectorAll(`[data-choice-group="${btn.dataset.choiceGroup}"]`).forEach(x=>x.classList.remove('selected'));
+    btn.classList.add('selected');
+  }));
+  shell.querySelectorAll('[data-toggle-choice]').forEach(btn=>btn.addEventListener('click',()=>btn.classList.toggle('selected')));
+
+  const finish=()=>{
+    const goal=shell.querySelector('[data-choice-group="goal"].selected')?.dataset.choice||'Feel healthier';
+    const equipment={};
+    shell.querySelectorAll('[data-toggle-choice].selected').forEach(x=>equipment[x.dataset.toggleChoice]=true);
+    const profile={
+      name:document.getElementById('onboardName')?.value.trim()||'Courtney',
+      goal,
+      equipment,
+      walkGoal:Number(document.getElementById('onboardWalkGoal')?.value||30),
+      waterGoal:Number(document.getElementById('onboardWaterGoal')?.value||2.5),
+      completedAt:new Date().toISOString()
+    };
+    saveRootedProfile(profile);
+    shell.classList.remove('show');
+    setTimeout(()=>shell.hidden=true,350);
+    renderRootedPremium();
+  };
+  document.getElementById('finishOnboarding')?.addEventListener('click',finish);
+  document.getElementById('skipOnboarding')?.addEventListener('click',()=>{
+    saveRootedProfile({name:'Courtney',goal:'Feel healthier',equipment:{dumbbells:true,walkingPad:true,yogaMat:true},walkGoal:30,waterGoal:2.5,completedAt:new Date().toISOString()});
+    shell.classList.remove('show');
+    setTimeout(()=>shell.hidden=true,350);
+    renderRootedPremium();
+  });
+}
+
+function getWalkMinutesToday(){
+  try{
+    const walk=state.walking?.[dk]||state.walkLogs?.[dk]||{};
+    return Number(walk.minutes||0);
+  }catch(e){return 0}
+}
+
+function setRing(id,pct){
+  const el=document.getElementById(id);
+  if(el)el.style.setProperty('--progress',Math.max(0,Math.min(100,pct)));
+}
+
+function renderRootedPremium(){
+  const profile=rootedProfile()||{name:'Courtney',walkGoal:30,waterGoal:2.5};
+  const hour=new Date().getHours();
+  const greeting=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
+  const dateLabel=new Intl.DateTimeFormat('en-AU',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
+  const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
+
+  set('rootedGreeting',`${greeting}, ${profile.name}.`);
+  set('rootedDateLabel',dateLabel);
+  set('rootedDailyLine','Today is another chance to grow.');
+
+  let planned=0,guide=1600;
+  try{
+    const totals=nutritionTotals();
+    planned=totals.planned||0;
+    guide=totals.guide||1600;
+  }catch(e){}
+  const waterLit=(typeof waterCount==='function'?waterCount():0)*0.5;
+  const walkMinutes=getWalkMinutesToday();
+
+  set('ringCalories',planned);
+  set('ringCaloriesSub',`of ${guide.toLocaleString('en-AU')}`);
+  set('ringWater',waterLit.toFixed(1));
+  set('ringWaterSub',`of ${profile.waterGoal} L`);
+  set('ringWalk',walkMinutes);
+  set('ringWalkSub',`of ${profile.walkGoal} min`);
+
+  setRing('calorieRing',planned/guide*100);
+  setRing('waterRing',waterLit/profile.waterGoal*100);
+  setRing('walkRing',walkMinutes/profile.walkGoal*100);
+
+  const total=typeof totalRootedChoices==='function'?totalRootedChoices():0;
+  const heroPlant=document.getElementById('heroPlant');
+  if(heroPlant)heroPlant.textContent=total>=80?'🌳':total>=35?'🪴':total>=12?'🌿':'🌱';
+
+  const roots=rootedDailyRoots();
+  const done=!!roots[rootedTodayKey()];
+  const rootBtn=document.getElementById('completeTodaysRoot');
+  if(rootBtn){
+    rootBtn.textContent=done?'✓':'○';
+    rootBtn.classList.toggle('done',done);
+  }
+
+  let title='Take your first step';
+  let text='Complete one small habit to help your garden grow.';
+  if(waterLit<0.5){title='Drink your first bottle';text='Start gently with 500 mL of water.'}
+  else if(walkMinutes<profile.walkGoal){title='Make space for your walk';text=`You have ${Math.max(0,profile.walkGoal-walkMinutes)} minutes left today.`}
+  else if(planned<1400){title='Nourish yourself properly';text='Your meal plan is a little light today. Add something filling.'}
+  else {title='You are tending your roots';text='Choose one kind thing for your body before the day ends.'}
+  set('todaysRootTitle',done?'Today’s root is complete':title);
+  set('todaysRootText',done?'A small choice still counts. Your garden is growing.':text);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  setupRootedOnboarding();
+  renderRootedPremium();
+  document.getElementById('completeTodaysRoot')?.addEventListener('click',()=>{
+    const roots=rootedDailyRoots();
+    const key=rootedTodayKey();
+    roots[key]=!roots[key];
+    localStorage.setItem(ROOTED_ROOTS_KEY,JSON.stringify(roots));
+    renderRootedPremium();
+  });
+  document.addEventListener('click',()=>setTimeout(renderRootedPremium,30));
+  document.addEventListener('change',()=>setTimeout(renderRootedPremium,30));
+});

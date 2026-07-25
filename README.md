@@ -1,18 +1,13 @@
-# Rooted — Foundation Build 1
+# Rooted Build 2
 
-This is the first proper Rooted rebrand and design foundation.
+Includes:
+- First-run onboarding
+- Name, goal, equipment, walking and water preferences
+- Personalised greeting
+- Animated calorie, water and walking progress rings
+- Today's Root
+- Updated plant display
+- Existing workouts, meals, nutrition, walking and progress data retained
 
-## Included
-- Rooted name, leaf icon and splash screen
-- Sage, cream, sand and peach design system
-- Softer rounded cards and navigation
-- New Today focus tiles: Move, Nourish, Hydrate and Recover
-- A non-punitive plant-growth system
-- Plant stages: Seedling, Taking root, Growing strong and Deeply rooted
-- Existing personalised meals, calories, workouts, walking pad, dumbbell tracking and leftovers retained
-- Updated PWA manifest and cache
-
-## Upload
-Replace every file in the root of the GitHub repository.
-Commit suggestion: `Rooted foundation build`
-Then open the site once with `?v=rooted1`.
+Upload all files to the repository root and replace the old files.
+Open once with `?v=rooted2`.
