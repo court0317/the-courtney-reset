@@ -1,0 +1,29 @@
+ROOTED CLOUD — TWO FINAL SETUP STEPS
+
+1) CREATE THE SECURE DATABASE TABLE
+   • Open your Rooted-app project in Supabase.
+   • Click SQL Editor in the left sidebar.
+   • Click New query.
+   • Open the supplied file named supabase-setup.sql.
+   • Copy everything, paste it into the query, then click Run.
+
+2) ADD YOUR PUBLISHABLE KEY
+   • In Supabase, open Project Settings > API Keys.
+   • Copy the COMPLETE key beginning with: sb_publishable_
+   • Open the supplied file named supabase-config.js.
+   • Replace PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE with the complete key.
+   • Keep the quotation marks around it.
+
+Then upload all files in this ZIP to your GitHub repository as usual.
+
+WHAT THIS VERSION DOES
+• Adds email sign-up, login, logout and password reset.
+• Keeps each person's data private using Supabase Row Level Security.
+• Automatically moves existing Rooted progress from the current device into the first account used on that device.
+• Syncs all existing Rooted local-storage data as one private cloud snapshot, preserving the app's current functionality.
+• Keeps a local copy so the app remains responsive; cloud sync runs automatically after changes.
+
+IMPORTANT
+• The publishable key is meant for browser apps. Never use or paste a secret key or service-role key into Rooted.
+• Email confirmation is enabled by default in many Supabase projects. New users may need to click the confirmation email before logging in.
+• Test with your own account before sharing the link.

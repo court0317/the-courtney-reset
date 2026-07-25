@@ -1,4 +1,4 @@
-const CACHE='rooted-v10-story-world';
+const CACHE='rooted-cloud-v10-story-world';
 const ASSETS=[
   './',
   './index.html?v=rooted900',
