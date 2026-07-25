@@ -797,6 +797,20 @@
   <div id="recipeViewContent"></div>
 </dialog>
 
+<dialog id="recipeImportModal" class="recipe-modal recipe-import-modal">
+  <button class="modal-close" type="button" aria-label="Close">×</button>
+  <span class="eyebrow">Import recipe</span>
+  <h2>Bring in a recipe from a website</h2>
+  <p class="sub">This works best with sites that publish structured recipe data. Imports may need a quick review before you save them.</p>
+  <label class="recipe-import-field">Recipe URL<input id="recipeImportUrl" type="url" placeholder="https://example.com/recipe"></label>
+  <div class="recipe-import-actions">
+    <button class="primary" id="recipeImportSubmitBtn" type="button">Import</button>
+    <button class="outline" id="recipeImportCancelBtn" type="button">Cancel</button>
+  </div>
+  <div id="recipeImportStatus" class="recipe-import-status" aria-live="polite"></div>
+  <div id="recipeImportError" class="recipe-import-error" aria-live="polite"></div>
+</dialog>
+
 <dialog id="mealPickerModal"><button class="modal-close">×</button><span class="eyebrow">Courtney approved</span><h2>Choose a meal</h2>
  <div class="picker-row"><label>Meal<select id="pickerMealType"><option>Lunch</option><option>Dinner</option><option>Breakfast</option><option>Snack</option></select></label><label>Effort<select id="pickerEffort"><option value="barely">Barely any</option><option value="easy" selected>Easy</option><option value="cook">Happy to cook</option></select></label></div>
  <div class="craving-grid" id="cravingGrid"></div><div id="recipeChoices"></div></dialog>

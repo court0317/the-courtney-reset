@@ -27,6 +27,8 @@
 
   let recipes = [];
   let favouritesOnly = false;
+  let pendingImportedRecipe = null;
+  let importingRecipe = false;
   let currentFolder = 'all';
   let pendingPhoto = '';
   let selectedTags = [];
@@ -209,6 +211,192 @@
     $('recipeEditorModal').showModal();
   }
 
+  function openImportModal() {
+    $('recipeImportUrl').value = '';
+    $('recipeImportStatus').textContent = '';
+    $('recipeImportError').textContent = '';
+    $('recipeImportModal').showModal();
+  }
+
+  function closeImportModal() {
+    $('recipeImportModal')?.close?.();
+  }
+
+  function parseDuration(value) {
+    if (!value) return '';
+    if (typeof value === 'number') return String(value);
+    const match = String(value).trim().match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/i);
+    if (!match) return '';
+    const hours = Number(match[1] || 0);
+    const minutes = Number(match[2] || 0);
+    const seconds = Number(match[3] || 0);
+    return String(Math.round(hours * 60 + minutes + seconds / 60));
+  }
+
+  function flattenInstructions(value) {
+    if (!value) return '';
+    if (Array.isArray(value)) {
+      const parts = value.map(item => {
+        if (typeof item === 'string') return item.trim();
+        if (item && typeof item === 'object') {
+          if (item.text) return item.text;
+          if (item.name) return item.name;
+          if (item['@value']) return item['@value'];
+          if (item['text']) return item['text'];
+          if (Array.isArray(item.itemListElement)) {
+            return item.itemListElement.map(entry => entry.text || entry.name || '').filter(Boolean).join(' ');
+          }
+          return '';
+        }
+        return '';
+      }).filter(Boolean);
+      return parts.join('\n');
+    }
+    if (typeof value === 'string') return value.trim();
+    if (typeof value === 'object') {
+      if (value.text) return value.text;
+      if (value.name) return value.name;
+      if (value['@value']) return value['@value'];
+      if (Array.isArray(value.itemListElement)) {
+        return value.itemListElement.map(entry => entry.text || entry.name || '').filter(Boolean).join(' ');
+      }
+    }
+    return '';
+  }
+
+  function normaliseRecipeData(data) {
+    const recipe = data && typeof data === 'object' ? data : null;
+    if (!recipe) return null;
+    const image = recipe.image || recipe.photo || recipe['image'] || '';
+    const imageValue = Array.isArray(image) ? image[0] : typeof image === 'object' ? image.url || image.contentUrl || '' : image;
+    const ingredients = Array.isArray(recipe.recipeIngredient)
+      ? recipe.recipeIngredient.filter(Boolean).map(item => String(item).trim())
+      : typeof recipe.recipeIngredient === 'string'
+        ? recipe.recipeIngredient.split(/\n|;|\u2028/).map(item => item.trim()).filter(Boolean)
+        : [];
+    const instructions = flattenInstructions(recipe.recipeInstructions);
+    const yieldValue = recipe.recipeYield ? (Array.isArray(recipe.recipeYield) ? recipe.recipeYield[0] : recipe.recipeYield) : '';
+    const nutrition = recipe.nutrition || {};
+    const calories = nutrition.calories || nutrition.energy || '';
+    const protein = nutrition.proteinContent || '';
+    const carbs = nutrition.carbohydrateContent || '';
+    const fat = nutrition.fatContent || '';
+    const fibre = nutrition.fiberContent || '';
+    const category = recipe.recipeCategory || recipe.category || '';
+    const cuisine = recipe.recipeCuisine || '';
+    const keywords = recipe.keywords || '';
+    return {
+      name: recipe.name || '',
+      image: imageValue || '',
+      description: recipe.description || '',
+      ingredients,
+      method: instructions || '',
+      serves: typeof yieldValue === 'number' ? yieldValue : (typeof yieldValue === 'string' ? Number(yieldValue.replace(/\D/g, '')) || 4 : 4),
+      prep: parseDuration(recipe.prepTime || '') || '',
+      cook: parseDuration(recipe.cookTime || recipe.totalTime || '') || '',
+      type: (category || 'Dinner').toString(),
+      calories: calories ? Number(String(calories).replace(/\D/g, '')) || '' : '',
+      protein: protein ? Number(String(protein).replace(/\D/g, '')) || '' : '',
+      carbs: carbs ? Number(String(carbs).replace(/\D/g, '')) || '' : '',
+      fat: fat ? Number(String(fat).replace(/\D/g, '')) || '' : '',
+      fibre: fibre ? Number(String(fibre).replace(/\D/g, '')) || '' : '',
+      tags: typeof keywords === 'string' ? keywords.split(',').map(item => item.trim()).filter(Boolean) : []
+    };
+  }
+
+  function walkSchemaObjects(value) {
+    const results = [];
+    if (!value) return results;
+    if (Array.isArray(value)) {
+      value.forEach(item => results.push(...walkSchemaObjects(item)));
+      return results;
+    }
+    if (typeof value !== 'object') return results;
+    if (value['@type'] || value['@graph']) {
+      if (value['@type'] === 'Recipe' || value['@type'] === 'https://schema.org/Recipe') results.push(value);
+      if (Array.isArray(value['@graph'])) value['@graph'].forEach(item => results.push(...walkSchemaObjects(item)));
+    }
+    if (value['recipeIngredient'] || value['recipeInstructions'] || value['name']) {
+      results.push(value);
+    }
+    return results;
+  }
+
+  function extractRecipeFromHtml(html) {
+    const recipeMatches = [];
+    const scripts = html.match(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi) || [];
+    scripts.forEach(script => {
+      const content = script.match(/>([\s\S]*?)<\//);
+      if (!content) return;
+      try {
+        const parsed = JSON.parse(content[1]);
+        const found = walkSchemaObjects(parsed);
+        if (found.length) recipeMatches.push(...found);
+      } catch (_) {}
+    });
+    return recipeMatches.length ? recipeMatches[0] : null;
+  }
+
+  function prepareImportedRecipe(recipeData) {
+    const normalised = normaliseRecipeData(recipeData);
+    if (!normalised) return null;
+    pendingImportedRecipe = {
+      id: '',
+      name: normalised.name || 'Imported recipe',
+      type: normalised.type || 'Dinner',
+      serves: normalised.serves || 4,
+      photo: normalised.image || '',
+      calories: normalised.calories || '',
+      protein: normalised.protein || '',
+      carbs: normalised.carbs || '',
+      fat: normalised.fat || '',
+      fibre: normalised.fibre || '',
+      prep: normalised.prep || '',
+      cook: normalised.cook || '',
+      ingredients: normalised.ingredients || [],
+      method: normalised.method || '',
+      tags: normalised.tags || [],
+      favourite: false,
+      folder: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    return pendingImportedRecipe;
+  }
+
+  async function importRecipeFromUrl(url) {
+    const safeUrl = String(url || '').trim();
+    if (!safeUrl) return { success: false, message: 'Please enter a recipe URL.' };
+    const parsedUrl = new URL(safeUrl);
+    if (!parsedUrl.protocol.startsWith('http')) return { success: false, message: 'Please enter a valid recipe URL.' };
+    try {
+      $('recipeImportStatus').textContent = 'Importing recipe…';
+      $('recipeImportError').textContent = '';
+      importingRecipe = true;
+      const response = await fetch(parsedUrl.href);
+      if (!response.ok) throw new Error('fetch failed');
+      const html = await response.text();
+      const recipeData = extractRecipeFromHtml(html);
+      if (!recipeData) {
+        return { success: false, message: 'This website blocks direct importing. Copy and paste the recipe text manually for now.' };
+      }
+      const importedRecipe = prepareImportedRecipe(recipeData);
+      if (!importedRecipe) {
+        return { success: false, message: 'This website blocks direct importing. Copy and paste the recipe text manually for now.' };
+      }
+      pendingImportedRecipe = importedRecipe;
+      resetForm(importedRecipe);
+      closeImportModal();
+      $('recipeEditorModal').showModal();
+      return { success: true, message: 'Recipe imported. Review and save it to your collection.' };
+    } catch (error) {
+      return { success: false, message: 'This website blocks direct importing. Copy and paste the recipe text manually for now.' };
+    } finally {
+      importingRecipe = false;
+      $('recipeImportStatus').textContent = '';
+    }
+  }
+
   function viewRecipe(id) {
     const r = recipes.find(x => x.id === id); if (!r) return;
     $('recipeViewContent').innerHTML = `
@@ -266,52 +454,18 @@
   }
 
   $('addRecipeBtn').addEventListener('click', () => openEditor());
+  $('importRecipeBtn').addEventListener('click', () => openImportModal());
+  $('recipeImportSubmitBtn').addEventListener('click', async () => {
+    const url = $('recipeImportUrl').value;
+    const result = await importRecipeFromUrl(url);
+    $('recipeImportStatus').textContent = result.message;
+    if (!result.success) $('recipeImportError').textContent = result.message;
+  });
+  $('recipeImportCancelBtn').addEventListener('click', closeImportModal);
   $('recipeSearch').addEventListener('input', renderRecipes);
   $('recipeSort').addEventListener('change', renderRecipes);
   $('recipeFolderFilter').addEventListener('change', event => { currentFolder = event.target.value; renderRecipes(); });
   $('recipeFavouritesBtn').addEventListener('click', () => { favouritesOnly = !favouritesOnly; renderRecipes(); });
-  $('importRecipeBtn').addEventListener('click', async () => {
-    const url = prompt('Import recipe from URL', 'https://');
-    if (!url) return;
-    try {
-      const response = await fetch(`https://r.jina.ai/http://${url.replace(/^https?:\/\//, '')}`);
-      const text = await response.text();
-      const titleMatch = text.match(/Title[:\s]+(.+)/i) || text.match(/<title>(.*?)<\/title>/i);
-      const imageMatch = text.match(/https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|webp)/i);
-      const ingredients = [...text.matchAll(/-\s+(.+)/g)].map(m => m[1].trim()).slice(0, 12);
-      const method = text.split(/(?:Method|Instructions|Directions)[:\s]/i)[1] || text.split(/\n/).slice(0, 6).join('\n');
-      const servingsMatch = text.match(/(?:Serves|Servings)[:\s]+(\d+)/i);
-      const caloriesMatch = text.match(/(?:Calories|Energy)[:\s]+(\d+)/i);
-      const proteinMatch = text.match(/(?:Protein)[:\s]+(\d+)/i);
-      const carbsMatch = text.match(/(?:Carbs|Carbohydrates)[:\s]+(\d+)/i);
-      const fatMatch = text.match(/(?:Fat)[:\s]+(\d+)/i);
-      const recipe = {
-        id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`,
-        name: (titleMatch?.[1] || titleMatch?.[2] || 'Imported recipe').trim(),
-        type: 'Dinner',
-        serves: servingsMatch ? Number(servingsMatch[1]) : 4,
-        photo: imageMatch ? imageMatch[0] : '',
-        calories: caloriesMatch ? Number(caloriesMatch[1]) : 0,
-        protein: proteinMatch ? Number(proteinMatch[1]) : 0,
-        carbs: carbsMatch ? Number(carbsMatch[1]) : 0,
-        fat: fatMatch ? Number(fatMatch[1]) : 0,
-        prep: 0,
-        cook: 0,
-        ingredients: ingredients.length ? ingredients : ['Imported ingredients'],
-        method: method.trim() || 'Imported successfully.',
-        tags: [],
-        favourite: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      recipes = [recipe, ...recipes];
-      saveRecipes();
-      showRecipeToast('Recipe imported.');
-    } catch (error) {
-      console.error(error);
-      showRecipeToast('Import failed. Try a different URL.');
-    }
-  });
   $('recipePhoto').addEventListener('change', event => {
     const file = event.target.files?.[0]; if (!file) return;
     if (file.size > 2.5 * 1024 * 1024) { alert('Please choose a photo smaller than 2.5 MB.'); event.target.value=''; return; }
