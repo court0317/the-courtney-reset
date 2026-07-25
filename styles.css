@@ -430,3 +430,17 @@ html.rooted-large-text{font-size:18px}html.rooted-high-contrast body{color:#2027
   .home-living-garden-copy h2{font-size:1.08rem}
   .home-living-garden-copy p{font-size:.74rem}
 }
+
+
+/* Rooted 8.2.2 — illustrated brand lockup */
+.top{min-height:118px;padding:12px 20px 14px;align-items:center}
+.rooted-brand-lockup{display:flex;flex-direction:column;align-items:center;justify-content:center;width:min(340px,calc(100% - 58px));margin:0 auto;transform:translateX(22px)}
+.rooted-logo-mark{width:100%;max-width:300px;height:72px}
+.rooted-logo-mark svg{display:block;width:100%;height:100%}
+.rooted-logo-mark text{fill:var(--rooted-sage-dark);font-family:Georgia,"Times New Roman",serif;font-size:42px;font-weight:500;letter-spacing:8px}
+.rooted-logo-mark path{fill:none;stroke:var(--rooted-sage-dark);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.rooted-logo-mark .logo-sprout path:nth-child(2),.rooted-logo-mark .logo-sprout path:nth-child(3),.rooted-logo-mark .logo-flourish path:not(:first-child){fill:#91aa82;stroke:var(--rooted-sage-dark)}
+.rooted-logo-mark .logo-soil{stroke:#9a7455;stroke-width:4}
+.rooted-logo-date{margin-top:-1px;color:var(--rooted-sage);font-size:.68rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;text-align:center}
+.top .avatar{position:absolute;right:20px;top:28px}
+@media(max-width:430px){.top{min-height:106px;padding-left:14px;padding-right:14px}.rooted-brand-lockup{width:calc(100% - 52px);transform:translateX(19px)}.rooted-logo-mark{height:64px}.rooted-logo-mark text{font-size:39px;letter-spacing:6px}.rooted-logo-date{font-size:.61rem;letter-spacing:.14em}.top .avatar{right:14px;top:25px;width:40px;height:40px}}
