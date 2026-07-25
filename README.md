@@ -1,13 +1,12 @@
-# Rooted Build 2
+# Rooted Build 3
 
-Includes:
-- First-run onboarding
-- Name, goal, equipment, walking and water preferences
-- Personalised greeting
-- Animated calorie, water and walking progress rings
-- Today's Root
-- Updated plant display
-- Existing workouts, meals, nutrition, walking and progress data retained
+Added:
+- Rooted Coach with live, supportive suggestions
+- Weekly Focus Mode
+- Changeable focus: hydration, walking, strength, home cooking or recovery
+- Monthly review with healthy days, water goals, walking minutes and workouts
+- Dynamic messages based on actual activity
+- Existing onboarding, meals, workouts, nutrition, walking and garden retained
 
-Upload all files to the repository root and replace the old files.
-Open once with `?v=rooted2`.
+Upload every file to the repository root and replace the previous files.
+Open once with `?v=rooted3`.

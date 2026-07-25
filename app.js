@@ -550,3 +550,205 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('click',()=>setTimeout(renderRootedPremium,30));
   document.addEventListener('change',()=>setTimeout(renderRootedPremium,30));
 });
+
+// Rooted Build 3: Coach, weekly focus, dynamic day guidance and monthly review
+const ROOTED_FOCUS_KEY='rooted-weekly-focus-v3';
+
+function currentWeekKey(){
+  const d=new Date();
+  const jan1=new Date(d.getFullYear(),0,1);
+  const week=Math.ceil((((d-jan1)/86400000)+jan1.getDay()+1)/7);
+  return `${d.getFullYear()}-W${week}`;
+}
+function getWeeklyFocus(){
+  try{
+    const data=JSON.parse(localStorage.getItem(ROOTED_FOCUS_KEY))||{};
+    return data[currentWeekKey()]||'Hydration';
+  }catch(e){return 'Hydration'}
+}
+function saveWeeklyFocus(value){
+  let data={};
+  try{data=JSON.parse(localStorage.getItem(ROOTED_FOCUS_KEY))||{}}catch(e){}
+  data[currentWeekKey()]=value;
+  localStorage.setItem(ROOTED_FOCUS_KEY,JSON.stringify(data));
+}
+
+function workoutCompletedToday(){
+  try{return !!(state.completedWorkouts?.[dk] || state.workoutDone?.[dk])}catch(e){return false}
+}
+function mealsCompletedToday(){
+  try{return selectedMeals().filter(m=>state.mealDone?.[`${dk}-${m.type}`]).length}catch(e){return 0}
+}
+function coachSnapshot(){
+  const profile=rootedProfile()||{walkGoal:30,waterGoal:2.5};
+  const water=(typeof waterCount==='function'?waterCount():0)*0.5;
+  const walk=getWalkMinutesToday();
+  const workout=workoutCompletedToday();
+  const meals=mealsCompletedToday();
+  let planned=0;
+  try{planned=nutritionTotals().planned||0}catch(e){}
+  return {profile,water,walk,workout,meals,planned};
+}
+
+function renderCoach(){
+  const s=coachSnapshot();
+  let title='You are doing enough';
+  let message='One small supportive choice is a successful day.';
+  let action='View today';
+  let target='today';
+
+  if(s.water<0.5){
+    title='Start with something easy';
+    message='Your first 500 mL of water is a gentle way to get moving.';
+    action='Log water'; target='meals';
+  }else if(s.walk<s.profile.walkGoal){
+    const left=Math.max(0,s.profile.walkGoal-s.walk);
+    title='A short walk would fit nicely';
+    message=`You have ${left} minutes left to reach today’s walking goal.`;
+    action='Open Move'; target='workout';
+  }else if(!s.workout){
+    title='Your body is ready when you are';
+    message='Today’s workout is waiting, but a lower-energy option still counts.';
+    action='View workout'; target='workout';
+  }else if(s.meals<2){
+    title='Keep nourishment simple';
+    message='Choose the next planned meal or use fresh leftovers.';
+    action='Open meals'; target='meals';
+  }else if(s.planned<1400){
+    title='Your plan looks a little light';
+    message='Add a filling snack so you are not finishing the day hungry.';
+    action='Add nourishment'; target='meals';
+  }else{
+    title='You are tending your roots';
+    message='You have already supported yourself in several ways today.';
+    action='See journey'; target='progress';
+  }
+
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  set('coachTitle',title);
+  set('coachMessage',message);
+  const btn=document.getElementById('coachAction');
+  if(btn){btn.textContent=action;btn.dataset.target=target}
+}
+
+function focusProgress(focus){
+  const s=coachSnapshot();
+  if(focus==='Hydration') return Math.min(100,(s.water/s.profile.waterGoal)*100);
+  if(focus==='Walking') return Math.min(100,(s.walk/s.profile.walkGoal)*100);
+  if(focus==='Strength') return s.workout?100:0;
+  if(focus==='Home cooking') return Math.min(100,(s.meals/3)*100);
+  if(focus==='Recovery'){
+    const roots=rootedDailyRoots();
+    return roots[rootedTodayKey()]?100:35;
+  }
+  return 0;
+}
+function focusMessage(focus,pct){
+  if(pct>=100) return `${focus} is complete for today. Beautiful work.`;
+  const messages={
+    'Hydration':'A bottle at a time is all it takes.',
+    'Walking':'Short walks still build strong foundations.',
+    'Strength':'One session is enough to keep the habit alive.',
+    'Home cooking':'Simple meals count just as much as elaborate ones.',
+    'Recovery':'Rest and gentleness are productive too.'
+  };
+  return messages[focus]||'Build one supportive habit at a time.';
+}
+function renderWeeklyFocus(){
+  const focus=getWeeklyFocus();
+  const pct=focusProgress(focus);
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  set('weeklyFocusTitle',focus);
+  set('weeklyFocusMessage',focusMessage(focus,pct));
+  const bar=document.getElementById('weeklyFocusBar');
+  if(bar)bar.style.width=Math.round(pct)+'%';
+}
+
+function monthPrefix(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function countMonthlyBooleanMap(obj){
+  const prefix=monthPrefix();
+  const days=new Set();
+  Object.entries(obj||{}).forEach(([key,value])=>{
+    if(value && key.startsWith(prefix)) days.add(key.slice(0,10));
+  });
+  return days.size;
+}
+function monthlyReviewData(){
+  const prefix=monthPrefix();
+  const healthyDays=new Set();
+  const waterDays={};
+  let walkMinutes=0;
+  let workouts=0;
+
+  Object.entries(state.water||{}).forEach(([key,value])=>{
+    if(!value || !key.startsWith(prefix))return;
+    const day=key.slice(0,10);
+    waterDays[day]=(waterDays[day]||0)+1;
+    healthyDays.add(day);
+  });
+  Object.entries(state.mealDone||{}).forEach(([key,value])=>{
+    if(value && key.startsWith(prefix))healthyDays.add(key.slice(0,10));
+  });
+  Object.entries(state.completedWorkouts||{}).forEach(([key,value])=>{
+    if(value && key.startsWith(prefix)){workouts++;healthyDays.add(key.slice(0,10))}
+  });
+  Object.entries(state.workoutDone||{}).forEach(([key,value])=>{
+    if(value && key.startsWith(prefix)){workouts++;healthyDays.add(key.slice(0,10))}
+  });
+  const walkMaps=[state.walking||{},state.walkLogs||{}];
+  walkMaps.forEach(map=>Object.entries(map).forEach(([key,value])=>{
+    if(key.startsWith(prefix)){
+      const mins=Number(value?.minutes||0);
+      walkMinutes+=mins;
+      if(mins>0)healthyDays.add(key.slice(0,10));
+    }
+  }));
+  const waterGoalDays=Object.values(waterDays).filter(count=>count>=5).length;
+  return {healthyDays:healthyDays.size,waterGoalDays,walkMinutes,workouts};
+}
+function renderMonthlyReview(){
+  const data=monthlyReviewData();
+  const month=new Intl.DateTimeFormat('en-AU',{month:'long'}).format(new Date());
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  set('monthReviewTitle',`${month} in Rooted`);
+  set('monthHealthyDays',data.healthyDays);
+  set('monthWaterDays',data.waterGoalDays);
+  set('monthWalkMinutes',data.walkMinutes);
+  set('monthWorkouts',data.workouts);
+  let badge='Beginning';
+  let message='Every small choice you log will begin shaping your month.';
+  if(data.healthyDays>=5){badge='Growing';message='You are building a steady pattern, one day at a time.'}
+  if(data.healthyDays>=12){badge='Taking root';message='Your habits are becoming part of your normal routine.'}
+  if(data.healthyDays>=20){badge='Flourishing';message='You have created a beautifully consistent month.'}
+  set('monthReviewBadge',badge);
+  set('monthReviewMessage',message);
+}
+
+function renderRootedBuild3(){
+  renderCoach();
+  renderWeeklyFocus();
+  renderMonthlyReview();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const picker=document.getElementById('focusPicker');
+  document.getElementById('changeWeeklyFocus')?.addEventListener('click',()=>{
+    if(picker)picker.hidden=!picker.hidden;
+  });
+  document.querySelectorAll('[data-week-focus]').forEach(btn=>btn.addEventListener('click',()=>{
+    saveWeeklyFocus(btn.dataset.weekFocus);
+    if(picker)picker.hidden=true;
+    renderWeeklyFocus();
+  }));
+  document.getElementById('coachAction')?.addEventListener('click',e=>{
+    const target=e.currentTarget.dataset.target;
+    const nav=document.querySelector(`[data-page="${target}"],[data-go="${target}"]`);
+    if(nav)nav.click();
+  });
+  renderRootedBuild3();
+  document.addEventListener('click',()=>setTimeout(renderRootedBuild3,40));
+  document.addEventListener('change',()=>setTimeout(renderRootedBuild3,40));
+});

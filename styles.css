@@ -193,3 +193,32 @@ nav{background:rgba(255,253,248,.9)!important;backdrop-filter:blur(18px);-webkit
   .progress-ring::before{inset:8px}
   .progress-ring b{font-size:1rem}
 }
+
+/* Rooted Build 3 */
+.rooted-coach{display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:16px;margin:16px 0;background:linear-gradient(135deg,#fffaf3,#eef3e9)}
+.coach-orb{width:58px;height:58px;border-radius:20px;background:#dfe9d9;display:grid;place-items:center;font-size:1.8rem;box-shadow:inset 0 0 0 1px rgba(70,90,69,.06)}
+.coach-copy h2{margin:4px 0 5px}
+.coach-copy p{margin:0;color:var(--rooted-muted);font-size:.86rem;line-height:1.45}
+.coach-action{white-space:nowrap}
+.weekly-focus{margin:16px 0}
+.text-button{border:0;background:transparent;color:var(--rooted-sage-dark);font-weight:750}
+.focus-picker{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.focus-picker button{border:1px solid rgba(70,90,69,.12);background:#faf7f0;color:var(--rooted-ink);padding:11px;border-radius:14px;text-align:left}
+.weekly-focus-track{height:11px;background:#e8e0d5;border-radius:999px;overflow:hidden;margin:14px 0 8px}
+.weekly-focus-track span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rooted-sage),var(--rooted-peach));border-radius:inherit;transition:width .4s ease}
+.weekly-focus p{margin:0;color:var(--rooted-muted);font-size:.85rem}
+.monthly-review{margin:18px 0}
+.month-badge{background:#e5ebdf;color:var(--rooted-sage-dark);padding:7px 10px;border-radius:999px;font-size:.72rem;font-weight:800}
+.month-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0}
+.month-stats div{background:#faf7f0;border-radius:18px;padding:12px 8px;text-align:center}
+.month-stats span,.month-stats b,.month-stats small{display:block}
+.month-stats span{font-size:1.35rem;margin-bottom:5px}
+.month-stats b{font-size:1.18rem}
+.month-stats small{font-size:.65rem;color:var(--rooted-muted);margin-top:3px}
+.monthly-review>p{margin:0;color:var(--rooted-muted);font-size:.86rem;line-height:1.5}
+@media(max-width:620px){
+  .rooted-coach{grid-template-columns:50px 1fr}
+  .coach-orb{width:50px;height:50px}
+  .coach-action{grid-column:1/-1;width:100%}
+  .month-stats{grid-template-columns:1fr 1fr}
+}
