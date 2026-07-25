@@ -2,7 +2,7 @@
 (() => {
   'use strict';
 
-  const VALID_PAGES = new Set(['today', 'workout', 'meals', 'shop', 'progress', 'garden', 'settings', 'aquarium', 'week', 'world', 'journey-map', 'memory']);
+  const VALID_PAGES = new Set(['today', 'workout', 'meals', 'shop', 'progress', 'garden', 'settings', 'aquarium', 'week', 'world', 'journey-map', 'memory', 'history']);
 
   function showPage(pageId, updateHash = true) {
     if (!VALID_PAGES.has(pageId) || !document.getElementById(pageId)) {
