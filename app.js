@@ -180,7 +180,17 @@ function openGuide(e){modalTitle.textContent=e.name;modalHow.textContent=e.how;m
 let timer=60,timerInt=null;function openTimer(n){timer=n;timerValue.textContent=timer;timerToggle.textContent='Start';clearInterval(timerInt);timerModal.showModal()}function timerTick(){if(timer<=0){clearInterval(timerInt);timerInt=null;timerToggle.textContent='Start';navigator.vibrate?.(200);return}timer--;timerValue.textContent=timer}
 function celebrate(){if(dailyPct()===100&&!state.celebrated[dk]){state.celebrated[dk]=true;for(let i=0;i<45;i++){let p=document.createElement('i');p.className='confetti-piece';p.style.left=Math.random()*100+'%';p.style.background=['#7f9079','#b89655','#b46f72','#d8c5a5'][i%4];p.style.animationDelay=Math.random()*.6+'s';confetti.appendChild(p);setTimeout(()=>p.remove(),2500)}}}
 function render(){renderHeader();renderToday();renderWorkout();renderMeals();renderShop();renderProgress();persist()}
-function go(id){document.querySelectorAll('.page,.nav').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelector(`.nav[data-go="${id}"]`)?.classList.add('active');scrollTo(0,0)}
+function go(id){
+  if(window.RootedNavigation?.showPage){
+    window.RootedNavigation.showPage(id);
+    return;
+  }
+  document.querySelectorAll('.page,.nav').forEach(x=>x.classList.remove('active'));
+  const page=document.getElementById(id);
+  if(page){page.classList.add('active');page.hidden=false}
+  document.querySelector(`.nav[data-go="${id}"]`)?.classList.add('active');
+  scrollTo(0,0);
+}
 document.querySelectorAll('[data-go]').forEach(x=>x.onclick=()=>go(x.dataset.go));document.querySelectorAll('.modal-close').forEach(x=>x.onclick=()=>x.closest('dialog').close());
 swapAll.onclick=()=>{state.dayMeals[dk]=defaultDayMeals(d,w);save()};clearShop.onclick=()=>{state.shopping={};save()};chooseMealBtn.onclick=()=>openMealPicker('Dinner');leftoversBtn.onclick=openLeftovers;takeawayBtn.onclick=openTakeaway;tooTiredBtn.onclick=tooTired;skipBreakfastBtn.onclick=skipBreakfast;pickerMealType.onchange=()=>buildCravings('all');pickerEffort.onchange=()=>buildCravings('all');takeawaySave.onclick=()=>saveTakeaway(null,false);takeawayNoTrack.onclick=()=>saveTakeaway(null,true);
 saveCheckin.onclick=()=>{state.checkins[w]={weight:weight.value,waist:waist.value,hips:hips.value,energy:energy.value,win:win.value};save();alert('Week '+w+' saved')};exportBtn.onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='courtney-reset-backup-v5.json';a.click()};importFile.onchange=async()=>{try{state=JSON.parse(await importFile.files[0].text());save()}catch{alert('That file could not be read')}};resetBtn.onclick=()=>{if(confirm('Reset all progress?')){localStorage.removeItem(KEY);location.reload()}};
@@ -512,7 +522,7 @@ function renderRootedPremium(){
   set('ringWalkSub',`of ${profile.walkGoal} min`);
 
   setRing('calorieRing',planned/guide*100);
-  setRing('waterRing',waterLit/profile.waterGoal*100);
+  setRing('rootedWaterRing',waterLit/profile.waterGoal*100);
   setRing('walkRing',walkMinutes/profile.walkGoal*100);
 
   const total=typeof totalRootedChoices==='function'?totalRootedChoices():0;
@@ -683,22 +693,22 @@ function monthlyReviewData(){
   let walkMinutes=0;
   let workouts=0;
 
-  Object.entries(state.water||{}).forEach(([key,value])=>{
+  Object.entries((state&&state.water)||{}).forEach(([key,value])=>{
     if(!value || !key.startsWith(prefix))return;
     const day=key.slice(0,10);
     waterDays[day]=(waterDays[day]||0)+1;
     healthyDays.add(day);
   });
-  Object.entries(state.mealDone||{}).forEach(([key,value])=>{
+  Object.entries((state&&state.mealDone)||{}).forEach(([key,value])=>{
     if(value && key.startsWith(prefix))healthyDays.add(key.slice(0,10));
   });
-  Object.entries(state.completedWorkouts||{}).forEach(([key,value])=>{
+  Object.entries((state&&state.completedWorkouts)||{}).forEach(([key,value])=>{
     if(value && key.startsWith(prefix)){workouts++;healthyDays.add(key.slice(0,10))}
   });
-  Object.entries(state.workoutDone||{}).forEach(([key,value])=>{
+  Object.entries((state&&state.workoutDone)||{}).forEach(([key,value])=>{
     if(value && key.startsWith(prefix)){workouts++;healthyDays.add(key.slice(0,10))}
   });
-  const walkMaps=[state.walking||{},state.walkLogs||{}];
+  const walkMaps=[(state&&state.walking)||{},(state&&state.walkLogs)||{}];
   walkMaps.forEach(map=>Object.entries(map).forEach(([key,value])=>{
     if(key.startsWith(prefix)){
       const mins=Number(value?.minutes||0);

@@ -1,12 +1,17 @@
-# Rooted Build 3
+# Rooted V4 — Stable Navigation
 
-Added:
-- Rooted Coach with live, supportive suggestions
-- Weekly Focus Mode
-- Changeable focus: hydration, walking, strength, home cooking or recovery
-- Monthly review with healthy days, water goals, walking minutes and workouts
-- Dynamic messages based on actual activity
-- Existing onboarding, meals, workouts, nutrition, walking and garden retained
+This build fixes the unresponsive tabs by adding an independent navigation controller.
 
 Upload every file to the repository root and replace the previous files.
-Open once with `?v=rooted3`.
+
+After GitHub Pages finishes updating, open:
+
+`https://court0317.github.io/the-courtney-reset/?v=rooted4#today`
+
+Included:
+- Reliable bottom tabs using event delegation
+- Navigation still works if another feature has an error
+- Correct active-tab state and URL hash
+- Fixed duplicate hydration-ring ID
+- Safer monthly review calculations
+- Stronger service-worker cache refresh
