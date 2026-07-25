@@ -1,15 +1,13 @@
-# The Courtney Reset — Version 5
+# The Courtney Reset — Version 6
 
 New in this version:
-- Easy Monday–Friday meals and more energetic weekend options
-- Courtney-approved meal picker
-- Optional breakfast and one-tap skip
-- Leftover serve tracking
-- Takeaway option, including “don’t track tonight”
-- “Too tired” real-life mode
-- No mushrooms or tomatoes
-- Garlic-light and dairy-adaptable meal notes
-- Smart weekly grocery list
-- Automatic start on Monday 27 July 2026
+- 1,600 kcal weekday and 1,750 kcal weekend guidance
+- Planned calories, target and remaining room shown separately
+- Helpful prompt when a day is planned below 1,400 kcal
+- Add-another-meal/snack button
+- Week-at-a-glance dinners
+- Premium visual refresh
+- Dark mode
+- Preserves Version 5 progress automatically
 
-Upload every file to the root of the GitHub repository. Open the Pages link once with `?v=5` to refresh the installed app.
+Upload every file to the root of the GitHub repository and open the Pages URL once with `?v=6`.
