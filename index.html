@@ -785,6 +785,8 @@
       <label class="recipe-favourite-check"><input id="recipeFavourite" type="checkbox"> Add to favourites</label>
     </div>
     <div class="recipe-form-actions">
+      <span id="recipeEditorDraftStatus" class="recipe-draft-status" aria-live="polite"></span>
+      <button type="button" class="outline" id="recipeClearDraftBtn">Clear draft</button>
       <button type="button" class="outline" id="recipeBackBtn" hidden>Back</button>
       <button type="button" class="primary" id="recipeNextBtn">Next</button>
       <button class="primary recipe-save" id="recipeSubmitBtn" type="submit" hidden>Save recipe</button>
@@ -804,8 +806,10 @@
   <p class="sub">This works best with sites that publish structured recipe data. Imports may need a quick review before you save them.</p>
   <label class="recipe-import-field">Recipe URL<input id="recipeImportUrl" type="url" placeholder="https://example.com/recipe"></label>
   <div class="recipe-import-actions">
-    <button class="primary" id="recipeImportSubmitBtn" type="button">Import</button>
+    <span id="recipeImportDraftStatus" class="recipe-draft-status" aria-live="polite"></span>
+    <button class="outline" id="recipeImportClearBtn" type="button">Clear draft</button>
     <button class="outline" id="recipeImportCancelBtn" type="button">Cancel</button>
+    <button class="primary" id="recipeImportSubmitBtn" type="button">Import</button>
   </div>
   <div id="recipeImportStatus" class="recipe-import-status" aria-live="polite"></div>
   <div id="recipeImportError" class="recipe-import-error" aria-live="polite"></div>

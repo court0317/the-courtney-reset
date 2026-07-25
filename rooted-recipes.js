@@ -25,6 +25,7 @@
   const section = $('myRecipesSection');
   if (!section) return;
 
+  const DRAFT_STORAGE_KEY = 'rooted-recipe-draft-v1';
   let recipes = [];
   let favouritesOnly = false;
   let pendingImportedRecipe = null;
@@ -34,6 +35,7 @@
   let selectedTags = [];
   let currentStep = 1;
   let recipeToastTimer = null;
+  let draftRestoreTimer = null;
 
   function loadRecipes() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
@@ -80,6 +82,121 @@
     toast.classList.add('show');
     clearTimeout(recipeToastTimer);
     recipeToastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  function loadRecipeDraft() {
+    try { return JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || 'null'); }
+    catch (_) { return null; }
+  }
+
+  function hasRecipeDraftContent(draft) {
+    if (!draft || typeof draft !== 'object') return false;
+    const entries = [draft.recipeUrl, draft.name, draft.photo, draft.mealType, draft.serves, draft.calories, draft.protein, draft.carbs, draft.fat, draft.fibre, draft.prep, draft.cook, draft.ingredients, draft.method, draft.tags, draft.favourite];
+    return entries.some(value => {
+      if (Array.isArray(value)) return value.some(item => String(item || '').trim());
+      if (typeof value === 'string') return value.trim() !== '';
+      if (typeof value === 'number') return value > 0;
+      if (typeof value === 'boolean') return value;
+      return false;
+    });
+  }
+
+  function saveRecipeDraft() {
+    const draft = {
+      recipeUrl: $('recipeImportUrl')?.value?.trim() || '',
+      name: $('recipeName')?.value?.trim() || '',
+      photo: pendingPhoto || '',
+      mealType: $('recipeType')?.value || 'Dinner',
+      serves: $('recipeServes')?.value || '',
+      calories: $('recipeCalories')?.value || '',
+      protein: $('recipeProtein')?.value || '',
+      carbs: $('recipeCarbs')?.value || '',
+      fat: $('recipeFat')?.value || '',
+      fibre: $('recipeFiber')?.value || '',
+      prep: $('recipePrep')?.value || '',
+      cook: $('recipeCook')?.value || '',
+      ingredients: $('recipeIngredients')?.value.split(/\n+/).map(item => item.trim()).filter(Boolean) || [],
+      method: $('recipeMethod')?.value?.trim() || '',
+      tags: Array.isArray(selectedTags) ? selectedTags.filter(Boolean) : [],
+      favourite: !!$('recipeFavourite')?.checked,
+      updatedAt: new Date().toISOString()
+    };
+    if (!hasRecipeDraftContent(draft)) {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      return false;
+    }
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    return true;
+  }
+
+  function clearRecipeDraft() {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    const importStatus = $('recipeImportStatus');
+    const importError = $('recipeImportError');
+    const editorStatus = $('recipeEditorDraftStatus');
+    const importDraftStatus = $('recipeImportDraftStatus');
+    if (importStatus) importStatus.textContent = '';
+    if (importError) importError.textContent = '';
+    if (editorStatus) editorStatus.textContent = '';
+    if (importDraftStatus) importDraftStatus.textContent = '';
+  }
+
+  function showDraftRestoredMessage(targetId = 'recipeEditorDraftStatus') {
+    const target = $(targetId);
+    if (!target) return;
+    target.textContent = 'Draft restored';
+    clearTimeout(draftRestoreTimer);
+    draftRestoreTimer = setTimeout(() => {
+      if (target.isConnected) target.textContent = '';
+    }, 1600);
+  }
+
+  function applyRecipeDraftToForm(draft) {
+    $('recipeEditorForm').reset();
+    $('recipeFolder').value = draft?.folder || '';
+    $('recipeEditId').value = draft?.id || '';
+    $('recipeEditorTitle').textContent = draft?.id ? 'Edit recipe' : 'Create a recipe';
+    $('recipeEditorSubtitle').textContent = draft?.id ? 'Tweak the details and keep your recipe book feeling fresh.' : 'Build your next favourite meal in a few calm steps.';
+    $('recipeName').value = draft?.name || '';
+    $('recipeType').value = draft?.mealType || draft?.type || 'Dinner';
+    $('recipeServes').value = draft?.serves || 4;
+    $('recipeCalories').value = draft?.calories || '';
+    $('recipeProtein').value = draft?.protein || '';
+    $('recipeCarbs').value = draft?.carbs || '';
+    $('recipeFat').value = draft?.fat || '';
+    $('recipeFiber').value = draft?.fibre || '';
+    $('recipePrep').value = draft?.prep || '';
+    $('recipeCook').value = draft?.cook || '';
+    $('recipeIngredients').value = Array.isArray(draft?.ingredients) ? draft.ingredients.join('\n') : '';
+    $('recipeMethod').value = draft?.method || '';
+    $('recipeFavourite').checked = !!draft?.favourite;
+    selectedTags = Array.isArray(draft?.tags) ? draft.tags : [];
+    pendingPhoto = draft?.photo || '';
+    currentStep = 1;
+    $('recipePhotoPreview').src = pendingPhoto;
+    $('recipePhotoPreview').hidden = !pendingPhoto;
+    $('recipePhotoHint').textContent = pendingPhoto ? 'Current photo saved — choose another to replace it' : 'Choose a photo from your phone or computer';
+    updateIngredientCount();
+    updateMethodPreview();
+    refreshTagButtons();
+    updateStepUI();
+  }
+
+  function restoreRecipeDraftIntoEditor() {
+    const draft = loadRecipeDraft();
+    if (!draft) return false;
+    if ($('recipeImportUrl')) $('recipeImportUrl').value = draft.recipeUrl || '';
+    applyRecipeDraftToForm(draft);
+    showDraftRestoredMessage('recipeEditorDraftStatus');
+    return true;
+  }
+
+  function restoreRecipeDraftIntoImport() {
+    const draft = loadRecipeDraft();
+    if (!draft) return false;
+    if ($('recipeImportUrl')) $('recipeImportUrl').value = draft.recipeUrl || '';
+    showDraftRestoredMessage('recipeImportDraftStatus');
+    return true;
   }
 
   function updateStepUI() {
@@ -176,26 +293,27 @@
   }
 
   function resetForm(recipe = null) {
+    const source = recipe && typeof recipe === 'object' ? recipe : null;
     $('recipeEditorForm').reset();
-    $('recipeFolder').value = recipe?.folder || '';
-    $('recipeEditId').value = recipe?.id || '';
-    $('recipeEditorTitle').textContent = recipe ? 'Edit recipe' : 'Create a recipe';
-    $('recipeEditorSubtitle').textContent = recipe ? 'Tweak the details and keep your recipe book feeling fresh.' : 'Build your next favourite meal in a few calm steps.';
-    $('recipeName').value = recipe?.name || '';
-    $('recipeType').value = recipe?.type || 'Dinner';
-    $('recipeServes').value = recipe?.serves || 4;
-    $('recipeCalories').value = recipe?.calories || '';
-    $('recipeProtein').value = recipe?.protein || '';
-    $('recipeCarbs').value = recipe?.carbs || '';
-    $('recipeFat').value = recipe?.fat || '';
-    $('recipeFiber').value = recipe?.fibre || '';
-    $('recipePrep').value = recipe?.prep || '';
-    $('recipeCook').value = recipe?.cook || '';
-    $('recipeIngredients').value = (recipe?.ingredients || []).join('\n');
-    $('recipeMethod').value = recipe?.method || '';
-    $('recipeFavourite').checked = !!recipe?.favourite;
-    selectedTags = Array.isArray(recipe?.tags) ? recipe.tags : [];
-    pendingPhoto = recipe?.photo || '';
+    $('recipeFolder').value = source?.folder || '';
+    $('recipeEditId').value = source?.id || '';
+    $('recipeEditorTitle').textContent = source ? 'Edit recipe' : 'Create a recipe';
+    $('recipeEditorSubtitle').textContent = source ? 'Tweak the details and keep your recipe book feeling fresh.' : 'Build your next favourite meal in a few calm steps.';
+    $('recipeName').value = source?.name || '';
+    $('recipeType').value = source?.mealType || source?.type || 'Dinner';
+    $('recipeServes').value = source?.serves || 4;
+    $('recipeCalories').value = source?.calories || '';
+    $('recipeProtein').value = source?.protein || '';
+    $('recipeCarbs').value = source?.carbs || '';
+    $('recipeFat').value = source?.fat || '';
+    $('recipeFiber').value = source?.fibre || '';
+    $('recipePrep').value = source?.prep || '';
+    $('recipeCook').value = source?.cook || '';
+    $('recipeIngredients').value = (source?.ingredients || []).join('\n');
+    $('recipeMethod').value = source?.method || '';
+    $('recipeFavourite').checked = !!source?.favourite;
+    selectedTags = Array.isArray(source?.tags) ? source.tags : [];
+    pendingPhoto = source?.photo || '';
     currentStep = 1;
     $('recipePhotoPreview').src = pendingPhoto;
     $('recipePhotoPreview').hidden = !pendingPhoto;
@@ -207,14 +325,22 @@
   }
 
   function openEditor(recipe = null) {
-    resetForm(recipe);
+    if (!recipe) {
+      const restored = restoreRecipeDraftIntoEditor();
+      if (!restored) resetForm(recipe);
+    } else {
+      resetForm(recipe);
+    }
     $('recipeEditorModal').showModal();
   }
 
   function openImportModal() {
-    $('recipeImportUrl').value = '';
-    $('recipeImportStatus').textContent = '';
-    $('recipeImportError').textContent = '';
+    const restored = restoreRecipeDraftIntoImport();
+    if (!restored) {
+      $('recipeImportUrl').value = '';
+      $('recipeImportStatus').textContent = '';
+      $('recipeImportError').textContent = '';
+    }
     $('recipeImportModal').showModal();
   }
 
@@ -386,6 +512,7 @@
       }
       pendingImportedRecipe = importedRecipe;
       resetForm(importedRecipe);
+      saveRecipeDraft();
       closeImportModal();
       $('recipeEditorModal').showModal();
       return { success: true, message: 'Recipe imported. Review and save it to your collection.' };
@@ -462,6 +589,13 @@
     if (!result.success) $('recipeImportError').textContent = result.message;
   });
   $('recipeImportCancelBtn').addEventListener('click', closeImportModal);
+  $('recipeImportClearBtn').addEventListener('click', () => {
+    clearRecipeDraft();
+    $('recipeImportUrl').value = '';
+    $('recipeImportStatus').textContent = '';
+    $('recipeImportError').textContent = '';
+    resetForm();
+  });
   $('recipeSearch').addEventListener('input', renderRecipes);
   $('recipeSort').addEventListener('change', renderRecipes);
   $('recipeFolderFilter').addEventListener('change', event => { currentFolder = event.target.value; renderRecipes(); });
@@ -469,10 +603,10 @@
   $('recipePhoto').addEventListener('change', event => {
     const file = event.target.files?.[0]; if (!file) return;
     if (file.size > 2.5 * 1024 * 1024) { alert('Please choose a photo smaller than 2.5 MB.'); event.target.value=''; return; }
-    const reader = new FileReader(); reader.onload = () => { pendingPhoto = reader.result; $('recipePhotoPreview').src = pendingPhoto; $('recipePhotoPreview').hidden=false; }; reader.readAsDataURL(file);
+    const reader = new FileReader(); reader.onload = () => { pendingPhoto = reader.result; $('recipePhotoPreview').src = pendingPhoto; $('recipePhotoPreview').hidden=false; saveRecipeDraft(); }; reader.readAsDataURL(file);
   });
-  $('recipeIngredients').addEventListener('input', updateIngredientCount);
-  $('recipeMethod').addEventListener('input', updateMethodPreview);
+  $('recipeIngredients').addEventListener('input', () => { updateIngredientCount(); saveRecipeDraft(); });
+  $('recipeMethod').addEventListener('input', () => { updateMethodPreview(); saveRecipeDraft(); });
   $('recipeNextBtn').addEventListener('click', () => {
     if (currentStep < 5) currentStep += 1;
     updateStepUI();
@@ -480,6 +614,10 @@
   $('recipeBackBtn').addEventListener('click', () => {
     if (currentStep > 1) currentStep -= 1;
     updateStepUI();
+  });
+  $('recipeClearDraftBtn').addEventListener('click', () => {
+    clearRecipeDraft();
+    resetForm();
   });
   document.querySelectorAll('[data-step-pill]').forEach(btn => btn.addEventListener('click', () => {
     currentStep = Number(btn.dataset.stepPill);
@@ -491,7 +629,10 @@
     const existing = recipes.find(x => x.id === id);
     const recipe = {id,name:$('recipeName').value.trim(),type:$('recipeType').value,serves:num('recipeServes')||1,photo:pendingPhoto,calories:num('recipeCalories'),protein:num('recipeProtein'),carbs:num('recipeCarbs'),fat:num('recipeFat'),fibre:num('recipeFiber'),prep:num('recipePrep'),cook:num('recipeCook'),ingredients:$('recipeIngredients').value.split('\n').map(x=>x.trim()).filter(Boolean),method:$('recipeMethod').value.trim(),tags:selectedTags.filter(Boolean),favourite:$('recipeFavourite').checked,folder:$('recipeFolder').value.trim()||'',createdAt:existing?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
     recipes = existing ? recipes.map(x => x.id === id ? recipe : x) : [recipe, ...recipes];
-    saveRecipes(); $('recipeEditorModal').close(); showRecipeToast(existing ? 'Recipe updated.' : 'Recipe saved.');
+    saveRecipes();
+    clearRecipeDraft();
+    $('recipeEditorModal').close();
+    showRecipeToast(existing ? 'Recipe updated.' : 'Recipe saved.');
   });
 
   document.addEventListener('click', event => {
@@ -507,9 +648,26 @@
     const view = event.target.closest('[data-view-recipe]'); if(view) viewRecipe(view.dataset.viewRecipe);
   });
   document.querySelectorAll('[data-recipe-tag]').forEach(btn => {
-    btn.addEventListener('click', () => toggleTag(btn.dataset.recipeTag));
+    btn.addEventListener('click', () => {
+      toggleTag(btn.dataset.recipeTag);
+      saveRecipeDraft();
+    });
   });
   document.querySelectorAll('.recipe-modal .modal-close').forEach(btn => btn.addEventListener('click', () => btn.closest('dialog').close()));
+  ['recipeName','recipeFolder','recipeType','recipeServes','recipeCalories','recipeProtein','recipeCarbs','recipeFat','recipeFiber','recipePrep','recipeCook','recipeImportUrl'].forEach(id => {
+    const field = $(id);
+    if (field) {
+      field.addEventListener('input', saveRecipeDraft);
+      field.addEventListener('change', saveRecipeDraft);
+    }
+  });
+  $('recipeFavourite').addEventListener('change', saveRecipeDraft);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      if ($('recipeEditorModal')?.open) restoreRecipeDraftIntoEditor();
+      if ($('recipeImportModal')?.open) restoreRecipeDraftIntoImport();
+    }
+  });
   initialiseRecipes();
   window.RootedRecipes = {
     getRecipes: () => recipes,
