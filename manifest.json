@@ -5,7 +5,6 @@
   "start_url": "./?v=flourish-and-bloom#today",
   "display": "standalone",
   "scope": "./",
-  "scope": "./",
   "background_color": "#f7f1e7",
   "theme_color": "#6f846b",
   "icons": [

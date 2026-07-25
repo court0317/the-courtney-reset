@@ -1,0 +1,15 @@
+FLOURISH & BLOOM 3.4 — RECIPE & RELIABILITY UPDATE
+
+Fixed
+- Recipe URL importing now tries the recipe website directly, then two browser-safe fallback readers.
+- Invalid or incomplete links now show a clear message instead of silently failing.
+- Import button now shows progress and cannot be tapped repeatedly during an import.
+- Imported recipes are checked for usable recipe details before opening the editor.
+- Successful imports open in the recipe editor for review before saving.
+- Offline cache version updated so phones receive the newest app files after deployment.
+- Script and stylesheet cache-busting versions aligned.
+- Duplicate manifest scope entry removed.
+
+Compatibility
+- Existing recipes, profile details, progress, garden data and cloud setup remain unchanged.
+- The existing internal cloud table name is retained so current synced data is not disconnected.

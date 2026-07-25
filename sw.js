@@ -1,12 +1,12 @@
-const CACHE='flourish-and-bloom-v2';
+const CACHE='flourish-and-bloom-v3-4';
 const ASSETS=[
   './',
-  './index.html?v=flourish-and-bloom',
-  './styles.css?v=flourish-and-bloom',
-  './navigation.js?v=flourish-and-bloom',
-  './app.js?v=flourish-and-bloom',
-  './flourish-bloom-recipes.js?v=flourish-and-bloom',
-  './v81.js?v=flourish-and-bloom',
+  './index.html?v=flourish340',
+  './styles.css?v=flourish340',
+  './navigation.js?v=flourish340',
+  './app.js?v=flourish340',
+  './flourish-bloom-recipes.js?v=flourish340',
+  './v81.js?v=flourish340',
   './manifest.json',
   './icon.svg',
   './icon-192.svg',
@@ -32,6 +32,6 @@ self.addEventListener('fetch',event=>{
         caches.open(CACHE).then(cache=>cache.put(event.request,copy));
         return response;
       })
-      .catch(()=>caches.match(event.request).then(cached=>cached||caches.match('./index.html?v=flourish-and-bloom')))
+      .catch(()=>caches.match(event.request).then(cached=>cached||caches.match('./index.html?v=flourish340')))
   );
 });

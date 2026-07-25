@@ -506,37 +506,78 @@
     return pendingImportedRecipe;
   }
 
+  async function fetchRecipeHtml(url) {
+    const attempts = [
+      { label: 'recipe website', url, options: { headers: { Accept: 'text/html,application/xhtml+xml' } } },
+      { label: 'secure reader', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, options: { headers: { Accept: 'text/html' } } },
+      { label: 'backup reader', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, options: { headers: { Accept: 'text/html' } } }
+    ];
+    let lastError = null;
+    for (const attempt of attempts) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 12000);
+        const response = await fetch(attempt.url, { ...attempt.options, signal: controller.signal, cache: 'no-store' });
+        clearTimeout(timeout);
+        if (!response.ok) throw new Error(`${attempt.label} returned ${response.status}`);
+        const html = await response.text();
+        if (!html || html.length < 100) throw new Error(`${attempt.label} returned no usable page`);
+        return html;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError || new Error('Unable to read this recipe website');
+  }
+
   async function importRecipeFromUrl(url) {
     const safeUrl = String(url || '').trim();
     if (!safeUrl) return { success: false, message: 'Please enter a recipe URL.' };
-    const parsedUrl = new URL(safeUrl);
-    if (!parsedUrl.protocol.startsWith('http')) return { success: false, message: 'Please enter a valid recipe URL.' };
+
+    let parsedUrl;
     try {
-      $('recipeImportStatus').textContent = 'Importing recipe…';
+      parsedUrl = new URL(safeUrl);
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) throw new Error('Unsupported protocol');
+    } catch (_) {
+      return { success: false, message: 'Please enter a full recipe link beginning with http:// or https://.' };
+    }
+
+    const submitButton = $('recipeImportSubmitBtn');
+    try {
+      $('recipeImportStatus').textContent = 'Reading the recipe…';
       $('recipeImportError').textContent = '';
       importingRecipe = true;
-      const response = await fetch(parsedUrl.href);
-      if (!response.ok) throw new Error('fetch failed');
-      const html = await response.text();
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Importing…';
+      }
+
+      const html = await fetchRecipeHtml(parsedUrl.href);
       const recipeData = extractRecipeFromHtml(html);
       if (!recipeData) {
-        return { success: false, message: 'This website blocks direct importing. Copy and paste the recipe text manually for now.' };
+        return { success: false, message: 'I could open the page, but it did not include readable recipe details. Add it manually and paste the ingredients and method.' };
       }
       const importedRecipe = prepareImportedRecipe(recipeData);
-      if (!importedRecipe) {
-        return { success: false, message: 'This website blocks direct importing. Copy and paste the recipe text manually for now.' };
+      if (!importedRecipe || !importedRecipe.name || (!importedRecipe.ingredients.length && !importedRecipe.method)) {
+        return { success: false, message: 'The page did not provide enough recipe information to import. Add it manually instead.' };
       }
       pendingImportedRecipe = importedRecipe;
       resetForm(importedRecipe);
       saveRecipeDraft();
       closeImportModal();
       $('recipeEditorModal').showModal();
+      showRecipeToast('Recipe imported — review it, then tap Save recipe.');
       return { success: true, message: 'Recipe imported. Review and save it to your collection.' };
     } catch (error) {
-      return { success: false, message: 'This website blocks direct importing. Copy and paste the recipe text manually for now.' };
+      console.warn('Recipe import failed:', error);
+      return { success: false, message: 'That website blocked importing. You can still tap Add Recipe and paste the recipe details manually.' };
     } finally {
       importingRecipe = false;
       $('recipeImportStatus').textContent = '';
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Import';
+      }
     }
   }
 
