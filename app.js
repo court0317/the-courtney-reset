@@ -317,3 +317,91 @@ document.getElementById('addTopUpBtn')?.addEventListener('click',()=>{
   state.dayMeals[dk].Extra=topUp;
   save();
 });
+
+// Rooted foundation UI
+window.addEventListener('load',()=>{
+  const splash=document.getElementById('rootedSplash');
+  if(splash){
+    setTimeout(()=>splash.classList.add('hide'),900);
+    setTimeout(()=>splash.remove(),1500);
+  }
+  document.querySelectorAll('[data-focus-go]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const target=btn.dataset.focusGo;
+      const nav=document.querySelector(`[data-page="${target}"], [data-go="${target}"]`);
+      if(nav) nav.click();
+    });
+  });
+  renderRooted();
+});
+
+function rootedHabitScore(){
+  let score=0;
+  try{
+    const meals=selectedMeals();
+    const mealDoneCount=meals.filter(m=>state.mealDone?.[`${dk}-${m.type}`]).length;
+    if(mealDoneCount>=2) score++;
+    if(waterCount()>=5) score++;
+    const workoutDone=!!(state.completedWorkouts?.[dk] || state.workoutDone?.[dk]);
+    if(workoutDone) score++;
+    const walk=state.walking?.[dk] || state.walkLogs?.[dk];
+    if((walk?.minutes||0)>=20) score++;
+  }catch(e){}
+  return score;
+}
+
+function totalRootedChoices(){
+  let total=0;
+  try{
+    total += Object.values(state.water||{}).filter(Boolean).length;
+    total += Object.values(state.mealDone||{}).filter(Boolean).length;
+    total += Object.values(state.completedWorkouts||{}).filter(Boolean).length;
+    total += Object.values(state.workoutDone||{}).filter(Boolean).length;
+    total += Object.values(state.walking||{}).filter(v=>(v?.minutes||0)>0).length;
+    total += Object.values(state.walkLogs||{}).filter(v=>(v?.minutes||0)>0).length;
+  }catch(e){}
+  return total;
+}
+
+function renderRooted(){
+  const today=rootedHabitScore();
+  const total=totalRootedChoices();
+  const waterLit=typeof waterCount==='function'?waterCount():0;
+  const stages=[
+    {min:0,icon:'🌱',name:'Seedling'},
+    {min:12,icon:'🌿',name:'Taking root'},
+    {min:35,icon:'🪴',name:'Growing strong'},
+    {min:80,icon:'🌳',name:'Deeply rooted'}
+  ];
+  let stage=stages[0];
+  stages.forEach(s=>{if(total>=s.min)stage=s});
+  const next=stages.find(s=>s.min>total);
+  const pct=next?Math.min(100,Math.round((total-stage.min)/(next.min-stage.min)*100)):100;
+
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
+  set('plantStageIcon',stage.icon);
+  set('plantGrowthText',today===4?'Flourishing':today>=2?'Growing':'Beginning');
+  set('plantVisual',stage.icon);
+  set('plantStageName',stage.name);
+  set('rootProgressLabel',`${total} healthy choices logged`);
+  const bar=document.getElementById('rootProgressBar'); if(bar)bar.style.width=pct+'%';
+  set('hydrateFocusText',`${(waterLit*.5).toFixed(1)} of 2.5 L`);
+
+  const complete='✓', open='○';
+  const workoutDone=!!(state.completedWorkouts?.[dk] || state.workoutDone?.[dk]);
+  set('moveFocusState',workoutDone?complete:open);
+  set('hydrateFocusState',waterLit>=5?complete:open);
+  let mealDone=false;
+  try{mealDone=selectedMeals().filter(m=>state.mealDone?.[`${dk}-${m.type}`]).length>=2}catch(e){}
+  set('nourishFocusState',mealDone?complete:open);
+  set('recoverFocusState',open);
+}
+
+const originalSave = typeof save==='function' ? save : null;
+if(originalSave){
+  save = function(){
+    const result=originalSave.apply(this,arguments);
+    setTimeout(renderRooted,0);
+    return result;
+  }
+}
