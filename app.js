@@ -1195,3 +1195,101 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('change',()=>setTimeout(renderAquarium,90));
   renderAquarium();
 });
+
+// Rooted Volume 7 — Living Garden and Weekly Breakdown
+function rootedWeekDayKey(weekNumber, dayIndex){return `w${weekNumber}d${dayIndex}`}
+function rootedDaySummary(weekNumber, dayIndex){
+  const key=rootedWeekDayKey(weekNumber,dayIndex);
+  const workout=workouts[dayIndex];
+  const walk=!!state.checks[`${key}-walk`];
+  const stretch=!!state.checks[`${key}-stretch`];
+  const exerciseKeys=Object.keys(state.checks).filter(k=>k.startsWith(`${key}-ex`)&&state.checks[k]);
+  const moved=walk||stretch||exerciseKeys.length>0;
+  const water=Object.entries(state.water||{}).filter(([k,v])=>k.startsWith(`${key}-`)&&v).length;
+  const meals=Object.entries(state.mealDone||{}).filter(([k,v])=>k.startsWith(`${key}-`)&&v).length;
+  const root=!!rootedDailyRoots()[key];
+  const perfect=moved&&water>=4&&meals>=3;
+  let result='Fresh start';
+  if(perfect)result='Perfect day';
+  else if(moved&&water>=3)result='Strong day';
+  else if(moved)result='Movement win';
+  else if(water>=3)result='Hydration win';
+  else if(meals>0||root)result='Small win';
+  return {key,workout,walk,moved,water,meals,root,perfect,result};
+}
+function rootedWeeklyData(){
+  const days=Array.from({length:7},(_,i)=>rootedDaySummary(w,i));
+  return {
+    days,
+    movement:days.filter(x=>x.moved).length,
+    water:days.reduce((a,x)=>a+x.water,0)*0.5,
+    meals:days.reduce((a,x)=>a+x.meals,0),
+    perfect:days.filter(x=>x.perfect).length,
+    roots:days.filter(x=>x.root).length
+  };
+}
+function renderLivingGarden(){
+  const counts=gardenCounts();
+  const butterflies=Math.min(5,Math.floor(counts.total/12));
+  const flowers=Math.min(9,Math.floor(counts.total/7));
+  const visitors=[];
+  if(counts.total>=18)visitors.push('🐞');
+  if(counts.total>=35)visitors.push('🐝');
+  if(counts.total>=65)visitors.push('🐦');
+  const butterflyLayer=document.getElementById('gardenButterflies');
+  if(butterflyLayer)butterflyLayer.innerHTML=Array.from({length:butterflies},(_,i)=>`<span style="left:${8+(i*19)%78}%;top:${22+(i*17)%48}%;--delay:${i*-1.3}s;--speed:${6+i}s">${i%2?'🦋':'🦋'}</span>`).join('');
+  const flowerLayer=document.getElementById('gardenFlowers');
+  const flowerIcons=['🌼','🌸','🌷','🌻','🌺'];
+  if(flowerLayer)flowerLayer.innerHTML=Array.from({length:flowers},(_,i)=>`<span style="left:${4+(i*11)%88}%;animation-delay:${i*.08}s">${flowerIcons[i%flowerIcons.length]}</span>`).join('');
+  const visitorLayer=document.getElementById('gardenVisitors');
+  if(visitorLayer)visitorLayer.innerHTML=visitors.map((icon,i)=>`<span style="left:${10+i*31}%;top:${48-i*12}%;animation-delay:${i*-2}s">${icon}</span>`).join('');
+}
+function weeklyStory(data){
+  if(!data.movement&&!data.water&&!data.meals&&!data.roots)return 'Your week is ready for its first little win. Log one walk, bottle of water, meal or daily root and your story will begin.';
+  const parts=[];
+  if(data.movement)parts.push(`you moved on ${data.movement} ${data.movement===1?'day':'days'}`);
+  if(data.water)parts.push(`logged ${data.water.toFixed(1)} litres of water`);
+  if(data.meals)parts.push(`completed ${data.meals} ${data.meals===1?'meal':'meals'}`);
+  let text=`This week ${parts.join(', ').replace(/, ([^,]*)$/, ' and $1')}. `;
+  if(data.perfect)text+=`${data.perfect} ${data.perfect===1?'day was':'days were'} beautifully balanced. `;
+  if(data.movement>=3)text+='Your consistency invited butterflies into the garden. ';
+  if(data.water>=10)text+='The aquarium felt fuller and more alive. ';
+  return text+'You did not need perfection—you kept growing.';
+}
+function renderWeeklyBreakdown(){
+  const data=rootedWeeklyData();
+  const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const list=document.getElementById('weeklyDayList');
+  if(list)list.innerHTML=data.days.map((day,i)=>{
+    const icons=[day.moved?'💪':'○',day.water>=4?'💧':'◌',day.meals>=3?'🍽️':'·'].join(' ');
+    return `<article class="weekly-day ${i===d?'today':''}"><div class="weekly-day-name"><b>${names[i]}</b><small>${day.workout.focus}</small></div><div class="weekly-icons">${icons}</div><span class="weekly-result ${day.perfect?'perfect':''}">${day.perfect?'⭐ ':''}${day.result}</span></article>`;
+  }).join('');
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
+  set('weeklyStoryLabel',`Week ${w} in Rooted`);
+  set('weeklyStoryTitle',data.perfect?'You created a beautiful week.':data.movement||data.water||data.meals?'You kept showing up.':'Your week is waiting.');
+  set('weeklyStoryText',weeklyStory(data));
+  set('weekMovement',data.movement);
+  set('weekWater',`${data.water.toFixed(1)} L`);
+  set('weekMeals',data.meals);
+  set('weekPerfect',data.perfect);
+  set('weekShortcutText',data.movement||data.water||data.meals?`${data.movement} movement days • ${data.water.toFixed(1)} L water`:'See your weekly breakdown and story');
+  const unlocks=[['🌸','Flower',data.perfect>=1],['🦋','Butterfly',data.movement>=3],['🐝','Bee',data.meals>=12],['🐠','Aquarium glow',data.water>=10]];
+  const unlockBox=document.getElementById('weeklyUnlocks');
+  if(unlockBox)unlockBox.innerHTML=unlocks.map(([icon,label,on])=>`<span class="weekly-unlock ${on?'':'locked'}">${on?icon:'🔒'} ${label}</span>`).join('');
+  const gained=unlocks.filter(x=>x[2]).length;
+  set('weeklyWorldTitle',gained?`${gained} world ${gained===1?'reward':'rewards'} unlocked`:'Your living world is waking up');
+  set('weeklyWorldText',gained?'Your habits are adding new life to your garden and aquarium.':'Movement, hydration and nourishing meals will invite more visitors into your world.');
+}
+
+const rootedV7OriginalRenderGarden=renderGarden;
+renderGarden=function(){rootedV7OriginalRenderGarden();renderLivingGarden();};
+document.addEventListener('DOMContentLoaded',()=>{
+  renderWeeklyBreakdown();
+  renderLivingGarden();
+  document.addEventListener('rooted:pagechange',e=>{
+    if(e.detail.pageId==='week')renderWeeklyBreakdown();
+    if(e.detail.pageId==='garden')renderLivingGarden();
+  });
+  document.addEventListener('click',()=>setTimeout(()=>{renderWeeklyBreakdown();renderLivingGarden();},100));
+  document.addEventListener('change',()=>setTimeout(()=>{renderWeeklyBreakdown();renderLivingGarden();},100));
+});

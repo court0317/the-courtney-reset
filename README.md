@@ -1,17 +1,13 @@
-# Rooted V6
+# Rooted — Volume 7: Living World
 
-New in Volume 6:
-- Animated hydration aquarium
-- Tank water rises with each 500 mL water log
-- A new fish appears with each bottle
-- Fish collection and unlock milestones
-- Hydration goal percentage, tank level and water streak
-- Add or undo water directly from the aquarium
-- Aquarium shortcut on the Today screen
-- Existing Garden, guided workouts, meals, settings, backups and stable navigation retained
+Volume 7 builds on Volume 6 and keeps the existing Garden and Aquarium.
 
-Upload every file to the repository root and replace the previous files.
+## New in Volume 7
+- Living Garden with flowers, butterflies, ladybugs, bees and birds that unlock from consistency
+- New **This Week** page with a seven-day habit breakdown
+- Automatically written weekly story
+- Weekly world rewards connecting movement, meals and hydration to the Garden and Aquarium
+- Updated cache/version references for deployment
 
-Open once after GitHub Pages updates:
-
-`https://court0317.github.io/the-courtney-reset/?v=rooted6#aquarium`
+## Deploy
+Upload all files to the root of your GitHub Pages repository, replacing the previous build. Then open the site with `?v=rooted7#today` once to bypass old cached assets.
