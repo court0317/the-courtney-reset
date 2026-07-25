@@ -1,4 +1,4 @@
-const CACHE='rooted-v821';
+const CACHE='rooted-v821-scrollfix';
 const ASSETS=[
   './',
   './index.html?v=rooted822',
