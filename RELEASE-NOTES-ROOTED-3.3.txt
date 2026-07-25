@@ -1,0 +1,22 @@
+ROOTED 3.3 — MY RECIPES
+
+Added to Nourish:
+- My Recipes library
+- Add recipe form
+- Upload and resize a recipe photo
+- Ingredients and method
+- Serves, calories, protein, carbs and fat
+- Prep and cook time
+- Tags
+- Search and meal-type filters
+- Favourite, view, edit and delete recipes
+- Add a saved recipe directly to today's meals
+
+Recipes are stored inside the existing Rooted app state, so they are included in the current Supabase cloud sync for the signed-in user.
+
+UPLOAD TO GITHUB
+1. Unzip this file.
+2. Open the unzipped folder.
+3. Upload every file inside it to the root of the-courtney-reset GitHub repository.
+4. Replace existing files and commit the changes.
+5. Wait 1–2 minutes, then refresh the live app.

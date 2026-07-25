@@ -27,3 +27,7 @@ All Rooted 9 data is additive and stored separately under `rooted-v9-interactive
 
 ## Rooted 10 — Story World
 Adds the Reading Corner, Letters to Future You, weekly Garden Snapshots, Achievement Scrapbook and Evening Wrap-up. New feature data is stored separately under `rooted-v10-story-features`; existing planner data is unchanged.
+
+
+## Rooted 3.3 — My Recipes
+Adds a private recipe library in Nourish with recipe photos, nutrition, ingredients, method, favourites, search, editing, deletion, and adding saved recipes to today. Recipes are stored in the existing Rooted state and included in cloud sync.
