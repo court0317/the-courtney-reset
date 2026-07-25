@@ -762,3 +762,286 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('click',()=>setTimeout(renderRootedBuild3,40));
   document.addEventListener('change',()=>setTimeout(renderRootedBuild3,40));
 });
+
+// Rooted V5: Garden, guided workouts, editable settings and safer backups
+const ROOTED_JOURNAL_KEY='rooted-garden-journal-v5';
+
+function rootedSettingsProfile(){
+  return rootedProfile()||{
+    name:'Courtney',
+    goal:'Feel healthier',
+    equipment:{dumbbells:true,walkingPad:true,yogaMat:true},
+    walkGoal:30,
+    waterGoal:2.5,
+    weekdayCalories:1600,
+    weekendCalories:1800
+  };
+}
+
+function openSettings(){
+  const p=rootedSettingsProfile();
+  const assign=(id,value)=>{const el=document.getElementById(id);if(el)el.value=String(value)};
+  assign('settingName',p.name||'Courtney');
+  assign('settingWalkGoal',p.walkGoal||30);
+  assign('settingWaterGoal',p.waterGoal||2.5);
+  assign('settingWeekdayCalories',p.weekdayCalories||1600);
+  assign('settingWeekendCalories',p.weekendCalories||1800);
+  const checks={
+    settingDumbbells:!!p.equipment?.dumbbells,
+    settingWalkingPad:!!p.equipment?.walkingPad,
+    settingYogaMat:!!p.equipment?.yogaMat
+  };
+  Object.entries(checks).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.checked=val});
+  window.RootedNavigation?.showPage('settings');
+}
+
+function saveSettings(){
+  const current=rootedSettingsProfile();
+  const p={
+    ...current,
+    name:document.getElementById('settingName')?.value.trim()||'Courtney',
+    walkGoal:Number(document.getElementById('settingWalkGoal')?.value||30),
+    waterGoal:Number(document.getElementById('settingWaterGoal')?.value||2.5),
+    weekdayCalories:Number(document.getElementById('settingWeekdayCalories')?.value||1600),
+    weekendCalories:Number(document.getElementById('settingWeekendCalories')?.value||1800),
+    equipment:{
+      dumbbells:!!document.getElementById('settingDumbbells')?.checked,
+      walkingPad:!!document.getElementById('settingWalkingPad')?.checked,
+      yogaMat:!!document.getElementById('settingYogaMat')?.checked
+    }
+  };
+  saveRootedProfile(p);
+  renderRootedPremium();
+  renderRootedBuild3();
+  const btn=document.getElementById('saveRootedSettings');
+  if(btn){const old=btn.textContent;btn.textContent='Saved ✓';setTimeout(()=>btn.textContent=old,1300)}
+}
+
+function gardenCounts(){
+  const healthyDays=new Set();
+  const moveDays=new Set();
+  let waterLogs=0;
+  Object.entries((state&&state.water)||{}).forEach(([key,val])=>{
+    if(val){waterLogs++;healthyDays.add(key.slice(0,10))}
+  });
+  Object.entries((state&&state.mealDone)||{}).forEach(([key,val])=>{
+    if(val)healthyDays.add(key.slice(0,10));
+  });
+  Object.entries((state&&state.checks)||{}).forEach(([key,val])=>{
+    if(val){healthyDays.add(key.slice(0,10));moveDays.add(key.slice(0,10))}
+  });
+  Object.entries((state&&state.walking)||{}).forEach(([key,val])=>{
+    if(Number(val?.minutes||0)>0){healthyDays.add(key.slice(0,10));moveDays.add(key.slice(0,10))}
+  });
+  const roots=Object.values(rootedDailyRoots()).filter(Boolean).length;
+  const total=healthyDays.size+roots+Math.floor(waterLogs/5)+moveDays.size;
+  return {healthyDays:healthyDays.size,roots,waterLogs,moveDays:moveDays.size,total};
+}
+
+function gardenStage(total){
+  if(total>=90)return {plant:'🌳',label:'Deeply rooted',title:'Your habits have strong roots',next:120};
+  if(total>=50)return {plant:'🌲',label:'Flourishing',title:'Your garden is flourishing',next:90};
+  if(total>=25)return {plant:'🪴',label:'Growing strong',title:'Your consistency is showing',next:50};
+  if(total>=10)return {plant:'🌿',label:'Taking root',title:'Your roots are taking hold',next:25};
+  return {plant:'🌱',label:'Seedling',title:'Your roots are beginning',next:10};
+}
+
+function renderGarden(){
+  const counts=gardenCounts();
+  const stage=gardenStage(counts.total);
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
+  set('gardenPlant',stage.plant);
+  set('gardenStageLabel',stage.label);
+  set('gardenStageTitle',stage.title);
+  set('gardenStageMessage',counts.total
+    ?'Every completed habit is helping this garden become stronger.'
+    :'Complete one small habit today to plant your first root.');
+  set('gardenHealthyDays',counts.healthyDays);
+  set('gardenRoots',counts.roots);
+  set('gardenWaterLogs',counts.waterLogs);
+  set('gardenMoveDays',counts.moveDays);
+  set('gardenProgressText',`${counts.total} growth points • next stage at ${stage.next}`);
+  const prior=stage.next===10?0:stage.next===25?10:stage.next===50?25:stage.next===90?50:90;
+  const pct=Math.max(0,Math.min(100,((counts.total-prior)/(stage.next-prior))*100));
+  const bar=document.getElementById('gardenProgressBar');
+  if(bar)bar.style.width=`${pct}%`;
+  const journal=document.getElementById('gardenJournal');
+  if(journal){
+    try{
+      const saved=JSON.parse(localStorage.getItem(ROOTED_JOURNAL_KEY)||'{}');
+      journal.value=saved[rootedTodayKey()]||'';
+    }catch(e){}
+  }
+}
+
+function saveGardenJournal(){
+  let saved={};
+  try{saved=JSON.parse(localStorage.getItem(ROOTED_JOURNAL_KEY)||'{}')}catch(e){}
+  saved[rootedTodayKey()]=document.getElementById('gardenJournal')?.value.trim()||'';
+  localStorage.setItem(ROOTED_JOURNAL_KEY,JSON.stringify(saved));
+  const status=document.getElementById('gardenJournalSaved');
+  if(status){status.textContent='Reflection saved ✓';setTimeout(()=>status.textContent='',1400)}
+}
+
+let guidedItems=[];
+let guidedIndex=0;
+let guidedSeconds=60;
+let guidedInterval=null;
+
+function collectGuidedExercises(){
+  guidedItems=[...document.querySelectorAll('#exerciseList .exercise-card')].map((card,index)=>{
+    const checkbox=card.querySelector('input[type="checkbox"]');
+    const heading=card.querySelector('h3,b,strong')?.textContent.trim()||`Exercise ${index+1}`;
+    const detail=[...card.querySelectorAll('p,small')].map(x=>x.textContent.trim()).filter(Boolean).join(' • ');
+    return {card,checkbox,name:heading,detail};
+  });
+}
+
+function renderGuidedExercise(){
+  const item=guidedItems[guidedIndex];
+  if(!item)return;
+  const total=guidedItems.length;
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
+  set('guidedCounter',`Exercise ${guidedIndex+1} of ${total}`);
+  set('guidedExerciseName',item.name);
+  set('guidedExerciseDetails',item.detail||'Move slowly and use a weight that feels controlled.');
+  set('guidedIcon',guidedIndex===total-1?'✨':'💪');
+  const bar=document.getElementById('guidedProgressBar');
+  if(bar)bar.style.width=`${((guidedIndex+1)/total)*100}%`;
+  const previous=document.getElementById('guidedPrevious');
+  if(previous)previous.disabled=guidedIndex===0;
+  const next=document.getElementById('guidedCompleteNext');
+  const finish=document.getElementById('guidedFinish');
+  if(next)next.hidden=guidedIndex===total-1;
+  if(finish)finish.hidden=guidedIndex!==total-1;
+  resetGuidedTimer();
+}
+
+function openGuidedWorkout(){
+  collectGuidedExercises();
+  if(!guidedItems.length){
+    alert('Your workout exercises are still loading. Open Move again in a moment.');
+    return;
+  }
+  guidedIndex=0;
+  renderGuidedExercise();
+  document.getElementById('guidedWorkoutModal')?.showModal();
+}
+
+function completeGuidedCurrent(){
+  const item=guidedItems[guidedIndex];
+  if(item?.checkbox && !item.checkbox.checked){
+    item.checkbox.click();
+  }
+}
+
+function resetGuidedTimer(){
+  if(guidedInterval){clearInterval(guidedInterval);guidedInterval=null}
+  guidedSeconds=60;
+  const timer=document.getElementById('guidedTimer');
+  const toggle=document.getElementById('guidedTimerToggle');
+  if(timer)timer.textContent=guidedSeconds;
+  if(toggle)toggle.textContent='Start rest';
+}
+
+function toggleGuidedTimer(){
+  const toggle=document.getElementById('guidedTimerToggle');
+  if(guidedInterval){
+    clearInterval(guidedInterval);guidedInterval=null;
+    if(toggle)toggle.textContent='Resume rest';
+    return;
+  }
+  if(toggle)toggle.textContent='Pause rest';
+  guidedInterval=setInterval(()=>{
+    guidedSeconds=Math.max(0,guidedSeconds-1);
+    const timer=document.getElementById('guidedTimer');
+    if(timer)timer.textContent=guidedSeconds;
+    if(guidedSeconds===0){
+      clearInterval(guidedInterval);guidedInterval=null;
+      if(toggle)toggle.textContent='Rest complete ✓';
+    }
+  },1000);
+}
+
+function exportRootedV5(){
+  const payload={
+    version:5,
+    exportedAt:new Date().toISOString(),
+    appState:state,
+    profile:rootedProfile(),
+    dailyRoots:rootedDailyRoots(),
+    weeklyFocus:localStorage.getItem(ROOTED_FOCUS_KEY),
+    gardenJournal:localStorage.getItem(ROOTED_JOURNAL_KEY)
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`rooted-backup-${rootedTodayKey()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function importRootedV5(file){
+  if(!file)return;
+  try{
+    const data=JSON.parse(await file.text());
+    if(data.appState){
+      state=data.appState;
+      localStorage.setItem(KEY,JSON.stringify(state));
+    }else{
+      state=data;
+      localStorage.setItem(KEY,JSON.stringify(state));
+    }
+    if(data.profile)saveRootedProfile(data.profile);
+    if(data.dailyRoots)localStorage.setItem(ROOTED_ROOTS_KEY,JSON.stringify(data.dailyRoots));
+    if(data.weeklyFocus)localStorage.setItem(ROOTED_FOCUS_KEY,data.weeklyFocus);
+    if(data.gardenJournal)localStorage.setItem(ROOTED_JOURNAL_KEY,data.gardenJournal);
+    location.reload();
+  }catch(e){
+    alert('That backup file could not be imported.');
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('settingsBtn')?.addEventListener('click',openSettings);
+  document.getElementById('saveRootedSettings')?.addEventListener('click',saveSettings);
+  document.getElementById('saveGardenJournal')?.addEventListener('click',saveGardenJournal);
+  document.getElementById('startGuidedWorkout')?.addEventListener('click',openGuidedWorkout);
+  document.getElementById('closeGuidedWorkout')?.addEventListener('click',()=>document.getElementById('guidedWorkoutModal')?.close());
+  document.getElementById('guidedPrevious')?.addEventListener('click',()=>{
+    guidedIndex=Math.max(0,guidedIndex-1);renderGuidedExercise();
+  });
+  document.getElementById('guidedCompleteNext')?.addEventListener('click',()=>{
+    completeGuidedCurrent();
+    guidedIndex=Math.min(guidedItems.length-1,guidedIndex+1);
+    renderGuidedExercise();
+  });
+  document.getElementById('guidedFinish')?.addEventListener('click',()=>{
+    completeGuidedCurrent();
+    document.getElementById('guidedWorkoutModal')?.close();
+    renderGarden();
+  });
+  document.getElementById('guidedTimerToggle')?.addEventListener('click',toggleGuidedTimer);
+  document.getElementById('settingsExport')?.addEventListener('click',exportRootedV5);
+  document.getElementById('settingsImport')?.addEventListener('change',e=>importRootedV5(e.target.files?.[0]));
+  document.getElementById('restartOnboarding')?.addEventListener('click',()=>{
+    localStorage.removeItem(ROOTED_PROFILE_KEY);
+    location.reload();
+  });
+  document.addEventListener('rooted:pagechange',e=>{
+    if(e.detail.pageId==='garden')renderGarden();
+    if(e.detail.pageId==='settings'){
+      const p=rootedSettingsProfile();
+      document.getElementById('settingName').value=p.name||'Courtney';
+      document.getElementById('settingWalkGoal').value=String(p.walkGoal||30);
+      document.getElementById('settingWaterGoal').value=String(p.waterGoal||2.5);
+      document.getElementById('settingWeekdayCalories').value=String(p.weekdayCalories||1600);
+      document.getElementById('settingWeekendCalories').value=String(p.weekendCalories||1800);
+      document.getElementById('settingDumbbells').checked=!!p.equipment?.dumbbells;
+      document.getElementById('settingWalkingPad').checked=!!p.equipment?.walkingPad;
+      document.getElementById('settingYogaMat').checked=!!p.equipment?.yogaMat;
+    }
+  });
+  renderGarden();
+});

@@ -256,3 +256,40 @@ nav .nav:active {
 .onboarding-shell[hidden] {
   display: none !important;
 }
+
+/* Rooted V5 */
+.guided-launch{margin-bottom:14px}
+.garden-shortcut{width:100%;display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:center;text-align:left;color:var(--ink);cursor:pointer}
+.garden-shortcut>span:first-child{font-size:2rem}
+.garden-shortcut small,.garden-shortcut b{display:block}
+.garden-shortcut small{color:var(--muted);margin-bottom:4px}
+.garden-shortcut>span:last-child{font-size:2rem;color:var(--sage2)}
+.garden-hero{text-align:center;padding:28px 20px;background:linear-gradient(150deg,#fffaf3,#e5ede0)}
+.garden-plant{font-size:7rem;line-height:1;margin:6px 0 16px;filter:drop-shadow(0 14px 20px rgba(57,79,55,.14));animation:gardenSway 4s ease-in-out infinite}
+@keyframes gardenSway{50%{transform:translateY(-5px) rotate(1.5deg)}}
+.garden-hero h2{font-family:Georgia,serif;font-size:2rem}
+.garden-progress{height:12px;background:#e3ddd2;border-radius:999px;overflow:hidden;margin:18px 0 8px}
+.garden-progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sage),#b7c596);border-radius:inherit;transition:width .5s ease}
+.garden-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.garden-grid .stat{margin:0}
+.settings-form{display:grid;gap:14px}
+.settings-form label{display:grid;gap:7px;font-size:.82rem;font-weight:700;color:var(--muted)}
+.settings-form input,.settings-form select{width:100%;padding:13px;border:1px solid var(--line);border-radius:14px;background:#fffdf8;color:var(--ink);font:inherit;font-size:1rem}
+.settings-checks{display:grid;gap:12px}
+.settings-checks label{display:flex;gap:10px;align-items:center}
+.settings-checks input{width:21px;height:21px;accent-color:var(--sage)}
+.guided-modal{width:min(92vw,520px);border:0;border-radius:30px;padding:28px;background:var(--paper);color:var(--ink);box-shadow:0 30px 90px rgba(25,35,27,.28)}
+.guided-modal::backdrop{background:rgba(35,43,36,.58);backdrop-filter:blur(7px)}
+.guided-progress{height:9px;background:#e7e0d5;border-radius:999px;overflow:hidden;margin:14px 0 8px}
+.guided-progress span{display:block;height:100%;width:0;background:var(--sage);transition:width .3s ease}
+.guided-icon{text-align:center;font-size:4.5rem;margin:16px 0}
+.guided-modal h2{text-align:center;font-family:Georgia,serif;font-size:2rem}
+.guided-modal>p{text-align:center;color:var(--muted);line-height:1.5}
+.guided-timer{width:106px;height:106px;border-radius:50%;display:grid;place-items:center;margin:20px auto;background:#edf1e8;border:8px solid #d6dfcf;font-size:2rem;font-weight:800}
+.guided-actions{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:9px}
+.guided-actions button{padding:12px 8px}
+@media(max-width:560px){
+  .guided-actions{grid-template-columns:1fr 1fr}
+  .guided-actions .primary{grid-column:1/-1}
+  .garden-plant{font-size:6rem}
+}
