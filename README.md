@@ -9,3 +9,5 @@ Deploy every file in this folder to GitHub Pages, then open once with `?v=rooted
 - Fixed Calendar History opening with an independent navigation handler.
 - Added the calendar script to offline caching.
 - Replaced unsupported instant scrolling for better iPhone compatibility.
+
+Rooted 2.0 recovery build: rebuilt home UI from stable v8.1.3 while preserving app logic.
