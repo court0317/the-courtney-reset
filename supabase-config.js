@@ -3,5 +3,5 @@
    Paste the full sb_publishable_... value between the quotes below. */
 window.ROOTED_SUPABASE_CONFIG = {
   url: 'https://rvnxqcksdupexxdbaqbo.supabase.co',
-  publishableKey: 'PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE'
+  publishableKey: 'sb_publishable_knJ1pcemsD5BhpjELL4m0Q_aRx0dkmr'
 };
