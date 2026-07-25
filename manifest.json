@@ -1,8 +1,8 @@
 {
   "name": "Rooted",
   "short_name": "Rooted",
-  "description": "A calm personalised wellness app with an animated hydration aquarium, guided workouts, meals, movement and progress.",
-  "start_url": "./?v=4",
+  "description": "A calm personalised wellness app with an a living wellness world with a garden, aquarium, journey map, memory lane, guided movement and meals.",
+  "start_url": "./?v=rooted8#today",
   "display": "standalone",
   "background_color": "#f7f1e7",
   "theme_color": "#6f846b",

@@ -1,13 +1,12 @@
-# Rooted — Volume 7: Living World
+# Rooted Volume 8 — Your Journey
 
-Volume 7 builds on Volume 6 and keeps the existing Garden and Aquarium.
+Volume 8 builds on the living garden, aquarium and weekly journal with:
 
-## New in Volume 7
-- Living Garden with flowers, butterflies, ladybugs, bees and birds that unlock from consistency
-- New **This Week** page with a seven-day habit breakdown
-- Automatically written weekly story
-- Weekly world rewards connecting movement, meals and hydration to the Garden and Aquarium
-- Updated cache/version references for deployment
+- Your World hub
+- Legacy Tree that never resets after one missed day
+- Journey Path with cumulative milestones
+- Memory Lane with saved weekly chapters
+- Smarter Rooted Coach guidance
+- Volume 8 cache/version update
 
-## Deploy
-Upload all files to the root of your GitHub Pages repository, replacing the previous build. Then open the site with `?v=rooted7#today` once to bypass old cached assets.
+Deploy all files together. After publishing, open once with `?v=rooted8#today`.

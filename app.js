@@ -1293,3 +1293,96 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('click',()=>setTimeout(()=>{renderWeeklyBreakdown();renderLivingGarden();},100));
   document.addEventListener('change',()=>setTimeout(()=>{renderWeeklyBreakdown();renderLivingGarden();},100));
 });
+
+
+// Rooted Volume 8 — Your Journey
+(() => {
+  'use strict';
+  const V8_KEY='rooted-v8-journey';
+  const getMain=()=>{try{return JSON.parse(localStorage.getItem('courtneyResetPremiumV5')||'{}')}catch{return {}}};
+  const getV8=()=>{try{return JSON.parse(localStorage.getItem(V8_KEY)||'{"memories":{},"firstOpened":""}')}catch{return {memories:{},firstOpened:''}}};
+  const saveV8=x=>localStorage.setItem(V8_KEY,JSON.stringify(x));
+  const el=id=>document.getElementById(id);
+  const put=(id,text)=>{const x=el(id);if(x)x.textContent=text};
+  const truthyCount=o=>Object.values(o||{}).filter(Boolean).length;
+  function stats(){
+    const m=getMain();
+    const checks=Object.keys(m.checks||{}).filter(k=>m.checks[k]);
+    const water=Object.values(m.water||{}).reduce((n,v)=>n+(Number(v)||0),0);
+    const meals=truthyCount(m.mealDone);
+    const roots=(()=>{try{return Object.values(JSON.parse(localStorage.getItem('rooted-daily-roots-v5')||'{}')).filter(Boolean).length}catch{return 0}})();
+    const workouts=checks.filter(k=>k.includes('-ex')||k.endsWith('-walk')).length;
+    const movementDays=new Set(checks.filter(k=>k.endsWith('-walk')).map(k=>k.split('-walk')[0])).size;
+    const total=workouts+water+meals+roots;
+    return {m,checks,water,meals,roots,workouts,movementDays,total};
+  }
+  const milestones=[
+    {icon:'🏡',title:'Your journey began',need:0,detail:'You opened Rooted and planted the first seed.'},
+    {icon:'🌱',title:'First healthy choice',need:1,detail:'One small action became your first root.'},
+    {icon:'💧',title:'First aquarium visitor',need:3,detail:'Hydration brought your first fish home.'},
+    {icon:'🌸',title:'First flower',need:7,detail:'A week of little choices helped something bloom.'},
+    {icon:'🦋',title:'Butterfly garden',need:15,detail:'Consistency invited a butterfly to stay.'},
+    {icon:'🌳',title:'Strong young tree',need:30,detail:'Thirty growth points became lasting roots.'},
+    {icon:'🗺️',title:'A world of your own',need:60,detail:'Your garden, aquarium and journey are flourishing.'},
+    {icon:'🏔️',title:'Rooted for the long run',need:100,detail:'One hundred choices built something remarkable.'}
+  ];
+  function treeStage(total){
+    if(total>=100)return ['🌳','A flourishing legacy tree',100];
+    if(total>=60)return ['🌲','A strong evergreen',100];
+    if(total>=30)return ['🌴','A growing young tree',60];
+    if(total>=15)return ['🪴','A thriving sapling',30];
+    if(total>=7)return ['🌿','A leafy seedling',15];
+    return [total?'🌱':'🫘',total?'A young seedling':'A seed ready to grow',7];
+  }
+  function renderWorld(){
+    const s=stats(), t=treeStage(s.total), hour=new Date().getHours();
+    put('worldGreeting',hour<12?'Good morning, your world is here.':hour<18?'Good afternoon, welcome back.':'Good evening, come see what grew.');
+    put('worldTitle',s.total>=30?'Your world is flourishing.':s.total?'Your little world is growing.':'Your little world is ready.');
+    put('worldMessage',s.total?`${s.total} supportive choices have added life to this world.`:'Your first supportive choice will plant the first root.');
+    put('worldGardenStatus',s.total>=15?'Butterflies visiting':s.total>=7?'Flowers blooming':s.total?'New roots growing':'Waking up');
+    put('worldAquariumStatus',s.water?`${(s.water*.5).toFixed(1)} L logged in your journey`:'Ready for its first fish');
+    put('worldJourneyStatus',`${milestones.filter(x=>s.total>=x.need).length} of ${milestones.length} milestones`);
+    put('worldMemoryStatus',s.total?'Your story is taking shape':'Your first chapter awaits');
+    put('legacyTree',t[0]);put('legacyTitle',t[1]);put('legacyProgress',`${s.total} lifetime growth points • next stage at ${t[2]}`);
+    const bar=el('legacyBar');if(bar)bar.style.width=`${Math.min(100,s.total/t[2]*100)}%`;
+  }
+  function renderJourney(){
+    const s=stats(), box=el('journeyPath');if(!box)return;
+    let currentFound=false;
+    box.innerHTML=milestones.map(m=>{
+      const unlocked=s.total>=m.need;const current=!unlocked&&!currentFound;(currentFound=currentFound||current);
+      return `<article class="milestone-node ${unlocked?'unlocked':'locked'} ${current?'current':''}"><div class="milestone-icon">${unlocked?m.icon:'🔒'}</div><div class="milestone-copy"><b>${m.title}</b><small>${unlocked?m.detail:`${Math.max(0,m.need-s.total)} more growth points to unlock`}</small></div></article>`;
+    }).join('');
+  }
+  function weeklySnapshot(){
+    const s=stats();
+    const weekNum=typeof w!=='undefined'?w:1;
+    const movement=s.movementDays, litres=s.water*.5;
+    let story='Your week is ready for its first little win.';
+    if(s.total)story=`You kept showing up. Your journey now holds ${s.total} supportive choices, ${movement} movement ${movement===1?'day':'days'} and ${litres.toFixed(1)} litres logged. `+(s.total>=15?'Butterflies have started finding their way to your garden.':'Your roots are getting stronger.');
+    return {weekNum,story,s};
+  }
+  function renderMemory(){
+    const snap=weeklySnapshot(), v=getV8(), key=`week-${snap.weekNum}`;
+    v.firstOpened=v.firstOpened||new Date().toISOString();v.memories=v.memories||{};
+    v.memories[key]={week:snap.weekNum,story:snap.story,total:snap.s.total,date:new Date().toISOString()};saveV8(v);
+    const entries=Object.values(v.memories).sort((a,b)=>b.week-a.week);
+    put('memoryHeadline',snap.s.total?'You are writing a story worth keeping.':'Your first chapter is beginning.');
+    put('memorySummary',entries.length===1?'Your weekly memories will collect here as Rooted grows with you.':`${entries.length} weekly chapters are saved on this device.`);
+    const box=el('memoryTimeline');if(!box)return;
+    const unlocked=milestones.filter(m=>snap.s.total>=m.need).slice(-3).reverse();
+    box.innerHTML=[...entries.map(x=>`<article class="memory-entry"><div class="memory-dot">📖</div><div class="memory-card"><small>Week ${x.week}</small><h3>This week in Rooted</h3><p>${x.story}</p></div></article>`),...unlocked.map(x=>`<article class="memory-entry"><div class="memory-dot">${x.icon}</div><div class="memory-card"><small>Milestone</small><h3>${x.title}</h3><p>${x.detail}</p></div></article>`)].join('');
+  }
+  function rootedCoachV8(){
+    const s=stats();let title='A gentle next step',msg='One small choice is enough to move today forward.',page='world';
+    if(s.water<5){title='Your aquarium is waiting';msg=`${Math.max(1,5-s.water)} more 500 mL ${5-s.water===1?'bottle':'bottles'} would complete a 2.5 L hydration day.`;page='aquarium'}
+    else if(s.movementDays<3){title='A little movement would help';msg='A gentle walk today can strengthen your journey path—no perfect workout required.';page='workout'}
+    else if(s.total<15){title='A butterfly is getting closer';msg=`Only ${15-s.total} more growth points until the Butterfly Garden milestone.`;page='journey-map'}
+    else {title='Look what you have built';msg='Your world has enough history for a beautiful trip down Memory Lane.';page='memory'}
+    put('coachTitle',title);put('coachMessage',msg);const b=el('coachAction');if(b){b.textContent=page==='aquarium'?'Add water':page==='workout'?'Start moving':page==='memory'?'Open Memory Lane':'View milestone';b.classList.add('ready');b.onclick=()=>window.RootedNavigation?.showPage(page)}
+  }
+  function renderAllV8(){renderWorld();renderJourney();renderMemory();rootedCoachV8()}
+  document.addEventListener('rooted:pagechange',e=>{if(e.detail.pageId==='world')renderWorld();if(e.detail.pageId==='journey-map')renderJourney();if(e.detail.pageId==='memory')renderMemory()});
+  document.addEventListener('click',e=>{if(e.target.closest('[data-go="world"],[data-go="journey-map"],[data-go="memory"]'))setTimeout(renderAllV8,30)},true);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderAllV8,{once:true});else renderAllV8();
+})();
