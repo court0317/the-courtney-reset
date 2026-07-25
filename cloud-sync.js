@@ -82,6 +82,10 @@
     uploadTimer = setTimeout(() => pushSnapshot(false), 900);
   }
 
+  function notifyCloudStateChanged() {
+    window.dispatchEvent(new CustomEvent('rooted:cloud-sync-updated', { detail: { source: 'cloud' } }));
+  }
+
   async function pushSnapshot(showStatus) {
     if (!client || !currentUser) return false;
     setCloudStatus('syncing', 'Saving…');
@@ -119,8 +123,7 @@
           cloudSavedAt: data.data.savedAt || data.updated_at,
           lastPulledAt: new Date().toISOString()
         }));
-        location.reload();
-        return;
+        notifyCloudStateChanged();
       }
     } else if (hasMeaningfulLocalData()) {
       await pushSnapshot(false);
@@ -156,10 +159,14 @@
     window.addEventListener('storage', event => {
       if (isRootedKey(event.key)) queueUpload();
     });
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') pushSnapshot(false);
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'hidden') {
+        await pushSnapshot(false);
+      }
     });
-    window.addEventListener('pagehide', () => pushSnapshot(false));
+    window.addEventListener('pagehide', async () => {
+      await pushSnapshot(false);
+    });
   }
 
   function createGate() {
@@ -305,7 +312,9 @@
     client.auth.onAuthStateChange(async (event, sessionNow) => {
       if (event === 'SIGNED_OUT') {
         currentUser = null;
-        location.reload();
+        document.getElementById('rootedAuthGate')?.remove();
+        createGate();
+        setCloudStatus('saved', 'Not signed in');
         return;
       }
       if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && sessionNow?.user) {
