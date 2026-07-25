@@ -1,19 +1,24 @@
-# The Courtney Reset — Version 6.2
+# The Courtney Reset — Version 7
 
-## New
-- Normal, low-energy, sore-day and rest-day workout modes
-- Walking pad logging for minutes, speed and distance
-- Dumbbell weight memory for each exercise
-- Fridge leftovers tracker with serves and age prompts
-- Exercise video search remains available inside every exercise guide
-- No Oura data entry and no freezer features
+## Nutrition system rebuilt
+- Weekday calorie guide: 1,600 kcal
+- Weekend calorie guide: 1,750 kcal
+- Shows planned calories, guide, remaining calories, protein and water
+- Live progress bar and plain-language status
+- Automatically repairs older 1,230 kcal plans by adding a suitable extra snack
+- Skipping breakfast remains allowed
+- Adds savoury, practical top-ups rather than forcing a sweet breakfast
+- Recalculates after meal swaps, leftovers and takeaway choices
 
-## Equipment
-- Dumbbells
-- Walking pad
-- Yoga mat
-- Optional chair, wall or couch for support
+## Existing features retained
+- Dumbbells, walking pad and yoga-mat workouts only
+- Exercise guides and video searches
+- Dumbbell weight memory
+- Normal, low-energy, sore and rest modes
+- Walking-pad logging
+- Fresh fridge-leftover tracking
+- No Oura data entry and no freezer system
 
 ## Install
-Upload all files to the root of the GitHub repository, replacing the current files.
-Then open the GitHub Pages site once using `?v=6.2`.
+Upload every file to the root of the GitHub repository and replace the old files.
+Open the GitHub Pages site once using `?v=7`.

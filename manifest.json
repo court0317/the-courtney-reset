@@ -1,7 +1,7 @@
 {
   "name": "The Courtney Reset",
   "short_name": "Courtney Reset",
-  "description": "Personalised workouts, walking pad tracking, dumbbell progress and fridge leftovers.",
+  "description": "Courtney's personalised meal, workout and walking app with live calorie planning.",
   "start_url": "./?v=4",
   "display": "standalone",
   "background_color": "#f6f1e8",

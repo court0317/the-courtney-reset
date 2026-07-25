@@ -29,7 +29,12 @@ const recipes=[
 {id:'creamy-chicken-pasta',type:'Dinner',name:'Creamy chicken pasta',icon:'🍝',effort:'cook',category:'pasta',cal:640,protein:42,ingredients:['chicken breast','pasta','lactose-free cream or dairy-free cooking cream'],method:'A more energetic weekend meal.',weekday:false},
 {id:'taco-bowl',type:'Dinner',name:'Taco bowl — no tomato',icon:'🌮',effort:'easy',category:'quick',cal:570,protein:36,ingredients:['lean mince','rice','corn','lettuce','lactose-free cheese optional','garlic-free mild seasoning'],method:'No tomato salsa.',weekday:true},
 {id:'loaded-potato',type:'Dinner',name:'Loaded baked potato',icon:'🥔',effort:'easy',category:'comfort',cal:560,protein:30,ingredients:['potatoes','lean mince or chicken','corn','lactose-free cheese optional'],method:'Microwave first, then crisp it up.',weekday:true},
-{id:'weekend-empanadas',type:'Dinner',name:'Homemade empanadas',icon:'🥟',effort:'cook',category:'comfort',cal:600,protein:32,ingredients:['lean mince','puff pastry','carrot','mild spices','egg for wash only'],method:'A weekend cook that creates handy leftovers.',weekday:false}
+{id:'weekend-empanadas',type:'Dinner',name:'Homemade empanadas',icon:'🥟',effort:'cook',category:'comfort',cal:600,protein:32,ingredients:['lean mince','puff pastry','carrot','mild spices','egg for wash only'],method:'A weekend cook that creates handy leftovers.',weekday:false},
+
+{id:'protein-snack',type:'Extra',name:'Protein snack plate',icon:'🥨',effort:'barely',category:'snack',cal:330,protein:22,ingredients:['plain crackers','sliced chicken or ham','lactose-free cheese if tolerated'],method:'A savoury top-up for days when breakfast is skipped.',weekday:true},
+{id:'oats-topup',type:'Extra',name:'Small overnight oats',icon:'🥣',effort:'easy',category:'oats',cal:310,protein:15,ingredients:['rolled oats','almond milk','chia seeds','small amount of chocolate chips'],method:'Use a smaller portion than the breakfast oats.',weekday:true},
+{id:'popcorn-plus',type:'Extra',name:'Popcorn and a protein side',icon:'🍿',effort:'barely',category:'snack',cal:270,protein:15,ingredients:['popcorn','sliced chicken or lactose-free yoghurt if tolerated'],method:'Your favourite snack with something filling beside it.',weekday:true},
+{id:'toast-topup',type:'Extra',name:'Vegemite toast and fruit',icon:'🍞',effort:'barely',category:'light',cal:250,protein:8,ingredients:['bread','Vegemite','fruit'],method:'Savoury, quick and useful when the day is under target.',weekday:true}
 ];
 
 const takeawayOptions=[
@@ -50,15 +55,39 @@ function pct(n,t){return t?Math.round(n/t*100):0}
 function phaseSets(base,i){return w>=5&&i<2?base+1:base}
 function recipe(id){return recipes.find(r=>r.id===id)}
 function cloneMeal(r){return JSON.parse(JSON.stringify(r))}
+
+function calorieGuide(){return weekday?1600:1750}
+function bestTopUpFor(total){
+ const gap=calorieGuide()-total;
+ if(gap<=80)return null;
+ if(gap<=270)return cloneMeal(recipe('toast-topup'));
+ if(gap<=320)return cloneMeal(recipe('popcorn-plus'));
+ if(gap<=380)return cloneMeal(recipe('oats-topup'));
+ return cloneMeal(recipe('protein-snack'));
+}
 function defaultDayMeals(day=d,week=w){
  const easyDinner=['thai-pumpkin','spagbol','honey-soy','burger','taco-bowl'];
  const weekendDinner=['steak','creamy-chicken-pasta'];
- return {Breakfast:cloneMeal(recipe(day===5?'choc-oats':day===6?'banana-oats':'skip')),
+ const meals={Breakfast:cloneMeal(recipe(day===5?'choc-oats':day===6?'banana-oats':'skip')),
  Lunch:cloneMeal(recipe(day===0?'chicken-wrap':day===1?'leftover-placeholder':day===2?'soup-lunch':day===3?'leftover-placeholder':day===4?'pizza-scrolls':day===5?'empanadas':'soup-lunch')),
  Snack:cloneMeal(recipe(day%2?'fruit':'popcorn')),
  Dinner:cloneMeal(recipe(day<5?easyDinner[(week+day)%easyDinner.length]:weekendDinner[day-5]))};
+ const total=Object.values(meals).reduce((a,m)=>a+(m?.cal||0),0);
+ const topUp=bestTopUpFor(total);
+ if(topUp){topUp.type='Extra';meals.Extra=topUp}
+ return meals;
 }
-function selectedMeals(dayKey=dk){if(!state.dayMeals[dayKey])state.dayMeals[dayKey]=defaultDayMeals();return ['Breakfast','Lunch','Snack','Dinner'].map(t=>state.dayMeals[dayKey][t]).filter(Boolean)}
+function selectedMeals(dayKey=dk){
+ if(!state.dayMeals[dayKey])state.dayMeals[dayKey]=defaultDayMeals();
+ const order=['Breakfast','Lunch','Snack','Dinner','Extra'];
+ let list=order.map(t=>state.dayMeals[dayKey][t]).filter(Boolean);
+ const total=list.reduce((a,m)=>a+(m.cal||0),0);
+ if(!state.dayMeals[dayKey].Extra){
+   const topUp=bestTopUpFor(total);
+   if(topUp){topUp.type='Extra';state.dayMeals[dayKey].Extra=topUp;list.push(topUp);persist()}
+ }
+ return order.map(t=>state.dayMeals[dayKey][t]).filter(Boolean)
+}
 function mealFor(type){return selectedMeals().find(m=>m.type===type)}
 function setMeal(type,meal){if(!state.dayMeals[dk])state.dayMeals[dk]=defaultDayMeals();state.dayMeals[dk][type]=cloneMeal(meal);state.dayMeals[dk][type].type=type;state.mealDone[`${dk}-${type}`]=false;save()}
 function taskKeys(){let ks=[`${dk}-walk`];work.ex.forEach((e,i)=>{for(let n=1;n<=phaseSets(e.sets,i);n++)ks.push(`${dk}-ex${i}-set${n}`)});return ks}
@@ -78,6 +107,7 @@ function renderToday(){
  focusTitle.textContent=`${work.icon} ${work.focus}`;dayBadge.textContent=`Week ${w}`;
  todayQuick.innerHTML=[['walk',`${work.walk} min walking pad`],['water','Drink at least 2 L water'],['protein','Include protein with meals'],['stretch','Complete your stretch']].map(([x,t])=>`<label class="quick"><input type="checkbox" data-quick="${x}" ${quickDone(x)?'checked':''}><b>${t}</b></label>`).join('');
  document.querySelectorAll('[data-quick]').forEach(x=>x.onchange=()=>quickToggle(x.dataset.quick,x.checked));streak.textContent=calcStreak()+' days';programPct.textContent=programProgress()+'%';coachText.textContent=s.stage==='countdown'?'Your Monday plan is ready.':coachMessages[d];
+ renderNutritionSummary();
  mealPreview.innerHTML=selectedMeals().map(m=>`<div class="meal-mini"><div><b>${m.type}</b><small>${m.icon||'🍽️'} ${m.name}</small></div><span>${m.protein||0}g protein</span></div>`).join('')
 }
 function quickDone(x){if(x==='walk')return !!state.checks[`${dk}-walk`];if(x==='water')return waterCount()>=4;if(x==='protein')return selectedMeals().filter(m=>state.mealDone[`${dk}-${m.type}`]).length>=3;if(x==='stretch')return !!state.checks[`${dk}-stretch`]}
@@ -86,9 +116,50 @@ function renderWorkout(){workoutDay.textContent=`Week ${w} · ${work.day}`;worko
  exerciseList.innerHTML=work.ex.map((e,i)=>{let sets=phaseSets(e.sets,i);return`<article class="exercise-card"><div class="exercise-head"><div><h3>${e.name}</h3><div class="exercise-meta">${sets} sets · ${e.reps} · ${e.rest?e.rest+' sec rest':'no timer'}</div></div><button class="text-btn guide-btn" data-ex="${i}">How to</button></div><div class="sets">${Array.from({length:sets},(_,n)=>`<label class="set-pill"><input class="set-check" type="checkbox" data-set="${i}-${n+1}" ${state.checks[`${dk}-ex${i}-set${n+1}`]?'checked':''}>Set ${n+1}</label>`).join('')}</div><div class="weight-row"><label>Weight used<input type="text" data-weight="${i}" value="${state.weights[`${dk}-${i}`]||''}" placeholder="e.g. 5 kg"></label><label>Reps completed<input type="text" data-reps="${i}" value="${state.weights[`${dk}-${i}-reps`]||''}" placeholder="e.g. 10, 10, 9"></label></div><div class="exercise-actions"><button class="outline timer-btn" data-seconds="${e.rest||45}">Rest timer</button><button class="outline guide-btn" data-ex="${i}">Technique</button></div></article>`}).join('');
  document.querySelectorAll('[data-set]').forEach(x=>x.onchange=()=>{let[a,b]=x.dataset.set.split('-');state.checks[`${dk}-ex${a}-set${b}`]=x.checked;celebrate();save()});document.querySelectorAll('[data-weight]').forEach(x=>x.oninput=()=>{state.weights[`${dk}-${x.dataset.weight}`]=x.value;persist()});document.querySelectorAll('[data-reps]').forEach(x=>x.oninput=()=>{state.weights[`${dk}-${x.dataset.reps}-reps`]=x.value;persist()});document.querySelectorAll('.guide-btn').forEach(x=>x.onclick=()=>openGuide(work.ex[x.dataset.ex]));document.querySelectorAll('.timer-btn').forEach(x=>x.onclick=()=>openTimer(+x.dataset.seconds));workoutNotes.value=state.notes[dk]||'';workoutNotes.oninput=()=>{state.notes[dk]=workoutNotes.value;persist()}}
 function mealCard(m){let done=state.mealDone[`${dk}-${m.type}`],macro=m.noTrack?'<span class="soft-badge">No tracking tonight</span>':`${m.cal||0} calories · ${m.protein||0}g protein`,ingredients=(m.ingredients||[]).map(x=>`<span class="chip">${x}</span>`).join(''),cooked=(m.type==='Dinner'||m.type==='Lunch')&&!m.isLeftover&&!m.isTakeaway&&m.id!=='skip'?`<button class="outline cooked-btn" data-cooked="${m.type}">Cooked it + save leftovers</button>`:'';return`<article class="meal-card ${m.isTakeaway?'takeaway-card':''}"><div class="meal-top"><div><span class="eyebrow">${m.type}</span><h3>${m.icon||'🍽️'} ${m.name}</h3></div><input class="meal-check" type="checkbox" data-mealdone="${m.type}" ${done?'checked':''}></div><div class="macro">${macro}</div>${ingredients?`<div class="ingredients">${ingredients}</div>`:''}<p class="sub meal-method">${m.method||''}</p><div class="meal-actions"><button class="outline choose-one" data-type="${m.type}">Change</button>${cooked}</div></article>`}
-function renderMeals(){let list=selectedMeals();calTotal.textContent=list.reduce((a,m)=>a+(m.cal||0),0);proteinTotal.textContent=list.reduce((a,m)=>a+(m.protein||0),0)+'g';waterTotal.textContent=(waterCount()*.5).toFixed(1)+'L';dayStyleNote.textContent=weekday?'Monday–Friday is Easy Mode: quick meals, batch cooking and leftovers are prioritised.':'Weekend mode: you have room for a meal that takes a little more energy.';mealList.innerHTML=list.map(mealCard).join('');
- document.querySelectorAll('[data-mealdone]').forEach(x=>x.onchange=()=>{state.mealDone[`${dk}-${x.dataset.mealdone}`]=x.checked;save()});document.querySelectorAll('.choose-one').forEach(x=>x.onclick=()=>openMealPicker(x.dataset.type));document.querySelectorAll('.cooked-btn').forEach(x=>x.onclick=()=>saveLeftovers(x.dataset.cooked));
- waterGrid.innerHTML=Array.from({length:5},(_,i)=>`<button class="water-btn ${state.water[`${dk}-${i+1}`]?'done':''}" data-water="${i+1}">${(i+1)*500}<small>mL</small></button>`).join('');document.querySelectorAll('[data-water]').forEach(x=>x.onclick=()=>{state.water[`${dk}-${x.dataset.water}`]=!state.water[`${dk}-${x.dataset.water}`];save()});renderLeftovers()}
+
+function nutritionTotals(){
+ const list=selectedMeals();
+ const planned=list.reduce((a,m)=>a+(m.cal||0),0);
+ const protein=list.reduce((a,m)=>a+(m.protein||0),0);
+ const guide=calorieGuide();
+ return {list,planned,protein,guide,remaining:guide-planned};
+}
+function renderNutritionSummary(){
+ const n=nutritionTotals();
+ calTotal.textContent=n.planned;
+ proteinTotal.textContent=n.protein+'g';
+ waterTotal.textContent=(waterCount()*.5).toFixed(1)+'L';
+ calorieGoal.textContent=n.guide;
+ calorieRemaining.textContent=n.remaining>0?n.remaining:0;
+ const ratio=Math.min(100,Math.round(n.planned/n.guide*100));
+ calorieProgressBar.style.width=ratio+'%';
+ const status=n.planned<1400
+   ?'A little low for your normal plan.'
+   :n.planned<=n.guide+150
+     ?'Right on track for a steady, realistic day.'
+     :'A bigger day—and that is completely okay.';
+ nutritionStatus.textContent=status;
+ lowCaloriePrompt.hidden=n.planned>=1400;
+ lowCalorieText.textContent=`You have ${Math.max(0,n.guide-n.planned)} calories available. Add something filling rather than finishing the day hungry.`;
+ if(typeof todayPlannedCalories!=='undefined'){
+   todayPlannedCalories.textContent=n.planned;
+   todayCaloriesLeft.textContent=n.remaining>0?`${n.remaining} left`:'goal reached';
+   todayCalorieBar.style.width=ratio+'%';
+   todayNutritionMessage.textContent=status;
+ }
+}
+function renderMeals(){
+ let list=selectedMeals();
+ renderNutritionSummary();
+ dayStyleNote.textContent=weekday?'Monday–Friday is Easy Mode: quick meals and fresh leftovers are prioritised.':'Weekend mode: you have room for a meal that takes a little more energy.';
+ mealList.innerHTML=list.map(mealCard).join('');
+ document.querySelectorAll('[data-mealdone]').forEach(x=>x.onchange=()=>{state.mealDone[`${dk}-${x.dataset.mealdone}`]=x.checked;save()});
+ document.querySelectorAll('.choose-one').forEach(x=>x.onclick=()=>openMealPicker(x.dataset.type));
+ document.querySelectorAll('.cooked-btn').forEach(x=>x.onclick=()=>saveLeftovers(x.dataset.cooked));
+ waterGrid.innerHTML=Array.from({length:5},(_,i)=>`<button class="water-btn ${state.water[`${dk}-${i+1}`]?'done':''}" data-water="${i+1}">${(i+1)*500}<small>mL</small></button>`).join('');
+ document.querySelectorAll('[data-water]').forEach(x=>x.onclick=()=>{state.water[`${dk}-${x.dataset.water}`]=!state.water[`${dk}-${x.dataset.water}`];save()});
+ renderLeftovers();
+}
 function renderLeftovers(){let total=state.leftovers.reduce((a,x)=>a+x.serves,0);leftoverCount.textContent=`${total} ${total===1?'serve':'serves'}`;leftoverShelf.innerHTML=state.leftovers.length?state.leftovers.map((x,i)=>`<div class="leftover-row"><div><b>🥡 ${x.name}</b><small>${x.serves} ${x.serves===1?'serve':'serves'} left</small></div><button class="text-btn" data-remove-leftover="${i}">Remove</button></div>`).join(''):'<p class="empty">Nothing saved yet. Tap “Cooked it + save leftovers” after making a meal.</p>';document.querySelectorAll('[data-remove-leftover]').forEach(x=>x.onclick=()=>{state.leftovers.splice(+x.dataset.removeLeftover,1);save()})}
 function saveLeftovers(type){let m=mealFor(type),serves=parseInt(prompt(`How many leftover serves of ${m.name} are going into the fridge?`,'2'),10);if(!serves||serves<1)return;let existing=state.leftovers.find(x=>x.name===m.name);if(existing)existing.serves+=serves;else state.leftovers.push({name:m.name,serves,cal:m.cal,protein:m.protein,icon:m.icon});save()}
 function openMealPicker(type='Dinner'){pickerMealType.value=type;pickerEffort.value=weekday?'easy':'cook';buildCravings('all');mealPickerModal.showModal()}
@@ -114,7 +185,7 @@ document.querySelectorAll('[data-go]').forEach(x=>x.onclick=()=>go(x.dataset.go)
 swapAll.onclick=()=>{state.dayMeals[dk]=defaultDayMeals(d,w);save()};clearShop.onclick=()=>{state.shopping={};save()};chooseMealBtn.onclick=()=>openMealPicker('Dinner');leftoversBtn.onclick=openLeftovers;takeawayBtn.onclick=openTakeaway;tooTiredBtn.onclick=tooTired;skipBreakfastBtn.onclick=skipBreakfast;pickerMealType.onchange=()=>buildCravings('all');pickerEffort.onchange=()=>buildCravings('all');takeawaySave.onclick=()=>saveTakeaway(null,false);takeawayNoTrack.onclick=()=>saveTakeaway(null,true);
 saveCheckin.onclick=()=>{state.checkins[w]={weight:weight.value,waist:waist.value,hips:hips.value,energy:energy.value,win:win.value};save();alert('Week '+w+' saved')};exportBtn.onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='courtney-reset-backup-v5.json';a.click()};importFile.onchange=async()=>{try{state=JSON.parse(await importFile.files[0].text());save()}catch{alert('That file could not be read')}};resetBtn.onclick=()=>{if(confirm('Reset all progress?')){localStorage.removeItem(KEY);location.reload()}};
 timerToggle.onclick=()=>{if(timerInt){clearInterval(timerInt);timerInt=null;timerToggle.textContent='Start'}else{timerInt=setInterval(timerTick,1000);timerToggle.textContent='Pause'}};timerMinus.onclick=()=>{timer=Math.max(0,timer-15);timerValue.textContent=timer};timerPlus.onclick=()=>{timer+=15;timerValue.textContent=timer};
-if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=6.2').catch(()=>{}));render();
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=7').catch(()=>{}));render();
 
 
 // --- Version 6.2 practical upgrades ---
@@ -236,3 +307,13 @@ if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWork
   });
   renderLeftovers();
 })();
+
+// Version 7 nutrition controls
+document.getElementById('addTopUpBtn')?.addEventListener('click',()=>{
+  if(!state.dayMeals[dk])state.dayMeals[dk]=defaultDayMeals();
+  const current=selectedMeals().filter(m=>m.type!=='Extra').reduce((a,m)=>a+(m.cal||0),0);
+  const topUp=bestTopUpFor(current)||cloneMeal(recipe('toast-topup'));
+  topUp.type='Extra';
+  state.dayMeals[dk].Extra=topUp;
+  save();
+});

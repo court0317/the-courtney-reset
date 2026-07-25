@@ -46,3 +46,28 @@ body[data-workout-mode="skip"] .rest-hidden{display:none!important}
   .leftover-form input[type="text"]{grid-column:1/-1}
   .leftover-form button{grid-column:1/-1}
 }
+
+/* Version 7 — nutrition rebuild */
+.nutrition-hero{background:linear-gradient(145deg,var(--sage2),var(--sage));color:#fff;border-radius:26px;padding:20px;margin-bottom:12px;box-shadow:0 16px 38px rgba(47,65,47,.18)}
+.nutrition-main .light{color:rgba(255,255,255,.72)}
+.nutrition-number{display:flex;align-items:flex-end;gap:8px;margin-top:7px}
+.nutrition-number strong{font-size:3rem;line-height:1;font-weight:850}
+.nutrition-number span{opacity:.8;padding-bottom:5px}
+.calorie-progress,.mini-calorie-track{height:9px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.22);margin:15px 0 10px}
+.calorie-progress span,.mini-calorie-track span{display:block;height:100%;width:0;background:#fff;border-radius:inherit;transition:width .35s ease}
+.nutrition-main p{margin:0;opacity:.9}
+.nutrition-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
+.nutrition-stats div{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.14);padding:10px;border-radius:15px}
+.nutrition-stats small{display:block;opacity:.72;font-size:.68rem}
+.nutrition-stats b{display:block;margin-top:3px;font-size:1.05rem}
+.nutrition-prompt{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff3d7;border:1px solid #ead5a0;border-radius:18px;padding:14px;margin:12px 0}
+.nutrition-prompt p{margin:4px 0 0;color:#776746;font-size:.85rem}
+.today-nutrition-card{overflow:hidden}
+.today-nutrition-card .mini-calorie-track{background:var(--soft)}
+.today-nutrition-card .mini-calorie-track span{background:var(--sage)}
+@media(max-width:620px){
+  .nutrition-stats{grid-template-columns:1fr 1fr}
+  .nutrition-number strong{font-size:2.55rem}
+  .nutrition-prompt{align-items:flex-start;flex-direction:column}
+  .nutrition-prompt button{width:100%}
+}
