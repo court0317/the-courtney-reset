@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#81907c">
+<meta name="description" content="The Courtney Reset — an interactive 8-week home fitness, meal and habit tracker.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<title>The Courtney Reset</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div><h1>The Courtney Reset</h1><small>8-week home fitness & meal plan</small></div>
+      <div class="pill" id="weekPill">Week 1</div>
+    </div>
+  </header>
+
+  <main>
+    <section id="home" class="section active">
+      <div class="card hero">
+        <h2 id="greeting">Hi Courtney 🌿</h2>
+        <p id="todayFocus"></p>
+        <div class="progress"><span id="dailyBar"></span></div>
+        <p><b id="dailyPercent">0%</b> of today complete</p>
+      </div>
+
+      <div class="grid">
+        <div class="metric"><small>Program progress</small><b id="programPercent">0%</b></div>
+        <div class="metric"><small>Current streak</small><b id="streak">0 days</b></div>
+        <div class="metric"><small>Water today</small><b id="waterMetric">0 / 5</b></div>
+        <div class="metric"><small>Weekly workouts</small><b id="weeklyMetric">0 / 7</b></div>
+      </div>
+
+      <div class="card">
+        <h3>Today’s non-negotiables</h3>
+        <div id="quickTasks"></div>
+      </div>
+
+      <div class="card">
+        <h3>Coach note</h3>
+        <div class="quote" id="coachNote"></div>
+      </div>
+    </section>
+
+    <section id="plan" class="section">
+      <div class="card">
+        <h2>Daily plan</h2>
+        <div class="row stack">
+          <label>Week
+            <select id="weekSelect"></select>
+          </label>
+          <label>Day
+            <select id="daySelect"></select>
+          </label>
+        </div>
+      </div>
+      <div id="dailyPlan"></div>
+    </section>
+
+    <section id="meals" class="section">
+      <div class="card">
+        <h2>Meals & hydration</h2>
+        <p class="note">These are realistic suggestions, not strict rules. Swap anything you dislike and keep portions comfortable.</p>
+        <div id="mealCards"></div>
+      </div>
+      <div class="card">
+        <h3>Water tracker</h3>
+        <div id="waterChecks"></div>
+      </div>
+      <div class="card">
+        <h3>Daily notes</h3>
+        <textarea id="dailyNotes" placeholder="Energy, hunger, soreness, wins, meal swaps..."></textarea>
+      </div>
+    </section>
+
+    <section id="shop" class="section">
+      <div class="card">
+        <h2>Shopping list</h2>
+        <p class="note">Tick items as you shop. Your choices save on this device.</p>
+        <div id="groceryList"></div>
+      </div>
+    </section>
+
+    <section id="progressSection" class="section">
+      <div class="card">
+        <h2>Weekly check-in</h2>
+        <div class="row stack">
+          <label>Weight (kg)<input id="weightInput" type="number" step="0.1"></label>
+          <label>Waist (cm)<input id="waistInput" type="number" step="0.1"></label>
+          <label>Hips (cm)<input id="hipsInput" type="number" step="0.1"></label>
+        </div>
+        <div class="row stack" style="margin-top:10px">
+          <label>Energy (1–10)<input id="energyInput" type="number" min="1" max="10"></label>
+          <label>Sleep average<input id="sleepInput" type="number" min="0" max="24" step="0.5"></label>
+        </div>
+        <label style="display:block;margin-top:10px">Biggest win<textarea id="winInput"></textarea></label>
+        <button class="btn" id="saveCheckin" style="margin-top:10px">Save this week</button>
+      </div>
+
+      <div class="card">
+        <h3>Check-in history</h3>
+        <div id="checkinHistory" class="note">No check-ins yet.</div>
+      </div>
+
+      <div class="card">
+        <h3>Backup</h3>
+        <p class="note">Export a backup before clearing browser data or changing phones.</p>
+        <div class="row stack">
+          <button class="btn secondary" id="exportBtn">Export progress</button>
+          <label class="btn secondary" style="text-align:center;cursor:pointer">Import backup<input id="importFile" type="file" accept=".json" hidden></label>
+          <button class="btn danger" id="resetBtn">Reset everything</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <div class="tabs-inner">
+      <button class="tab active" data-target="home"><span>⌂</span>Today</button>
+      <button class="tab" data-target="plan"><span>✓</span>Plan</button>
+      <button class="tab" data-target="meals"><span>🍽</span>Meals</button>
+      <button class="tab" data-target="shop"><span>🛒</span>Shop</button>
+      <button class="tab" data-target="progressSection"><span>↗</span>Progress</button>
+    </div>
+  </nav>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
