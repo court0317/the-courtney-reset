@@ -1,12 +1,5 @@
-# Rooted Volume 8 — Your Journey
+# Rooted Volume 8.1
 
-Volume 8 builds on the living garden, aquarium and weekly journal with:
+A personal wellness world with garden, aquarium, weekly stories, journey milestones, calendar history, editable goals, backups, weekly comparisons and accessibility controls.
 
-- Your World hub
-- Legacy Tree that never resets after one missed day
-- Journey Path with cumulative milestones
-- Memory Lane with saved weekly chapters
-- Smarter Rooted Coach guidance
-- Volume 8 cache/version update
-
-Deploy all files together. After publishing, open once with `?v=rooted8#today`.
+Deploy every file in this folder to GitHub Pages, then open once with `?v=rooted81#today`.
