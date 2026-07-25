@@ -1,7 +1,7 @@
 {
   "name": "The Courtney Reset",
-  "short_name": "Reset",
-  "description": "Courtney\u2019s personalised fitness, meals, leftovers and real-life planner",
+  "short_name": "Courtney Reset",
+  "description": "Courtney's personalised fitness app using dumbbells, a walking pad and yoga mat",
   "start_url": "./?v=4",
   "display": "standalone",
   "background_color": "#f6f1e8",

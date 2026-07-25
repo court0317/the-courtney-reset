@@ -1,13 +1,17 @@
-# The Courtney Reset — Version 6
+# The Courtney Reset — Version 6.1
 
-New in this version:
-- 1,600 kcal weekday and 1,750 kcal weekend guidance
-- Planned calories, target and remaining room shown separately
-- Helpful prompt when a day is planned below 1,400 kcal
-- Add-another-meal/snack button
-- Week-at-a-glance dinners
-- Premium visual refresh
-- Dark mode
-- Preserves Version 5 progress automatically
+## Equipment correction
+Every programmed workout now uses only:
+- Dumbbells
+- Walking pad
+- Yoga mat
+- An ordinary chair, wall or couch for balance/support where needed
 
-Upload every file to the root of the GitHub repository and open the Pages URL once with `?v=6`.
+No resistance bands, sliders, ankle weights, foam rollers or gym equipment are required.
+
+## Exercise demonstrations
+Tap **How to** or **Technique**, then tap **Watch a video demonstration**.  
+The app opens a YouTube search for that exact exercise and beginner-friendly proper form.
+
+## Update
+Upload every file to the root of the GitHub repository, replacing the current files. Then open the Pages site once with `?v=6.1`.
