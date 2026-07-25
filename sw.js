@@ -1,11 +1,11 @@
 const CACHE='rooted-cloud-v11-my-recipes';
 const ASSETS=[
   './',
-  './index.html?v=rooted330recipes',
-  './styles.css?v=rooted330recipes',
-  './navigation.js?v=rooted330recipes',
-  './app.js?v=rooted330recipes',
-  './v81.js?v=rooted330recipes',
+  './index.html?v=rooted331recipes',
+  './styles.css?v=rooted331recipes',
+  './navigation.js?v=rooted331recipes',
+  './app.js?v=rooted331recipes',
+  './v81.js?v=rooted331recipes',
   './manifest.json',
   './icon.svg',
   './icon-192.svg',
@@ -31,6 +31,6 @@ self.addEventListener('fetch',event=>{
         caches.open(CACHE).then(cache=>cache.put(event.request,copy));
         return response;
       })
-      .catch(()=>caches.match(event.request).then(cached=>cached||caches.match('./index.html?v=rooted330recipes')))
+      .catch(()=>caches.match(event.request).then(cached=>cached||caches.match('./index.html?v=rooted331recipes')))
   );
 });
