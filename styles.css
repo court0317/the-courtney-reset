@@ -444,3 +444,38 @@ html.rooted-large-text{font-size:18px}html.rooted-high-contrast body{color:#2027
 .rooted-logo-date{margin-top:-1px;color:var(--rooted-sage);font-size:.68rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;text-align:center}
 .top .avatar{position:absolute;right:20px;top:28px}
 @media(max-width:430px){.top{min-height:106px;padding-left:14px;padding-right:14px}.rooted-brand-lockup{width:calc(100% - 52px);transform:translateX(19px)}.rooted-logo-mark{height:64px}.rooted-logo-mark text{font-size:39px;letter-spacing:6px}.rooted-logo-date{font-size:.61rem;letter-spacing:.14em}.top .avatar{right:14px;top:25px;width:40px;height:40px}}
+
+
+/* Rooted 8.2.3 — home polish */
+@media (min-width: 900px){
+  .app,nav{max-width:880px}
+  main{padding-left:22px;padding-right:22px}
+}
+.home-living-garden{position:relative;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.home-living-garden:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(55,72,50,.10);border-color:#cbd5c4}
+.home-garden-link{display:inline-block;margin-top:7px;color:var(--sage2);font-size:.72rem;font-weight:800;letter-spacing:.02em}
+.home-progress-section{margin-top:2px}
+.rooted-home-v2>.card,.rooted-home-v2>section{margin-bottom:12px}
+.home-section-heading{margin-bottom:8px}
+.home-section-heading h2{margin-bottom:0}
+nav{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:4px}
+nav .nav{border-radius:16px;padding:7px 3px;transition:background .18s ease,color .18s ease,transform .18s ease}
+nav .nav.active{background:var(--soft);color:var(--sage2);box-shadow:inset 0 0 0 1px rgba(95,113,90,.08)}
+nav .nav.active span{transform:translateY(-1px)}
+.home-living-garden.garden-growth-pop{animation:gardenCardCelebrate .7s ease}
+.home-living-garden.garden-growth-pop .home-garden-main-plant{animation:gardenPlantCelebrate .7s ease}
+.home-living-garden.garden-growth-pop:after{content:'✦';position:absolute;right:18%;top:16%;font-size:1.3rem;color:#b89655;animation:gardenSparkle .7s ease both}
+@keyframes gardenCardCelebrate{0%,100%{transform:none}45%{transform:translateY(-3px) scale(1.012)}}
+@keyframes gardenPlantCelebrate{0%,100%{transform:translateX(-50%) scale(1)}45%{transform:translateX(-50%) translateY(-7px) scale(1.16)}}
+@keyframes gardenSparkle{0%{opacity:0;transform:scale(.3) rotate(-20deg)}45%{opacity:1;transform:scale(1.25) rotate(8deg)}100%{opacity:0;transform:translateY(-10px) scale(.8)}}
+@media(max-width:430px){
+  .top{min-height:94px;padding-top:8px;padding-bottom:9px}
+  .rooted-logo-mark{height:54px}
+  .rooted-logo-mark text{font-size:35px;letter-spacing:5px}
+  .rooted-logo-date{font-size:.57rem;letter-spacing:.13em}
+  .top .avatar{top:20px;width:38px;height:38px}
+  main{padding-top:12px}
+  .home-hero-card{margin-bottom:12px}
+  .home-living-garden{margin-bottom:12px}
+}
+@media(prefers-reduced-motion:reduce){.home-living-garden,.home-living-garden *{animation:none!important;transition:none!important}}

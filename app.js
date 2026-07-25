@@ -1254,6 +1254,7 @@ function rootedWeeklyData(){
     roots:days.filter(x=>x.root).length
   };
 }
+let rootedLastGardenPoints = null;
 function renderLivingGarden(){
   const counts=gardenCounts();
   const butterflies=Math.min(5,Math.floor(counts.total/12));
@@ -1290,6 +1291,14 @@ function renderLivingGarden(){
   if(homeFlowers)homeFlowers.innerHTML=Array.from({length:Math.min(5,flowers)},(_,i)=>`<span style="left:${7+(i*19)%82}%;animation-delay:${i*.08}s">${flowerIcons[i%flowerIcons.length]}</span>`).join('');
   const homeButterflies=document.getElementById('homeGardenButterflies');
   if(homeButterflies)homeButterflies.innerHTML=Array.from({length:Math.min(2,butterflies)},(_,i)=>`<span style="left:${12+i*48}%;top:${18+i*16}%;--delay:${i*-1.3}s;--speed:${6+i}s">🦋</span>`).join('');
+  const gardenCard=document.querySelector('.home-living-garden');
+  if(rootedLastGardenPoints!==null && counts.total>rootedLastGardenPoints && gardenCard){
+    gardenCard.classList.remove('garden-growth-pop');
+    void gardenCard.offsetWidth;
+    gardenCard.classList.add('garden-growth-pop');
+    setTimeout(()=>gardenCard.classList.remove('garden-growth-pop'),800);
+  }
+  rootedLastGardenPoints=counts.total;
 }
 function weeklyStory(data){
   if(!data.movement&&!data.water&&!data.meals&&!data.roots)return 'Your week is ready for its first little win. Log one walk, bottle of water, meal or daily root and your story will begin.';
