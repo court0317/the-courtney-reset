@@ -3,7 +3,8 @@ const {workouts}=window.APP_DATA;
 const START=new Date(2026,6,27),DAYS=56,KEY='courtneyResetPremiumV5';
 let previous=JSON.parse(localStorage.getItem('courtneyResetPremiumV4')||'null');
 let state=JSON.parse(localStorage.getItem(KEY)||'null')||previous||{};
-state={checks:{},water:{},mealDone:{},weights:{},notes:{},shopping:{},checkins:{},celebrated:{},dayMeals:{},leftovers:[],...state};
+state={checks:{},water:{},hydration:{},mealDone:{},weights:{},notes:{},shopping:{},checkins:{},celebrated:{},dayMeals:{},leftovers:[],...state};
+state.hydration=state.hydration||{};
 const $=x=>document.getElementById(x);
 
 const recipes=[
@@ -92,7 +93,27 @@ function mealFor(type){return selectedMeals().find(m=>m.type===type)}
 function setMeal(type,meal){if(!state.dayMeals[dk])state.dayMeals[dk]=defaultDayMeals();state.dayMeals[dk][type]=cloneMeal(meal);state.dayMeals[dk][type].type=type;state.mealDone[`${dk}-${type}`]=false;save()}
 function taskKeys(){let ks=[`${dk}-walk`];work.ex.forEach((e,i)=>{for(let n=1;n<=phaseSets(e.sets,i);n++)ks.push(`${dk}-ex${i}-set${n}`)});return ks}
 function dailyPct(){let ks=taskKeys();return pct(ks.filter(k=>state.checks[k]).length,ks.length)}
-function waterCount(){return[1,2,3,4,5].filter(i=>state.water[`${dk}-${i}`]).length}
+function waterCount(dayKey=dk){
+ const direct=Number(state.hydration?.[dayKey]);
+ if(Number.isFinite(direct)&&direct>=0)return Math.floor(direct);
+ const legacy=Object.entries(state.water||{}).filter(([key,value])=>key.startsWith(`${dayKey}-`)&&value).length;
+ if(legacy>0)state.hydration[dayKey]=legacy;
+ return legacy;
+}
+function setWaterCount(next,dayKey=dk){
+ if(!state.water)state.water={};
+ if(!state.hydration)state.hydration={};
+ const count=Math.max(0,Math.min(20,Math.floor(Number(next)||0)));
+ state.hydration[dayKey]=count;
+ // Keep the legacy bottle keys in sync so weekly/history features from older builds remain compatible.
+ for(let i=1;i<=20;i++){
+   const key=`${dayKey}-${i}`;
+   if(i<=count)state.water[key]=true;
+   else delete state.water[key];
+ }
+ return count;
+}
+function changeWaterCount(delta,dayKey=dk){return setWaterCount(waterCount(dayKey)+delta,dayKey)}
 function proteinData(){let list=selectedMeals(),done=list.filter(m=>state.mealDone[`${dk}-${m.type}`]);return{done:done.reduce((a,m)=>a+(m.protein||0),0),total:list.reduce((a,m)=>a+(m.protein||0),0)}}
 function programProgress(){let done=0,total=0;for(let ww=1;ww<=8;ww++)for(let dd=0;dd<7;dd++){let wo=workouts[dd],k=`w${ww}d${dd}`;total++;if(state.checks[`${k}-walk`])done++;total++;if(wo.ex.every((e,i)=>Array.from({length:ww>=5&&i<2?e.sets+1:e.sets},(_,n)=>state.checks[`${k}-ex${i}-set${n+1}`]).every(Boolean)))done++}return pct(done,total)}
 function setRing(el,val){el.style.background=`conic-gradient(var(--sage) ${val}%,#e2e5df ${val}%)`}
@@ -111,7 +132,7 @@ function renderToday(){
  mealPreview.innerHTML=selectedMeals().map(m=>`<div class="meal-mini"><div><b>${m.type}</b><small>${m.icon||'🍽️'} ${m.name}</small></div><span>${m.protein||0}g protein</span></div>`).join('')
 }
 function quickDone(x){if(x==='walk')return !!state.checks[`${dk}-walk`];if(x==='water')return waterCount()>=4;if(x==='protein')return selectedMeals().filter(m=>state.mealDone[`${dk}-${m.type}`]).length>=3;if(x==='stretch')return !!state.checks[`${dk}-stretch`]}
-function quickToggle(x,v){if(x==='walk')state.checks[`${dk}-walk`]=v;if(x==='water')for(let i=1;i<=4;i++)state.water[`${dk}-${i}`]=v;if(x==='protein')selectedMeals().forEach(m=>state.mealDone[`${dk}-${m.type}`]=v);if(x==='stretch')state.checks[`${dk}-stretch`]=v;save()}
+function quickToggle(x,v){if(x==='walk')state.checks[`${dk}-walk`]=v;if(x==='water')setWaterCount(v?Math.max(4,waterCount()):0);if(x==='protein')selectedMeals().forEach(m=>state.mealDone[`${dk}-${m.type}`]=v);if(x==='stretch')state.checks[`${dk}-stretch`]=v;save()}
 function renderWorkout(){workoutDay.textContent=`Week ${w} · ${work.day}`;workoutTitle.textContent=`${work.icon} ${work.focus}`;walkTitle.textContent=`${work.walk} minute walking-pad walk`;walkDone.checked=!!state.checks[`${dk}-walk`];walkDone.onchange=()=>{state.checks[`${dk}-walk`]=walkDone.checked;celebrate();save()};
  exerciseList.innerHTML=work.ex.map((e,i)=>{let sets=phaseSets(e.sets,i);return`<article class="exercise-card"><div class="exercise-head"><div><h3>${e.name}</h3><div class="exercise-meta">${sets} sets · ${e.reps} · ${e.rest?e.rest+' sec rest':'no timer'}</div></div><button class="text-btn guide-btn" data-ex="${i}">How to</button></div><div class="sets">${Array.from({length:sets},(_,n)=>`<label class="set-pill"><input class="set-check" type="checkbox" data-set="${i}-${n+1}" ${state.checks[`${dk}-ex${i}-set${n+1}`]?'checked':''}>Set ${n+1}</label>`).join('')}</div><div class="weight-row"><label>Weight used<input type="text" data-weight="${i}" value="${state.weights[`${dk}-${i}`]||''}" placeholder="e.g. 5 kg"></label><label>Reps completed<input type="text" data-reps="${i}" value="${state.weights[`${dk}-${i}-reps`]||''}" placeholder="e.g. 10, 10, 9"></label></div><div class="exercise-actions"><button class="outline timer-btn" data-seconds="${e.rest||45}">Rest timer</button><button class="outline guide-btn" data-ex="${i}">Technique</button></div></article>`}).join('');
  document.querySelectorAll('[data-set]').forEach(x=>x.onchange=()=>{let[a,b]=x.dataset.set.split('-');state.checks[`${dk}-ex${a}-set${b}`]=x.checked;celebrate();save()});document.querySelectorAll('[data-weight]').forEach(x=>x.oninput=()=>{state.weights[`${dk}-${x.dataset.weight}`]=x.value;persist()});document.querySelectorAll('[data-reps]').forEach(x=>x.oninput=()=>{state.weights[`${dk}-${x.dataset.reps}-reps`]=x.value;persist()});document.querySelectorAll('.guide-btn').forEach(x=>x.onclick=()=>openGuide(work.ex[x.dataset.ex]));document.querySelectorAll('.timer-btn').forEach(x=>x.onclick=()=>openTimer(+x.dataset.seconds));workoutNotes.value=state.notes[dk]||'';workoutNotes.oninput=()=>{state.notes[dk]=workoutNotes.value;persist()}}
@@ -156,8 +177,13 @@ function renderMeals(){
  document.querySelectorAll('[data-mealdone]').forEach(x=>x.onchange=()=>{state.mealDone[`${dk}-${x.dataset.mealdone}`]=x.checked;save()});
  document.querySelectorAll('.choose-one').forEach(x=>x.onclick=()=>openMealPicker(x.dataset.type));
  document.querySelectorAll('.cooked-btn').forEach(x=>x.onclick=()=>saveLeftovers(x.dataset.cooked));
- waterGrid.innerHTML=Array.from({length:5},(_,i)=>`<button class="water-btn ${state.water[`${dk}-${i+1}`]?'done':''}" data-water="${i+1}">${(i+1)*500}<small>mL</small></button>`).join('');
- document.querySelectorAll('[data-water]').forEach(x=>x.onclick=()=>{state.water[`${dk}-${x.dataset.water}`]=!state.water[`${dk}-${x.dataset.water}`];save()});
+ const currentWater=waterCount();
+ waterGrid.innerHTML=Array.from({length:5},(_,i)=>`<button class="water-btn ${currentWater>=i+1?'done':''}" data-water="${i+1}">${(i+1)*500}<small>mL</small></button>`).join('');
+ document.querySelectorAll('[data-water]').forEach(x=>x.onclick=()=>{
+   const target=Number(x.dataset.water);
+   setWaterCount(currentWater===target?target-1:target);
+   save();
+ });
  renderLeftovers();
 }
 function renderLeftovers(){let total=state.leftovers.reduce((a,x)=>a+x.serves,0);leftoverCount.textContent=`${total} ${total===1?'serve':'serves'}`;leftoverShelf.innerHTML=state.leftovers.length?state.leftovers.map((x,i)=>`<div class="leftover-row"><div><b>🥡 ${x.name}</b><small>${x.serves} ${x.serves===1?'serve':'serves'} left</small></div><button class="text-btn" data-remove-leftover="${i}">Remove</button></div>`).join(''):'<p class="empty">Nothing saved yet. Tap “Cooked it + save leftovers” after making a meal.</p>';document.querySelectorAll('[data-remove-leftover]').forEach(x=>x.onclick=()=>{state.leftovers.splice(+x.dataset.removeLeftover,1);save()})}
@@ -195,7 +221,7 @@ document.querySelectorAll('[data-go]').forEach(x=>x.onclick=()=>go(x.dataset.go)
 swapAll.onclick=()=>{state.dayMeals[dk]=defaultDayMeals(d,w);save()};clearShop.onclick=()=>{state.shopping={};save()};chooseMealBtn.onclick=()=>openMealPicker('Dinner');leftoversBtn.onclick=openLeftovers;takeawayBtn.onclick=openTakeaway;tooTiredBtn.onclick=tooTired;skipBreakfastBtn.onclick=skipBreakfast;pickerMealType.onchange=()=>buildCravings('all');pickerEffort.onchange=()=>buildCravings('all');takeawaySave.onclick=()=>saveTakeaway(null,false);takeawayNoTrack.onclick=()=>saveTakeaway(null,true);
 saveCheckin.onclick=()=>{state.checkins[w]={weight:weight.value,waist:waist.value,hips:hips.value,energy:energy.value,win:win.value};save();alert('Week '+w+' saved')};exportBtn.onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='courtney-reset-backup-v5.json';a.click()};importFile.onchange=async()=>{try{state=JSON.parse(await importFile.files[0].text());save()}catch{alert('That file could not be read')}};resetBtn.onclick=()=>{if(confirm('Reset all progress?')){localStorage.removeItem(KEY);location.reload()}};
 timerToggle.onclick=()=>{if(timerInt){clearInterval(timerInt);timerInt=null;timerToggle.textContent='Start'}else{timerInt=setInterval(timerTick,1000);timerToggle.textContent='Pause'}};timerMinus.onclick=()=>{timer=Math.max(0,timer-15);timerValue.textContent=timer};timerPlus.onclick=()=>{timer+=15;timerValue.textContent=timer};
-if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=81').catch(()=>{}));render();
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=811').catch(()=>{}));render();
 
 
 // --- Version 6.2 practical upgrades ---
@@ -1075,7 +1101,7 @@ function aquariumWaterStreak(){
   for(let i=0;i<365;i++){
     const key=d.toISOString().slice(0,10);
     let count=0;
-    try{count=Number((state&&state.water&&state.water[key])||0)}catch(e){}
+    try{count=waterCount(key)}catch(e){}
     if(count>=goalBottles)streak++;
     else if(i>0)break;
     else if(i===0 && count<goalBottles){}
@@ -1169,10 +1195,8 @@ function clickExistingWaterControl(direction){
 
 function updateAquariumWaterFallback(delta){
   try{
-    if(!state.water)state.water={};
     const key=typeof dk!=='undefined'?dk:rootedTodayKey();
-    const current=Number(state.water[key]||0);
-    state.water[key]=Math.max(0,current+delta);
+    changeWaterCount(delta,key);
     if(typeof save==='function')save();
     else localStorage.setItem(KEY,JSON.stringify(state));
     if(typeof render==='function')render();
@@ -1181,12 +1205,14 @@ function updateAquariumWaterFallback(delta){
 
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('aquariumAddWater')?.addEventListener('click',()=>{
-    if(!clickExistingWaterControl('add'))updateAquariumWaterFallback(1);
-    setTimeout(()=>{renderAquarium();renderRootedPremium();},80);
+    changeWaterCount(1);
+    save();
+    setTimeout(()=>{renderAquarium();renderRootedPremium();},40);
   });
   document.getElementById('aquariumRemoveWater')?.addEventListener('click',()=>{
-    if(!clickExistingWaterControl('remove'))updateAquariumWaterFallback(-1);
-    setTimeout(()=>{renderAquarium();renderRootedPremium();},80);
+    changeWaterCount(-1);
+    save();
+    setTimeout(()=>{renderAquarium();renderRootedPremium();},40);
   });
   document.addEventListener('rooted:pagechange',e=>{
     if(e.detail.pageId==='aquarium')renderAquarium();

@@ -1,5 +1,5 @@
-# Rooted Volume 8.1
+# Rooted v8.1.1 — Hydration Stability Fix
 
-A personal wellness world with garden, aquarium, weekly stories, journey milestones, calendar history, editable goals, backups, weekly comparisons and accessibility controls.
+This release fixes the water counter jumping backwards after 1 L. Hydration now uses one shared counter and synchronises Today, Aquarium, Weekly Breakdown and Coach.
 
-Deploy every file in this folder to GitHub Pages, then open once with `?v=rooted81#today`.
+Deploy every file in this folder to GitHub Pages, then open once with `?v=rooted811#today`.
