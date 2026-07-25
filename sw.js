@@ -1,4 +1,4 @@
-const CACHE_NAME = "courtney-reset-v1";
+const CACHE_NAME = "courtney-reset-v2";
 const APP_FILES = [
   "./",
   "./index.html",

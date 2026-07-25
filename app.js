@@ -11,6 +11,59 @@ const quotes = [
   "Recovery is part of the program, not time away from it."
 ];
 
+
+// Official program calendar.
+// Month numbers in JavaScript start at 0, so 6 means July.
+const PROGRAM_START = new Date(2026, 6, 27);
+const PROGRAM_DAYS = 56;
+
+function localDayNumber(date) {
+  // Noon avoids daylight-saving and midnight timezone edge cases.
+  return Math.floor(
+    new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12).getTime() /
+    86400000
+  );
+}
+
+function calendarStatus(now = new Date()) {
+  const elapsed = localDayNumber(now) - localDayNumber(PROGRAM_START);
+
+  if (elapsed < 0) {
+    return {
+      stage: "countdown",
+      daysUntil: Math.abs(elapsed),
+      week: 1,
+      day: 0,
+      programDay: 0
+    };
+  }
+
+  if (elapsed >= PROGRAM_DAYS) {
+    return {
+      stage: "complete",
+      daysUntil: 0,
+      week: 8,
+      day: 6,
+      programDay: 56
+    };
+  }
+
+  return {
+    stage: "active",
+    daysUntil: 0,
+    week: Math.floor(elapsed / 7) + 1,
+    day: elapsed % 7,
+    programDay: elapsed + 1
+  };
+}
+
+function syncToCalendar() {
+  const status = calendarStatus();
+  state.week = status.week;
+  state.day = status.day;
+  return status;
+}
+
 const key = "courtneyResetV1";
 let state = JSON.parse(localStorage.getItem(key) || "null") || {
   week:1, day:(new Date().getDay()+6)%7,
@@ -86,9 +139,29 @@ function todayCompletion(w=state.week,d=state.day){
 }
 
 function renderHome(){
+  const calendar = calendarStatus();
   const d=baseDays[state.day], c=todayCompletion();
-  todayFocus.textContent=`${d.day} · ${d.focus} · ${d.walk}`;
-  dailyBar.style.width=c.pct+"%"; dailyPercent.textContent=c.pct+"%";
+
+  if (calendar.stage === "countdown") {
+    const word = calendar.daysUntil === 1 ? "day" : "days";
+    greeting.textContent = "Your reset starts Monday 🌿";
+    todayFocus.textContent =
+      `${calendar.daysUntil} ${word} to go · Week 1 Monday is ready`;
+    dailyBar.style.width = "0%";
+    dailyPercent.textContent = "Countdown";
+  } else if (calendar.stage === "complete") {
+    greeting.textContent = "You completed the 8 weeks 🎉";
+    todayFocus.textContent = "Your full Courtney Reset calendar is complete.";
+    dailyBar.style.width = "100%";
+    dailyPercent.textContent = "Finished";
+  } else {
+    greeting.textContent = "Hi Courtney 🌿";
+    todayFocus.textContent =
+      `Day ${calendar.programDay} of 56 · Week ${calendar.week} · ${d.day} · ${d.focus}`;
+    dailyBar.style.width=c.pct+"%";
+    dailyPercent.textContent=c.pct+"%";
+  }
+
   const all=[];
   for(let w=1;w<=8;w++)for(let dd=0;dd<7;dd++)all.push(todayCompletion(w,dd));
   const done=all.reduce((a,x)=>a+x.done,0), total=all.reduce((a,x)=>a+x.total,0);
@@ -97,10 +170,24 @@ function renderHome(){
   waterMetric.textContent=`${waterDone} / 5`;
   const weekDone=Array.from({length:7},(_,dd)=>todayCompletion(state.week,dd).pct===100).filter(Boolean).length;
   weeklyMetric.textContent=`${weekDone} / 7`;
+
   let streakCount=0;
-  for(let w=1;w<=8;w++)for(let dd=0;dd<7;dd++){if(todayCompletion(w,dd).pct>=70)streakCount++;else if(w<state.week || (w===state.week&&dd<state.day))streakCount=0;}
+  for(let w=1;w<=8;w++)for(let dd=0;dd<7;dd++){
+    if(todayCompletion(w,dd).pct>=70)streakCount++;
+    else if(w<state.week || (w===state.week&&dd<state.day))streakCount=0;
+  }
   streak.textContent=`${streakCount} day${streakCount===1?"":"s"}`;
-  coachNote.textContent=quotes[state.day];
+
+  if (calendar.stage === "countdown") {
+    coachNote.textContent =
+      "Your first session is Week 1 Monday: Glutes & Legs. Set out your mat, dumbbells and booty band so you are ready.";
+  } else if (calendar.stage === "complete") {
+    coachNote.textContent =
+      "Eight weeks done. Take your final measurements, celebrate your progress and choose what you want to build next.";
+  } else {
+    coachNote.textContent=quotes[state.day];
+  }
+
   quickTasks.innerHTML=[
     [id(state.week,state.day,'walk'),d.walk],
     [id(state.week,state.day,'basic',0),"Drink at least 2 L water"],
@@ -156,6 +243,8 @@ resetBtn.addEventListener("click",()=>{
   if(confirm("Reset all workouts, meals, groceries and check-ins?")){localStorage.removeItem(key);location.reload();}
 });
 
+syncToCalendar();
+localStorage.setItem(key, JSON.stringify(state));
 renderAll();
 
 // Make the site available offline when hosted over HTTPS (including GitHub Pages).
