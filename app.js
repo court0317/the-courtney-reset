@@ -3,40 +3,11 @@ const {workouts}=window.APP_DATA;
 const START=new Date(2026,6,27),DAYS=56,KEY='courtneyResetPremiumV5';
 let previous=JSON.parse(localStorage.getItem('courtneyResetPremiumV4')||'null');
 let state=JSON.parse(localStorage.getItem(KEY)||'null')||previous||{};
-state={checks:{},water:{},hydration:{},mealDone:{},weights:{},notes:{},shopping:{},checkins:{},celebrated:{},dayMeals:{},leftovers:[],...state};
+state={checks:{},water:{},hydration:{},mealDone:{},weights:{},notes:{},shopping:{},shoppingList:[],checkins:{},celebrated:{},dayMeals:{},leftovers:[],...state};
 state.hydration=state.hydration||{};
+state.shoppingList=state.shoppingList||[];
 const $=x=>document.getElementById(x);
-
-const recipes=[
-{id:'skip',type:'Breakfast',name:'No breakfast today',icon:'☕',effort:'barely',category:'light',cal:0,protein:0,ingredients:[],method:'Breakfast is optional. Have water and eat when you are genuinely hungry.',weekday:true},
-{id:'choc-oats',type:'Breakfast',name:'Chocolate overnight oats',icon:'🥣',effort:'easy',category:'oats',cal:390,protein:18,ingredients:['rolled oats','almond milk','chia seeds','small amount of chocolate chips','optional lactose-free yoghurt'],method:'Mix the night before and keep it lightly sweet.',weekday:true},
-{id:'banana-oats',type:'Breakfast',name:'Banana overnight oats',icon:'🍌',effort:'easy',category:'oats',cal:370,protein:16,ingredients:['rolled oats','almond milk','banana','chia seeds'],method:'Mash in half a banana and keep the toppings simple.',weekday:true},
-{id:'vegemite-toast',type:'Breakfast',name:'Vegemite toast',icon:'🍞',effort:'barely',category:'light',cal:240,protein:8,ingredients:['bread','Vegemite','dairy-free spread if needed'],method:'Quick, savoury and not too sweet.',weekday:true},
-{id:'popcorn',type:'Snack',name:'Popcorn',icon:'🍿',effort:'barely',category:'snack',cal:140,protein:3,ingredients:['popcorn'],method:'Portion it into a bowl and enjoy it.',weekday:true},
-{id:'fruit',type:'Snack',name:'Fruit',icon:'🍎',effort:'barely',category:'snack',cal:100,protein:1,ingredients:['fruit'],method:'Choose whatever you actually feel like eating.',weekday:true},
-{id:'crackers',type:'Snack',name:'Plain crackers',icon:'🫓',effort:'barely',category:'snack',cal:180,protein:4,ingredients:['plain crackers'],method:'Add a small protein side only when it suits you.',weekday:true},
-
-{id:'leftover-placeholder',type:'Lunch',name:'Leftovers from another day',icon:'🥡',effort:'barely',category:'leftovers',cal:450,protein:25,ingredients:[],method:'Pick a saved leftover serve from the fridge list.',weekday:true},
-{id:'chicken-wrap',type:'Lunch',name:'Easy chicken wrap',icon:'🌯',effort:'easy',category:'quick',cal:480,protein:35,ingredients:['wraps','cooked chicken','lettuce','grated carrot','garlic-free dressing'],method:'Fill, roll and eat. No tomato.',weekday:true},
-{id:'soup-lunch',type:'Lunch',name:'Chicken and corn soup',icon:'🌽',effort:'easy',category:'soup',cal:420,protein:34,ingredients:['chicken breast','corn','chicken stock','potato','carrot'],method:'Make a batch and save extra serves for lunches.',weekday:true},
-{id:'pizza-scrolls',type:'Lunch',name:'Pizza scrolls',icon:'🍕',effort:'easy',category:'comfort',cal:520,protein:23,ingredients:['puff pastry','ham','lactose-free cheese if needed','tomato-free pizza base sauce'],method:'Use a tomato-free base such as a light BBQ-style sauce.',weekday:true},
-{id:'empanadas',type:'Lunch',name:'Mince empanadas',icon:'🥟',effort:'easy',category:'comfort',cal:540,protein:28,ingredients:['lean mince','puff pastry','carrot','mild spices','egg for wash only'],method:'Egg is only used as a wash, not eaten by itself.',weekday:true},
-
-{id:'spagbol',type:'Dinner',name:'Spaghetti bolognese — tomato free',icon:'🍝',effort:'easy',category:'pasta',cal:610,protein:38,ingredients:['lean mince','spaghetti','carrot','beef stock','pumpkin purée or tomato-free pasta sauce','optional garlic-infused oil'],method:'Keep garlic optional and make extra for leftovers.',weekday:true},
-{id:'steak',type:'Dinner',name:'Steak with mash',icon:'🥩',effort:'cook',category:'steak',cal:620,protein:45,ingredients:['steak','potatoes','lactose-free or dairy-free milk','preferred side'],method:'A good weekend meal or a weekday meal when you have the energy.',weekday:false},
-{id:'thai-pumpkin',type:'Dinner',name:'Thai chicken pumpkin soup',icon:'🥣',effort:'easy',category:'soup',cal:470,protein:38,ingredients:['chicken breast','pumpkin','coconut milk','red Thai curry paste','chicken stock'],method:'Use a garlic-light curry paste where possible. Great for batch cooking.',weekday:true},
-{id:'honey-soy',type:'Dinner',name:'Honey soy chicken and rice',icon:'🍗',effort:'easy',category:'quick',cal:590,protein:42,ingredients:['chicken breast','rice','honey','soy sauce','carrot'],method:'One-pan chicken with rice. Skip fresh garlic.',weekday:true},
-{id:'burger',type:'Dinner',name:'Homemade burger night',icon:'🍔',effort:'easy',category:'comfort',cal:650,protein:38,ingredients:['lean beef patty','burger buns','lettuce','lactose-free cheese if needed','potato wedges'],method:'No tomato and use garlic-free sauces.',weekday:true},
-{id:'creamy-chicken-pasta',type:'Dinner',name:'Creamy chicken pasta',icon:'🍝',effort:'cook',category:'pasta',cal:640,protein:42,ingredients:['chicken breast','pasta','lactose-free cream or dairy-free cooking cream'],method:'A more energetic weekend meal.',weekday:false},
-{id:'taco-bowl',type:'Dinner',name:'Taco bowl — no tomato',icon:'🌮',effort:'easy',category:'quick',cal:570,protein:36,ingredients:['lean mince','rice','corn','lettuce','lactose-free cheese optional','garlic-free mild seasoning'],method:'No tomato salsa.',weekday:true},
-{id:'loaded-potato',type:'Dinner',name:'Loaded baked potato',icon:'🥔',effort:'easy',category:'comfort',cal:560,protein:30,ingredients:['potatoes','lean mince or chicken','corn','lactose-free cheese optional'],method:'Microwave first, then crisp it up.',weekday:true},
-{id:'weekend-empanadas',type:'Dinner',name:'Homemade empanadas',icon:'🥟',effort:'cook',category:'comfort',cal:600,protein:32,ingredients:['lean mince','puff pastry','carrot','mild spices','egg for wash only'],method:'A weekend cook that creates handy leftovers.',weekday:false},
-
-{id:'protein-snack',type:'Extra',name:'Protein snack plate',icon:'🥨',effort:'barely',category:'snack',cal:330,protein:22,ingredients:['plain crackers','sliced chicken or ham','lactose-free cheese if tolerated'],method:'A savoury top-up for days when breakfast is skipped.',weekday:true},
-{id:'oats-topup',type:'Extra',name:'Small overnight oats',icon:'🥣',effort:'easy',category:'oats',cal:310,protein:15,ingredients:['rolled oats','almond milk','chia seeds','small amount of chocolate chips'],method:'Use a smaller portion than the breakfast oats.',weekday:true},
-{id:'popcorn-plus',type:'Extra',name:'Popcorn and a protein side',icon:'🍿',effort:'barely',category:'snack',cal:270,protein:15,ingredients:['popcorn','sliced chicken or lactose-free yoghurt if tolerated'],method:'Your favourite snack with something filling beside it.',weekday:true},
-{id:'toast-topup',type:'Extra',name:'Vegemite toast and fruit',icon:'🍞',effort:'barely',category:'light',cal:250,protein:8,ingredients:['bread','Vegemite','fruit'],method:'Savoury, quick and useful when the day is under target.',weekday:true}
-];
+window.RootedAppState=state;
 
 const takeawayOptions=[
 {name:'Burger and small chips',icon:'🍔',cal:800,protein:30},
@@ -50,29 +21,30 @@ const takeawayOptions=[
 function dayNum(x){return Math.floor(new Date(x.getFullYear(),x.getMonth(),x.getDate(),12).getTime()/86400000)}
 function status(){let e=dayNum(new Date())-dayNum(START);if(e<0)return{stage:'countdown',left:-e,week:1,day:0,n:0};if(e>=DAYS)return{stage:'complete',week:8,day:6,n:56};return{stage:'active',week:Math.floor(e/7)+1,day:e%7,n:e+1}}
 const s=status(),w=s.week,d=s.day,work=workouts[d],dk=`w${w}d${d}`,weekday=d<5;
-function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
+function persist(){window.RootedAppState=state;localStorage.setItem(KEY,JSON.stringify(state))}
+window.RootedAppStateSave=()=>{persist();render();};
 function save(){persist();render()}
 function pct(n,t){return t?Math.round(n/t*100):0}
 function phaseSets(base,i){return w>=5&&i<2?base+1:base}
-function recipe(id){return recipes.find(r=>r.id===id)}
+function createFallbackMeal(type,name,icon,cal,protein,ingredients=[],method=''){return{id:`fallback-${type.toLowerCase()}`,type,name,icon,cal,protein,ingredients,method,customRecipe:true};}
+function allRecipes(){return Array.isArray(window.RootedRecipes?.getRecipes?.()) ? window.RootedRecipes.getRecipes() : [];}
+function recipe(id){return allRecipes().find(r=>r.id===id)}
 function cloneMeal(r){return JSON.parse(JSON.stringify(r))}
 
 function calorieGuide(){return weekday?1600:1750}
 function bestTopUpFor(total){
  const gap=calorieGuide()-total;
  if(gap<=80)return null;
- if(gap<=270)return cloneMeal(recipe('toast-topup'));
- if(gap<=320)return cloneMeal(recipe('popcorn-plus'));
- if(gap<=380)return cloneMeal(recipe('oats-topup'));
- return cloneMeal(recipe('protein-snack'));
+ if(gap<=270)return cloneMeal(createFallbackMeal('Extra','Quick top-up','🥨',250,8,['fruit','toast'],'A light snack to close the calorie gap.'));
+ if(gap<=320)return cloneMeal(createFallbackMeal('Extra','Protein side','🍿',270,15,['popcorn'],'A simple add-on when you want a bit more staying power.'));
+ if(gap<=380)return cloneMeal(createFallbackMeal('Extra','Small oats','🥣',310,15,['rolled oats','almond milk'],'An easy extra if dinner ran light.'));
+ return cloneMeal(createFallbackMeal('Extra','Protein snack plate','🥨',330,22,['crackers','chicken or ham'],'A savoury top-up when you need a little more fuel.'));
 }
 function defaultDayMeals(day=d,week=w){
- const easyDinner=['thai-pumpkin','spagbol','honey-soy','burger','taco-bowl'];
- const weekendDinner=['steak','creamy-chicken-pasta'];
- const meals={Breakfast:cloneMeal(recipe(day===5?'choc-oats':day===6?'banana-oats':'skip')),
- Lunch:cloneMeal(recipe(day===0?'chicken-wrap':day===1?'leftover-placeholder':day===2?'soup-lunch':day===3?'leftover-placeholder':day===4?'pizza-scrolls':day===5?'empanadas':'soup-lunch')),
- Snack:cloneMeal(recipe(day%2?'fruit':'popcorn')),
- Dinner:cloneMeal(recipe(day<5?easyDinner[(week+day)%easyDinner.length]:weekendDinner[day-5]))};
+ const meals={Breakfast:createFallbackMeal('Breakfast','Breakfast','🌅',320,14,[],'Pick a recipe from My Recipes to make breakfast feel personal.'),
+ Lunch:createFallbackMeal('Lunch','Lunch','🥗',420,24,[],'Choose a recipe from My Recipes for lunch.'),
+ Snack:createFallbackMeal('Snack','Snack','🍎',160,5,[],'Your snack can be as simple or as prepared as you like.'),
+ Dinner:createFallbackMeal('Dinner','Dinner','🍽️',520,28,[],'Pick a recipe from My Recipes to build tomorrow’s dinner plan.')};
  const total=Object.values(meals).reduce((a,m)=>a+(m?.cal||0),0);
  const topUp=bestTopUpFor(total);
  if(topUp){topUp.type='Extra';meals.Extra=topUp}
@@ -189,16 +161,16 @@ function renderMeals(){
 function renderLeftovers(){let total=state.leftovers.reduce((a,x)=>a+x.serves,0);leftoverCount.textContent=`${total} ${total===1?'serve':'serves'}`;leftoverShelf.innerHTML=state.leftovers.length?state.leftovers.map((x,i)=>`<div class="leftover-row"><div><b>🥡 ${x.name}</b><small>${x.serves} ${x.serves===1?'serve':'serves'} left</small></div><button class="text-btn" data-remove-leftover="${i}">Remove</button></div>`).join(''):'<p class="empty">Nothing saved yet. Tap “Cooked it + save leftovers” after making a meal.</p>';document.querySelectorAll('[data-remove-leftover]').forEach(x=>x.onclick=()=>{state.leftovers.splice(+x.dataset.removeLeftover,1);save()})}
 function saveLeftovers(type){let m=mealFor(type),serves=parseInt(prompt(`How many leftover serves of ${m.name} are going into the fridge?`,'2'),10);if(!serves||serves<1)return;let existing=state.leftovers.find(x=>x.name===m.name);if(existing)existing.serves+=serves;else state.leftovers.push({name:m.name,serves,cal:m.cal,protein:m.protein,icon:m.icon});save()}
 function openMealPicker(type='Dinner'){pickerMealType.value=type;pickerEffort.value=weekday?'easy':'cook';buildCravings('all');mealPickerModal.showModal()}
-function buildCravings(active){let cats=[['all','✨','All'],['quick','🌯','Quick'],['pasta','🍝','Pasta'],['soup','🥣','Soup'],['steak','🥩','Steak'],['comfort','🍔','Comfort'],['oats','🥣','Oats'],['light','☕','Light'],['snack','🍿','Snack']];cravingGrid.innerHTML=cats.map(([id,ic,n])=>`<button class="craving ${active===id?'active':''}" data-craving="${id}"><span>${ic}</span>${n}</button>`).join('');document.querySelectorAll('[data-craving]').forEach(x=>x.onclick=()=>buildCravings(x.dataset.craving));renderRecipeChoices(active)}
-function renderRecipeChoices(category='all'){let type=pickerMealType.value,effort=pickerEffort.value,list=recipes.filter(r=>r.type===type&&(category==='all'||r.category===category));if(effort==='barely')list=list.filter(r=>r.effort==='barely'||r.effort==='easy');if(effort==='easy')list=list.filter(r=>r.effort!=='cook');if(weekday)list.sort((a,b)=>(b.weekday?1:0)-(a.weekday?1:0));recipeChoices.innerHTML=list.length?list.map(r=>`<button class="recipe-choice" data-recipe="${r.id}"><span>${r.icon}</span><div><b>${r.name}</b><small>${r.effort==='cook'?'More energy':'Easy'} · ${r.protein}g protein</small></div></button>`).join(''):'<p class="empty">No matches—try a different craving or effort level.</p>';document.querySelectorAll('[data-recipe]').forEach(x=>x.onclick=()=>{setMeal(pickerMealType.value,recipe(x.dataset.recipe));mealPickerModal.close()})}
+function buildCravings(active){cravingGrid.innerHTML='';renderRecipeChoices(active)}
+function renderRecipeChoices(category='all'){let type=pickerMealType.value,effort=pickerEffort.value,personalRecipes=Array.isArray(window.RootedRecipes?.getRecipes?.()) ? window.RootedRecipes.getRecipes() : [];let list=personalRecipes.filter(r=>r.type===type);if(effort==='barely')list=list.filter(r=>!r.effort||r.effort==='barely'||r.effort==='easy');if(effort==='easy')list=list.filter(r=>!r.effort||r.effort!=='cook');recipeChoices.innerHTML=list.length?list.map(r=>`<button class="recipe-choice" data-recipe="${r.id}"><span>${r.icon||'🍽️'}</span><div><b>${r.name}</b><small>${r.effort==='cook'?'More energy':'Easy'} · ${r.protein||0}g protein</small></div></button>`).join(''):`<div class="empty recipe-empty"><b>You haven't added any recipes yet.</b><p>Start with your own recipe and it will appear here.</p><button class="primary" type="button" id="mealPickerAddRecipeBtn">Add your first recipe</button></div>`;document.getElementById('mealPickerAddRecipeBtn')?.addEventListener('click',()=>{document.getElementById('addRecipeBtn')?.click();mealPickerModal?.close?.()});document.querySelectorAll('[data-recipe]').forEach(x=>x.onclick=()=>{setMeal(pickerMealType.value,recipe(x.dataset.recipe));mealPickerModal.close()})}
 function openLeftovers(){leftoverMealType.value='Dinner';leftoverChoices.innerHTML=state.leftovers.length?state.leftovers.map((x,i)=>`<button class="recipe-choice" data-use-leftover="${i}"><span>${x.icon||'🥡'}</span><div><b>${x.name}</b><small>${x.serves} ${x.serves===1?'serve':'serves'} left</small></div></button>`).join(''):'<p class="empty">You don’t have any saved leftovers yet.</p>';document.querySelectorAll('[data-use-leftover]').forEach(x=>x.onclick=()=>{let i=+x.dataset.useLeftover,item=state.leftovers[i];if(!state.dayMeals[dk])state.dayMeals[dk]=defaultDayMeals();state.dayMeals[dk][leftoverMealType.value]={id:'leftover',type:leftoverMealType.value,name:`Leftover ${item.name}`,icon:'🥡',cal:item.cal,protein:item.protein,ingredients:[],method:'Heat it through and enjoy not having to cook.',isLeftover:true};item.serves--;if(item.serves<=0)state.leftovers.splice(i,1);leftoverModal.close();save()});leftoverModal.showModal()}
 function openTakeaway(){takeawayChoices.innerHTML=takeawayOptions.map((x,i)=>`<button class="takeaway-choice" data-takeaway="${i}"><span>${x.icon}</span><b>${x.name}</b></button>`).join('');document.querySelectorAll('[data-takeaway]').forEach(x=>x.onclick=()=>saveTakeaway(takeawayOptions[+x.dataset.takeaway]));customTakeaway.value='';takeawayModal.showModal()}
 function saveTakeaway(choice,forceNoTrack=false){let name=choice?.name||customTakeaway.value.trim();if(!name)return;let noTrack=forceNoTrack||choice?.name.includes('don’t track');setMeal(takeawayMealType.value,{id:'takeaway',name,icon:choice?.icon||'🛍️',cal:noTrack?0:(choice?.cal||700),protein:noTrack?0:(choice?.protein||25),ingredients:[],method:'Enjoy it. Tomorrow continues normally—no punishment workout and no skipping meals to make up for it.',isTakeaway:true,noTrack});takeawayModal.close()}
-function tooTired(){if(state.leftovers.length){openLeftovers();return}setMeal('Dinner',recipe('loaded-potato'));alert('Tonight is sorted: loaded baked potato.')}
-function skipBreakfast(){setMeal('Breakfast',recipe('skip'))}
+function tooTired(){if(state.leftovers.length){openLeftovers();return}setMeal('Dinner',createFallbackMeal('Dinner','A simple dinner','🍽️',480,24,[],'A gentle low-effort dinner is planned for tonight.'));alert('Tonight is sorted with a simple dinner.')}
+function skipBreakfast(){setMeal('Breakfast',createFallbackMeal('Breakfast','A simple breakfast','☕',0,0,[],'Breakfast is optional. Keep it simple and stay kind to yourself.'))}
 function planForDay(dd){let k=`w${w}d${dd}`;return state.dayMeals[k]?Object.values(state.dayMeals[k]):Object.values(defaultDayMeals(dd,w))}
 function weeklyIngredients(){let set=new Set;for(let dd=0;dd<7;dd++)planForDay(dd).forEach(m=>{if(!m.isTakeaway&&!m.isLeftover)(m.ingredients||[]).forEach(x=>set.add(x))});return[...set].sort()}
-function renderShop(){let groups={'Weekly groceries':weeklyIngredients(),'Your equipment':['Dumbbells','Walking pad','Yoga mat']};shoppingList.innerHTML=Object.entries(groups).map(([g,items])=>`<section class="shop-group"><h3>${g}</h3>${items.map(x=>`<label class="shop-row"><input class="shop-check" type="checkbox" data-shop="${x}" ${state.shopping[x]?'checked':''}><span>${x}</span></label>`).join('')}</section>`).join('');document.querySelectorAll('[data-shop]').forEach(x=>x.onchange=()=>{state.shopping[x.dataset.shop]=x.checked;persist()})}
+function renderShop(){const manualItems=(state.shoppingList||[]).filter(Boolean);const groups={'Weekly groceries':[...new Set([...weeklyIngredients(),...manualItems])],'Your equipment':['Dumbbells','Walking pad','Yoga mat']};shoppingList.innerHTML=Object.entries(groups).map(([g,items])=>`<section class="shop-group"><h3>${g}</h3>${items.map(x=>`<label class="shop-row"><input class="shop-check" type="checkbox" data-shop="${x}" ${state.shopping[x]?'checked':''}><span>${x}</span></label>`).join('')}</section>`).join('');document.querySelectorAll('[data-shop]').forEach(x=>x.onchange=()=>{state.shopping[x.dataset.shop]=x.checked;persist()})}
 function renderProgress(){progressWeek.textContent=`Week ${w}`;let checks=Object.keys(state.checks).filter(k=>state.checks[k]);workoutsDone.textContent=checks.filter(k=>k.endsWith('-walk')).length;exercisesDone.textContent=checks.filter(k=>k.includes('-ex')).length;renderChart();let ach=[['🌱','First step',checks.length>0],['🔥','3-day streak',calcStreak()>=3],['💧','Hydrated',waterCount()>=4],['🥡','Leftover lover',state.leftovers.length>0],['💚','Real life win',selectedMeals().some(m=>m.isTakeaway||m.isLeftover)],['🏆','8 weeks',programProgress()===100]];achievements.innerHTML=ach.map(a=>`<div class="achievement ${a[2]?'unlocked':''}"><span>${a[0]}</span><b>${a[1]}</b></div>`).join('')}
 function renderChart(){let pts=Object.entries(state.checkins).filter(([,x])=>x.weight).sort((a,b)=>+a[0]-+b[0]);chartEmpty.style.display=pts.length?'none':'block';weightChart.innerHTML='';if(!pts.length)return;let vals=pts.map(x=>+x[1].weight),mn=Math.min(...vals)-1,mx=Math.max(...vals)+1,coords=pts.map(([ww,x],i)=>[40+i*(520/Math.max(1,pts.length-1)),190-(+x.weight-mn)/(mx-mn)*150]);weightChart.innerHTML=`<line x1="40" y1="190" x2="560" y2="190" stroke="#d8d3ca"/><polyline points="${coords.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#5f715a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>${coords.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="7" fill="#7f9079"/><text x="${p[0]}" y="${p[1]-14}" text-anchor="middle" font-size="14">${vals[i]}kg</text><text x="${p[0]}" y="212" text-anchor="middle" font-size="12">W${pts[i][0]}</text>`).join('')}`}
 function calcStreak(){let n=0;for(let ww=1;ww<=w;ww++)for(let dd=0;dd<7;dd++){if(ww===w&&dd>d)break;let k=`w${ww}d${dd}`;if(state.checks[`${k}-walk`])n++;else if(!(ww===w&&dd===d))n=0}return n}
