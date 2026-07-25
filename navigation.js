@@ -31,7 +31,7 @@
     }
 
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    document.dispatchEvent(new CustomEvent('rooted:pagechange', { detail: { pageId } }));
+    document.dispatchEvent(new CustomEvent('flourishBloom:pagechange', { detail: { pageId } }));
   }
 
   function requestedPage() {
@@ -54,7 +54,7 @@
 
   window.addEventListener('hashchange', () => showPage(requestedPage(), false));
 
-  window.RootedNavigation = { showPage };
+  window.FlourishBloomNavigation = { showPage };
 
   const start = () => showPage(requestedPage(), false);
   if (document.readyState === 'loading') {

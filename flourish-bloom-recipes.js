@@ -557,7 +557,7 @@
       setMeal(allowed.includes(r.type) ? r.type : 'Snack', meal);
       $('recipeViewModal')?.close();
       showRecipeToast(`${r.name} added to today.`);
-    } else showRecipeToast('Recipe saved. Refresh Flourish, then try adding it to today again.');
+    } else showRecipeToast('Recipe saved. Refresh Flourish & Bloom, then try adding it to today again.');
   }
 
   function addToShoppingList(id) {

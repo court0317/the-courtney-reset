@@ -1,8 +1,8 @@
 
-// Rooted Volume 8.1 — backups, calendar history, weekly comparison and accessibility
+// Flourish & Bloom Volume 8.1 — backups, calendar history, weekly comparison and accessibility
 (() => {
-  const PREF_KEY='rooted-v81-preferences';
-  const BACKUP_KEY='rooted-v81-last-backup';
+  const PREF_KEY='flourishBloom-v81-preferences';
+  const BACKUP_KEY='flourishBloom-v81-last-backup';
   let historyCursor=new Date();
   historyCursor.setDate(1);
   let selectedHistoryDate='';
@@ -40,7 +40,7 @@
     const movementCount=countMatching(s.checks,date,v=>!!v)+countMatching(s.walking,date,v=>Number(v?.minutes||v||0)>0);
     const meals=countMatching(s.mealDone,date,v=>!!v);
     let roots=0;
-    try{roots=Number(JSON.parse(localStorage.getItem('rooted-daily-roots-v5')||'{}')[date]||0)}catch{}
+    try{roots=Number(JSON.parse(localStorage.getItem('flourishBloom-daily-roots-v5')||'{}')[date]||0)}catch{}
     return {water,movement,movementCount,meals,roots,hasAny:water>0||movement||meals>0||roots>0};
   }
   function renderHistory(){
@@ -84,7 +84,7 @@
   }
   function applyPrefs(){
     const p=readPrefs(),root=document.documentElement;
-    root.classList.toggle('rooted-large-text',!!p.largeText);root.classList.toggle('rooted-reduce-motion',!!p.reduceMotion);root.classList.toggle('rooted-high-contrast',!!p.highContrast);
+    root.classList.toggle('flourishBloom-large-text',!!p.largeText);root.classList.toggle('flourishBloom-reduce-motion',!!p.reduceMotion);root.classList.toggle('flourishBloom-high-contrast',!!p.highContrast);
     const map={settingLargeText:p.largeText,settingReduceMotion:p.reduceMotion,settingHighContrast:p.highContrast};Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.checked=!!v});
   }
   function saveAccessibility(){
@@ -104,6 +104,6 @@
     document.getElementById('saveAccessibility')?.addEventListener('click',saveAccessibility);
     document.getElementById('settingsExport')?.addEventListener('click',()=>setTimeout(markBackup,100));
     document.getElementById('exportBtn')?.addEventListener('click',()=>setTimeout(markBackup,100));
-    document.addEventListener('rooted:pagechange',e=>{if(e.detail.pageId==='history'){renderHistory();if(!selectedHistoryDate){selectedHistoryDate=isoLocal(new Date());renderHistoryDetail(selectedHistoryDate)}}if(e.detail.pageId==='week')renderComparison();if(e.detail.pageId==='settings'){applyPrefs();renderBackupFreshness()}});
+    document.addEventListener('flourishBloom:pagechange',e=>{if(e.detail.pageId==='history'){renderHistory();if(!selectedHistoryDate){selectedHistoryDate=isoLocal(new Date());renderHistoryDetail(selectedHistoryDate)}}if(e.detail.pageId==='week')renderComparison();if(e.detail.pageId==='settings'){applyPrefs();renderBackupFreshness()}});
   });
 })();

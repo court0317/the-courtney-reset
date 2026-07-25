@@ -1,23 +1,24 @@
 (() => {
   'use strict';
 
-  const CONFIG = window.ROOTED_SUPABASE_CONFIG || {};
+  if (window.flourishBloomStorageMigration?.migrate) window.flourishBloomStorageMigration.migrate();
+  const CONFIG = window.FLOURISH_BLOOM_SUPABASE_CONFIG || {};
   const configured = Boolean(
     CONFIG.url &&
     CONFIG.publishableKey &&
     !CONFIG.publishableKey.includes('PASTE_YOUR') &&
     window.supabase?.createClient
   );
-  const ROOTED_PREFIXES = ['courtneyReset', 'rooted-'];
-  const CLOUD_META_KEY = 'rooted-cloud-meta-v1';
-  const DEVICE_ID_KEY = 'rooted-device-id-v1';
+  const FLOURISH_BLOOM_PREFIXES = ['flourishBloom', 'flourishBloom-'];
+  const CLOUD_META_KEY = 'flourishBloom-cloud-meta-v1';
+  const DEVICE_ID_KEY = 'flourishBloom-device-id-v1';
   let client = null;
   let currentUser = null;
   let uploadTimer = null;
   let applyingCloud = false;
   let readyResolve;
 
-  window.RootedCloud = {
+  window.FlourishBloomCloud = {
     configured,
     ready: new Promise(resolve => { readyResolve = resolve; }),
     syncNow: () => pushSnapshot(true),
@@ -25,8 +26,8 @@
     get user() { return currentUser; }
   };
 
-  function isRootedKey(key) {
-    return key && ROOTED_PREFIXES.some(prefix => key.startsWith(prefix)) && key !== CLOUD_META_KEY;
+  function isFlourishBloomKey(key) {
+    return key && FLOURISH_BLOOM_PREFIXES.some(prefix => key.startsWith(prefix)) && key !== CLOUD_META_KEY;
   }
 
   function getOrCreateDeviceId() {
@@ -42,7 +43,7 @@
     const data = {};
     for (let i = 0; i < localStorage.length; i += 1) {
       const key = localStorage.key(i);
-      if (isRootedKey(key)) data[key] = localStorage.getItem(key);
+      if (isFlourishBloomKey(key)) data[key] = localStorage.getItem(key);
     }
     return {
       version: 1,
@@ -64,7 +65,7 @@
     applyingCloud = true;
     try {
       Object.entries(cloudData.values).forEach(([key, value]) => {
-        if (isRootedKey(key) && typeof value === 'string') localStorage.setItem(key, value);
+        if (isFlourishBloomKey(key) && typeof value === 'string') localStorage.setItem(key, value);
       });
       localStorage.setItem(CLOUD_META_KEY, JSON.stringify({
         lastPulledAt: new Date().toISOString(),
@@ -83,7 +84,7 @@
   }
 
   function notifyCloudStateChanged() {
-    window.dispatchEvent(new CustomEvent('rooted:cloud-sync-updated', { detail: { source: 'cloud' } }));
+    window.dispatchEvent(new CustomEvent('flourishBloom:cloud-sync-updated', { detail: { source: 'cloud' } }));
   }
 
   async function pushSnapshot(showStatus) {
@@ -91,12 +92,12 @@
     setCloudStatus('syncing', 'Saving…');
     const payload = snapshot();
     const { error } = await client
-      .from('rooted_app_state')
+      .from('flourishBloom_app_state')
       .upsert({ user_id: currentUser.id, data: payload, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) {
-      console.error('Rooted cloud save failed', error);
+      console.error('Flourish & Bloom cloud save failed', error);
       setCloudStatus('error', 'Not synced');
-      if (showStatus) alert(`Rooted could not save to the cloud yet. ${friendlyError(error)}`);
+      if (showStatus) alert(`Flourish & Bloom could not save to the cloud yet. ${friendlyError(error)}`);
       return false;
     }
     localStorage.setItem(CLOUD_META_KEY, JSON.stringify({ lastPushedAt: new Date().toISOString() }));
@@ -106,7 +107,7 @@
 
   async function pullOrMigrate() {
     const { data, error } = await client
-      .from('rooted_app_state')
+      .from('flourishBloom_app_state')
       .select('data, updated_at')
       .eq('user_id', currentUser.id)
       .maybeSingle();
@@ -146,18 +147,18 @@
     const originalClear = Storage.prototype.clear;
     Storage.prototype.setItem = function(key, value) {
       originalSet.call(this, key, value);
-      if (this === localStorage && isRootedKey(key)) queueUpload();
+      if (this === localStorage && isFlourishBloomKey(key)) queueUpload();
     };
     Storage.prototype.removeItem = function(key) {
       originalRemove.call(this, key);
-      if (this === localStorage && isRootedKey(key)) queueUpload();
+      if (this === localStorage && isFlourishBloomKey(key)) queueUpload();
     };
     Storage.prototype.clear = function() {
       originalClear.call(this);
       if (this === localStorage) queueUpload();
     };
     window.addEventListener('storage', event => {
-      if (isRootedKey(event.key)) queueUpload();
+      if (isFlourishBloomKey(event.key)) queueUpload();
     });
     document.addEventListener('visibilitychange', async () => {
       if (document.visibilityState === 'hidden') {
@@ -171,24 +172,24 @@
 
   function createGate() {
     const gate = document.createElement('div');
-    gate.id = 'rootedAuthGate';
+    gate.id = 'flourishBloomAuthGate';
     gate.className = 'cloud-auth-gate';
     gate.innerHTML = `
       <div class="cloud-auth-card">
         <div class="cloud-sprout">🌿</div>
-        <span class="eyebrow">Welcome to Rooted</span>
+        <span class="eyebrow">Welcome to Flourish & Bloom</span>
         <h1>Your progress, safely yours.</h1>
         <p class="cloud-auth-intro">Sign in to keep your garden, journal and progress private and synced across your devices.</p>
         <div class="cloud-auth-tabs" role="tablist">
           <button type="button" class="active" data-auth-mode="signin">Log in</button>
           <button type="button" data-auth-mode="signup">Create account</button>
         </div>
-        <form id="rootedAuthForm">
-          <label>Email<input id="rootedAuthEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
-          <label>Password<input id="rootedAuthPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="At least 6 characters"></label>
-          <button id="rootedAuthSubmit" class="primary wide" type="submit">Log in</button>
-          <button id="rootedForgotPassword" class="cloud-link" type="button">Forgot password?</button>
-          <p id="rootedAuthMessage" class="cloud-auth-message" aria-live="polite"></p>
+        <form id="flourishBloomAuthForm">
+          <label>Email<input id="flourishBloomAuthEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+          <label>Password<input id="flourishBloomAuthPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="At least 6 characters"></label>
+          <button id="flourishBloomAuthSubmit" class="primary wide" type="submit">Log in</button>
+          <button id="flourishBloomForgotPassword" class="cloud-link" type="button">Forgot password?</button>
+          <p id="flourishBloomAuthMessage" class="cloud-auth-message" aria-live="polite"></p>
         </form>
         <p class="cloud-fineprint">Your existing progress on this device will be moved into your account the first time you sign in.</p>
       </div>`;
@@ -196,9 +197,9 @@
 
     let mode = 'signin';
     const tabs = gate.querySelectorAll('[data-auth-mode]');
-    const submit = gate.querySelector('#rootedAuthSubmit');
-    const password = gate.querySelector('#rootedAuthPassword');
-    const forgot = gate.querySelector('#rootedForgotPassword');
+    const submit = gate.querySelector('#flourishBloomAuthSubmit');
+    const password = gate.querySelector('#flourishBloomAuthPassword');
+    const forgot = gate.querySelector('#flourishBloomForgotPassword');
     tabs.forEach(tab => tab.addEventListener('click', () => {
       mode = tab.dataset.authMode;
       tabs.forEach(x => x.classList.toggle('active', x === tab));
@@ -208,9 +209,9 @@
       setAuthMessage('');
     }));
 
-    gate.querySelector('#rootedAuthForm').addEventListener('submit', async event => {
+    gate.querySelector('#flourishBloomAuthForm').addEventListener('submit', async event => {
       event.preventDefault();
-      const email = gate.querySelector('#rootedAuthEmail').value.trim();
+      const email = gate.querySelector('#flourishBloomAuthEmail').value.trim();
       const pass = password.value;
       submit.disabled = true;
       submit.textContent = mode === 'signup' ? 'Creating…' : 'Logging in…';
@@ -227,7 +228,7 @@
     });
 
     forgot.addEventListener('click', async () => {
-      const email = gate.querySelector('#rootedAuthEmail').value.trim();
+      const email = gate.querySelector('#flourishBloomAuthEmail').value.trim();
       if (!email) return setAuthMessage('Enter your email address first.', true);
       const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: location.href.split('#')[0] });
       setAuthMessage(error ? error.message : 'Password reset email sent.', Boolean(error));
@@ -235,14 +236,14 @@
   }
 
   function setAuthMessage(message, error = false) {
-    const el = document.getElementById('rootedAuthMessage');
+    const el = document.getElementById('flourishBloomAuthMessage');
     if (!el) return;
     el.textContent = message;
     el.classList.toggle('error', error);
   }
 
   function hideGate() {
-    document.getElementById('rootedAuthGate')?.remove();
+    document.getElementById('flourishBloomAuthGate')?.remove();
   }
 
   function setCloudStatus(kind, text) {
@@ -254,9 +255,9 @@
 
   function injectAccountControls() {
     const settings = document.querySelector('#settings');
-    if (settings && !document.getElementById('rootedCloudCard')) {
+    if (settings && !document.getElementById('flourishBloomCloudCard')) {
       const card = document.createElement('div');
-      card.id = 'rootedCloudCard';
+      card.id = 'flourishBloomCloudCard';
       card.className = 'card settings-form cloud-account-card';
       card.innerHTML = `
         <span class="eyebrow">Your account</span>
@@ -264,13 +265,13 @@
         <p class="cloud-account-email"></p>
         <div class="cloud-status-row"><span class="cloud-dot"></span><b data-cloud-status>Saved</b><small>Private to your account</small></div>
         <div class="cloud-account-actions">
-          <button type="button" class="outline" id="rootedSyncNow">Sync now</button>
-          <button type="button" class="outline danger-soft" id="rootedSignOut">Log out</button>
+          <button type="button" class="outline" id="flourishBloomSyncNow">Sync now</button>
+          <button type="button" class="outline danger-soft" id="flourishBloomSignOut">Log out</button>
         </div>`;
       settings.insertBefore(card, settings.children[1] || null);
       card.querySelector('.cloud-account-email').textContent = currentUser?.email || '';
-      card.querySelector('#rootedSyncNow').addEventListener('click', () => pushSnapshot(true));
-      card.querySelector('#rootedSignOut').addEventListener('click', async () => {
+      card.querySelector('#flourishBloomSyncNow').addEventListener('click', () => pushSnapshot(true));
+      card.querySelector('#flourishBloomSignOut').addEventListener('click', async () => {
         await pushSnapshot(false);
         await client.auth.signOut();
       });
@@ -284,13 +285,13 @@
 
   function renderAccountPanel() {
     document.getElementById('settingsBtn')?.click();
-    setTimeout(() => document.getElementById('rootedCloudCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    setTimeout(() => document.getElementById('flourishBloomCloudCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   }
 
   async function boot() {
     installStorageListener();
     if (!configured) {
-      console.warn('Rooted cloud is not configured. Add the Supabase publishable key in supabase-config.js.');
+        console.warn('Flourish & Bloom cloud is not configured. Add the Supabase publishable key in supabase-config.js.');
       readyResolve({ configured: false });
       return;
     }
@@ -303,7 +304,7 @@
       currentUser = session.user;
       await pullOrMigrate().catch(error => {
         console.error(error);
-        alert(`Rooted cloud setup needs attention. ${friendlyError(error)}`);
+        alert(`Flourish & Bloom cloud setup needs attention. ${friendlyError(error)}`);
       });
       hideGate();
       setTimeout(injectAccountControls, 0);
@@ -312,7 +313,7 @@
     client.auth.onAuthStateChange(async (event, sessionNow) => {
       if (event === 'SIGNED_OUT') {
         currentUser = null;
-        document.getElementById('rootedAuthGate')?.remove();
+        document.getElementById('flourishBloomAuthGate')?.remove();
         createGate();
         setCloudStatus('saved', 'Not signed in');
         return;
@@ -328,7 +329,7 @@
         }
       }
       if (event === 'PASSWORD_RECOVERY') {
-        const next = prompt('Enter your new Rooted password (at least 6 characters):');
+        const next = prompt('Enter your new Flourish & Bloom password (at least 6 characters):');
         if (next && next.length >= 6) {
           const { error } = await client.auth.updateUser({ password: next });
           alert(error ? error.message : 'Your password has been updated.');

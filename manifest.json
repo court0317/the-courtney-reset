@@ -1,9 +1,11 @@
 {
-  "name": "Rooted",
-  "short_name": "Rooted",
-  "description": "A calm personalised wellness app with an a living wellness world with a garden, aquarium, journey map, memory lane, guided movement and meals.",
-  "start_url": "./?v=rooted812#today",
+  "name": "Flourish & Bloom",
+  "short_name": "Flourish & Bloom",
+  "description": "Flourish & Bloom is a calm wellness planner for movement, meals, hydration, journaling and daily growth.",
+  "start_url": "./?v=flourish-and-bloom#today",
   "display": "standalone",
+  "scope": "./",
+  "scope": "./",
   "background_color": "#f7f1e7",
   "theme_color": "#6f846b",
   "icons": [

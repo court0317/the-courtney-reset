@@ -1,12 +1,12 @@
-const CACHE='rooted-cloud-v11-recipes';
+const CACHE='flourish-and-bloom-v1';
 const ASSETS=[
   './',
-  './index.html?v=rooted900',
-  './styles.css?v=rooted331',
-  './navigation.js?v=rooted900',
-  './app.js?v=rooted331',
-  './rooted-recipes.js?v=rooted331',
-  './v81.js?v=rooted900',
+  './index.html?v=flourish-and-bloom',
+  './styles.css?v=flourish-and-bloom',
+  './navigation.js?v=flourish-and-bloom',
+  './app.js?v=flourish-and-bloom',
+  './flourish-bloom-recipes.js?v=flourish-and-bloom',
+  './v81.js?v=flourish-and-bloom',
   './manifest.json',
   './icon.svg',
   './icon-192.svg',
@@ -32,6 +32,6 @@ self.addEventListener('fetch',event=>{
         caches.open(CACHE).then(cache=>cache.put(event.request,copy));
         return response;
       })
-      .catch(()=>caches.match(event.request).then(cached=>cached||caches.match('./index.html?v=rooted900')))
+      .catch(()=>caches.match(event.request).then(cached=>cached||caches.match('./index.html?v=flourish-and-bloom')))
   );
 });

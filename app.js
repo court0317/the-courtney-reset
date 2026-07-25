@@ -1,13 +1,49 @@
 
 const {workouts}=window.APP_DATA;
-const START=new Date(2026,6,27),DAYS=56,KEY='courtneyResetPremiumV5';
-let previous=JSON.parse(localStorage.getItem('courtneyResetPremiumV4')||'null');
+
+function migrateLegacyStorageKeys(){
+  if (localStorage.getItem('flourishBloomStorageMigrationV1') === 'done') return true;
+  const migrationMap = {
+    'flourishBloomPremiumV5': 'flourishBloomPremiumV5',
+    'flourishBloomPremiumV4': 'flourishBloomPremiumV4',
+    'flourishBloomV62': 'flourishBloomV62',
+    'flourishBloom-profile-v2': 'flourishBloom-profile-v2',
+    'flourishBloom-daily-roots-v2': 'flourishBloom-daily-roots-v2',
+    'flourishBloom-weekly-focus-v3': 'flourishBloom-weekly-focus-v3',
+    'flourishBloom-garden-journal-v5': 'flourishBloom-garden-journal-v5',
+    'flourishBloom-v9-interactive': 'flourishBloom-v9-interactive',
+    'flourishBloom-v10-story-features': 'flourishBloom-v10-story-features',
+    'flourishBloom-my-recipes-v1': 'flourishBloom-my-recipes-v1',
+    'flourishBloom-recipe-draft-v1': 'flourishBloom-recipe-draft-v1',
+    'flourishBloom-cloud-meta-v1': 'flourishBloom-cloud-meta-v1',
+    'flourishBloom-device-id-v1': 'flourishBloom-device-id-v1',
+    'flourishBloom-v81-preferences': 'flourishBloom-v81-preferences',
+    'flourishBloom-v81-last-backup': 'flourishBloom-v81-last-backup',
+    'flourishBloom-v8-journey': 'flourishBloom-v8-journey'
+  };
+  try {
+    Object.entries(migrationMap).forEach(([from, to]) => {
+      if (!localStorage.getItem(to) && localStorage.getItem(from) !== null) {
+        localStorage.setItem(to, localStorage.getItem(from));
+      }
+    });
+    localStorage.setItem('flourishBloomStorageMigrationV1', 'done');
+    return true;
+  } catch (error) {
+    console.warn('Flourish & Bloom storage migration skipped', error);
+    return false;
+  }
+}
+window.flourishBloomStorageMigration = { migrate: migrateLegacyStorageKeys };
+migrateLegacyStorageKeys();
+const START=new Date(2026,6,27),DAYS=56,KEY='flourishBloomPremiumV5';
+let previous=JSON.parse(localStorage.getItem('flourishBloomPremiumV4')||'null');
 let state=JSON.parse(localStorage.getItem(KEY)||'null')||previous||{};
 state={checks:{},water:{},hydration:{},mealDone:{},weights:{},notes:{},shopping:{},shoppingList:[],checkins:{},celebrated:{},dayMeals:{},leftovers:[],...state};
 state.hydration=state.hydration||{};
 state.shoppingList=state.shoppingList||[];
 const $=x=>document.getElementById(x);
-window.RootedAppState=state;
+window.FlourishBloomAppState=state;
 
 const takeawayOptions=[
 {name:'Burger and small chips',icon:'🍔',cal:800,protein:30},
@@ -21,13 +57,13 @@ const takeawayOptions=[
 function dayNum(x){return Math.floor(new Date(x.getFullYear(),x.getMonth(),x.getDate(),12).getTime()/86400000)}
 function status(){let e=dayNum(new Date())-dayNum(START);if(e<0)return{stage:'countdown',left:-e,week:1,day:0,n:0};if(e>=DAYS)return{stage:'complete',week:8,day:6,n:56};return{stage:'active',week:Math.floor(e/7)+1,day:e%7,n:e+1}}
 const s=status(),w=s.week,d=s.day,work=workouts[d],dk=`w${w}d${d}`,weekday=d<5;
-function persist(){window.RootedAppState=state;localStorage.setItem(KEY,JSON.stringify(state))}
-window.RootedAppStateSave=()=>{persist();render();};
+function persist(){window.FlourishBloomAppState=state;localStorage.setItem(KEY,JSON.stringify(state))}
+window.FlourishBloomAppStateSave=()=>{persist();render();};
 function save(){persist();render()}
 function pct(n,t){return t?Math.round(n/t*100):0}
 function phaseSets(base,i){return w>=5&&i<2?base+1:base}
 function createFallbackMeal(type,name,icon,cal,protein,ingredients=[],method=''){return{id:`fallback-${type.toLowerCase()}`,type,name,icon,cal,protein,ingredients,method,customRecipe:true};}
-function allRecipes(){return Array.isArray(window.RootedRecipes?.getRecipes?.()) ? window.RootedRecipes.getRecipes() : [];}
+function allRecipes(){return Array.isArray(window.FlourishBloomRecipes?.getRecipes?.()) ? window.FlourishBloomRecipes.getRecipes() : [];}
 function recipe(id){return allRecipes().find(r=>r.id===id)}
 function cloneMeal(r){return JSON.parse(JSON.stringify(r))}
 
@@ -95,7 +131,10 @@ const coachMessages=['Today is about glutes, not punishment. Slow reps and good 
 function renderToday(){
  if(s.stage==='countdown')countdownCard.innerHTML=`<span class="eyebrow light">Your reset begins</span><h2>Monday 27 July</h2><div class="countdown">${s.left} ${s.left===1?'day':'days'}</div><p>Your first workout and easy Monday meal plan are ready.</p>`;
  else if(s.stage==='complete')countdownCard.innerHTML='<h2>Eight weeks complete 🎉</h2><p>Take your final measurements and celebrate everything you achieved.</p>';
- else countdownCard.innerHTML=`<span class="eyebrow light">Day ${s.n} of 56</span><h2>Good ${new Date().getHours()<12?'morning':new Date().getHours()<18?'afternoon':'evening'}, Courtney</h2><p>${work.icon} Week ${w} · ${work.day} · ${work.focus}</p>`;
+ else {
+  const displayName=getDisplayName();
+  countdownCard.innerHTML=`<span class="eyebrow light">Day ${s.n} of 56</span><h2>Good ${new Date().getHours()<12?'morning':new Date().getHours()<18?'afternoon':'evening'}, ${displayName}</h2><p>${work.icon} Week ${w} · ${work.day} · ${work.focus}</p>`;
+ }
  let dp=dailyPct(),wc=waterCount(),pd=proteinData();movePct.textContent=dp+'%';waterPct.textContent=pct(wc,4)+'%';proteinPct.textContent=pct(pd.done,pd.total)+'%';setRing(moveRing,dp);setRing(waterRing,pct(wc,4));setRing(proteinRing,pct(pd.done,pd.total));
  focusTitle.textContent=`${work.icon} ${work.focus}`;dayBadge.textContent=`Week ${w}`;
  todayQuick.innerHTML=[['walk',`${work.walk} min walking pad`],['water','Drink at least 2 L water'],['protein','Include protein with meals'],['stretch','Complete your stretch']].map(([x,t])=>`<label class="quick"><input type="checkbox" data-quick="${x}" ${quickDone(x)?'checked':''}><b>${t}</b></label>`).join('');
@@ -162,7 +201,7 @@ function renderLeftovers(){let total=state.leftovers.reduce((a,x)=>a+x.serves,0)
 function saveLeftovers(type){let m=mealFor(type),serves=parseInt(prompt(`How many leftover serves of ${m.name} are going into the fridge?`,'2'),10);if(!serves||serves<1)return;let existing=state.leftovers.find(x=>x.name===m.name);if(existing)existing.serves+=serves;else state.leftovers.push({name:m.name,serves,cal:m.cal,protein:m.protein,icon:m.icon});save()}
 function openMealPicker(type='Dinner'){pickerMealType.value=type;pickerEffort.value=weekday?'easy':'cook';buildCravings('all');mealPickerModal.showModal()}
 function buildCravings(active){cravingGrid.innerHTML='';renderRecipeChoices(active)}
-function renderRecipeChoices(category='all'){let type=pickerMealType.value,effort=pickerEffort.value,personalRecipes=Array.isArray(window.RootedRecipes?.getRecipes?.()) ? window.RootedRecipes.getRecipes() : [];let list=personalRecipes.filter(r=>r.type===type);if(effort==='barely')list=list.filter(r=>!r.effort||r.effort==='barely'||r.effort==='easy');if(effort==='easy')list=list.filter(r=>!r.effort||r.effort!=='cook');recipeChoices.innerHTML=list.length?list.map(r=>`<button class="recipe-choice" data-recipe="${r.id}"><span>${r.icon||'🍽️'}</span><div><b>${r.name}</b><small>${r.effort==='cook'?'More energy':'Easy'} · ${r.protein||0}g protein</small></div></button>`).join(''):`<div class="empty recipe-empty"><b>You haven't added any recipes yet.</b><p>Start with your own recipe and it will appear here.</p><button class="primary" type="button" id="mealPickerAddRecipeBtn">Add your first recipe</button></div>`;document.getElementById('mealPickerAddRecipeBtn')?.addEventListener('click',()=>{document.getElementById('addRecipeBtn')?.click();mealPickerModal?.close?.()});document.querySelectorAll('[data-recipe]').forEach(x=>x.onclick=()=>{setMeal(pickerMealType.value,recipe(x.dataset.recipe));mealPickerModal.close()})}
+function renderRecipeChoices(category='all'){let type=pickerMealType.value,effort=pickerEffort.value,personalRecipes=Array.isArray(window.FlourishBloomRecipes?.getRecipes?.()) ? window.FlourishBloomRecipes.getRecipes() : [];let list=personalRecipes.filter(r=>r.type===type);if(effort==='barely')list=list.filter(r=>!r.effort||r.effort==='barely'||r.effort==='easy');if(effort==='easy')list=list.filter(r=>!r.effort||r.effort!=='cook');recipeChoices.innerHTML=list.length?list.map(r=>`<button class="recipe-choice" data-recipe="${r.id}"><span>${r.icon||'🍽️'}</span><div><b>${r.name}</b><small>${r.effort==='cook'?'More energy':'Easy'} · ${r.protein||0}g protein</small></div></button>`).join(''):`<div class="empty recipe-empty"><b>You haven't added any recipes yet.</b><p>Start with your own recipe and it will appear here.</p><button class="primary" type="button" id="mealPickerAddRecipeBtn">Add your first recipe</button></div>`;document.getElementById('mealPickerAddRecipeBtn')?.addEventListener('click',()=>{document.getElementById('addRecipeBtn')?.click();mealPickerModal?.close?.()});document.querySelectorAll('[data-recipe]').forEach(x=>x.onclick=()=>{setMeal(pickerMealType.value,recipe(x.dataset.recipe));mealPickerModal.close()})}
 function openLeftovers(){leftoverMealType.value='Dinner';leftoverChoices.innerHTML=state.leftovers.length?state.leftovers.map((x,i)=>`<button class="recipe-choice" data-use-leftover="${i}"><span>${x.icon||'🥡'}</span><div><b>${x.name}</b><small>${x.serves} ${x.serves===1?'serve':'serves'} left</small></div></button>`).join(''):'<p class="empty">You don’t have any saved leftovers yet.</p>';document.querySelectorAll('[data-use-leftover]').forEach(x=>x.onclick=()=>{let i=+x.dataset.useLeftover,item=state.leftovers[i];if(!state.dayMeals[dk])state.dayMeals[dk]=defaultDayMeals();state.dayMeals[dk][leftoverMealType.value]={id:'leftover',type:leftoverMealType.value,name:`Leftover ${item.name}`,icon:'🥡',cal:item.cal,protein:item.protein,ingredients:[],method:'Heat it through and enjoy not having to cook.',isLeftover:true};item.serves--;if(item.serves<=0)state.leftovers.splice(i,1);leftoverModal.close();save()});leftoverModal.showModal()}
 function openTakeaway(){takeawayChoices.innerHTML=takeawayOptions.map((x,i)=>`<button class="takeaway-choice" data-takeaway="${i}"><span>${x.icon}</span><b>${x.name}</b></button>`).join('');document.querySelectorAll('[data-takeaway]').forEach(x=>x.onclick=()=>saveTakeaway(takeawayOptions[+x.dataset.takeaway]));customTakeaway.value='';takeawayModal.showModal()}
 function saveTakeaway(choice,forceNoTrack=false){let name=choice?.name||customTakeaway.value.trim();if(!name)return;let noTrack=forceNoTrack||choice?.name.includes('don’t track');setMeal(takeawayMealType.value,{id:'takeaway',name,icon:choice?.icon||'🛍️',cal:noTrack?0:(choice?.cal||700),protein:noTrack?0:(choice?.protein||25),ingredients:[],method:'Enjoy it. Tomorrow continues normally—no punishment workout and no skipping meals to make up for it.',isTakeaway:true,noTrack});takeawayModal.close()}
@@ -179,8 +218,8 @@ let timer=60,timerInt=null;function openTimer(n){timer=n;timerValue.textContent=
 function celebrate(){if(dailyPct()===100&&!state.celebrated[dk]){state.celebrated[dk]=true;for(let i=0;i<45;i++){let p=document.createElement('i');p.className='confetti-piece';p.style.left=Math.random()*100+'%';p.style.background=['#7f9079','#b89655','#b46f72','#d8c5a5'][i%4];p.style.animationDelay=Math.random()*.6+'s';confetti.appendChild(p);setTimeout(()=>p.remove(),2500)}}}
 function render(){renderHeader();renderToday();renderWorkout();renderMeals();renderShop();renderProgress();persist()}
 function go(id){
-  if(window.RootedNavigation?.showPage){
-    window.RootedNavigation.showPage(id);
+  if(window.FlourishBloomNavigation?.showPage){
+    window.FlourishBloomNavigation.showPage(id);
     return;
   }
   document.querySelectorAll('.page,.nav').forEach(x=>x.classList.remove('active'));
@@ -191,14 +230,14 @@ function go(id){
 }
 document.querySelectorAll('[data-go]').forEach(x=>x.onclick=()=>go(x.dataset.go));document.querySelectorAll('.modal-close').forEach(x=>x.onclick=()=>x.closest('dialog').close());
 swapAll.onclick=()=>{state.dayMeals[dk]=defaultDayMeals(d,w);save()};clearShop.onclick=()=>{state.shopping={};save()};chooseMealBtn.onclick=()=>openMealPicker('Dinner');leftoversBtn.onclick=openLeftovers;takeawayBtn.onclick=openTakeaway;tooTiredBtn.onclick=tooTired;skipBreakfastBtn.onclick=skipBreakfast;pickerMealType.onchange=()=>buildCravings('all');pickerEffort.onchange=()=>buildCravings('all');takeawaySave.onclick=()=>saveTakeaway(null,false);takeawayNoTrack.onclick=()=>saveTakeaway(null,true);
-saveCheckin.onclick=()=>{state.checkins[w]={weight:weight.value,waist:waist.value,hips:hips.value,energy:energy.value,win:win.value};save();alert('Week '+w+' saved')};exportBtn.onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='courtney-reset-backup-v5.json';a.click()};importFile.onchange=async()=>{try{state=JSON.parse(await importFile.files[0].text());save()}catch{alert('That file could not be read')}};resetBtn.onclick=()=>{if(confirm('Reset all progress?')){localStorage.removeItem(KEY);location.reload()}};
+saveCheckin.onclick=()=>{state.checkins[w]={weight:weight.value,waist:waist.value,hips:hips.value,energy:energy.value,win:win.value};save();alert('Week '+w+' saved')};exportBtn.onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='flourish-and-bloom-backup-v5.json';a.click()};importFile.onchange=async()=>{try{state=JSON.parse(await importFile.files[0].text());save()}catch{alert('That file could not be read')}};resetBtn.onclick=()=>{if(confirm('Reset all progress?')){localStorage.removeItem(KEY);location.reload()}};
 timerToggle.onclick=()=>{if(timerInt){clearInterval(timerInt);timerInt=null;timerToggle.textContent='Start'}else{timerInt=setInterval(timerTick,1000);timerToggle.textContent='Pause'}};timerMinus.onclick=()=>{timer=Math.max(0,timer-15);timerValue.textContent=timer};timerPlus.onclick=()=>{timer+=15;timerValue.textContent=timer};
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=813').catch(()=>{}));render();
 
 
 // --- Version 6.2 practical upgrades ---
 (() => {
-  const KEY = 'courtneyResetV62';
+  const KEY = 'flourishBloomV62';
   const state = JSON.parse(localStorage.getItem(KEY) || '{"mode":"normal","walks":[],"weights":{},"leftovers":[]}');
   const save = () => localStorage.setItem(KEY, JSON.stringify(state));
 
@@ -326,9 +365,9 @@ document.getElementById('addTopUpBtn')?.addEventListener('click',()=>{
   save();
 });
 
-// Rooted foundation UI
+// Flourish & Bloom foundation UI
 window.addEventListener('load',()=>{
-  const splash=document.getElementById('rootedSplash');
+  const splash=document.getElementById('flourishBloomSplash');
   if(splash){
     setTimeout(()=>splash.classList.add('hide'),900);
     setTimeout(()=>splash.remove(),1500);
@@ -340,10 +379,10 @@ window.addEventListener('load',()=>{
       if(nav) nav.click();
     });
   });
-  renderRooted();
+  renderFlourishBloom();
 });
 
-function rootedHabitScore(){
+function flourishBloomHabitScore(){
   let score=0;
   try{
     const meals=selectedMeals();
@@ -358,7 +397,7 @@ function rootedHabitScore(){
   return score;
 }
 
-function totalRootedChoices(){
+function totalFlourishBloomChoices(){
   let total=0;
   try{
     total += Object.values(state.water||{}).filter(Boolean).length;
@@ -371,15 +410,15 @@ function totalRootedChoices(){
   return total;
 }
 
-function renderRooted(){
-  const today=rootedHabitScore();
-  const total=totalRootedChoices();
+function renderFlourishBloom(){
+  const today=flourishBloomHabitScore();
+  const total=totalFlourishBloomChoices();
   const waterLit=typeof waterCount==='function'?waterCount():0;
   const stages=[
     {min:0,icon:'🌱',name:'Seedling'},
-    {min:12,icon:'🌿',name:'Taking root'},
+    {min:12,icon:'🌿',name:'Taking hold'},
     {min:35,icon:'🪴',name:'Growing strong'},
-    {min:80,icon:'🌳',name:'Deeply rooted'}
+    {min:80,icon:'🌳',name:'Deeply flourishing'}
   ];
   let stage=stages[0];
   stages.forEach(s=>{if(total>=s.min)stage=s});
@@ -388,7 +427,7 @@ function renderRooted(){
 
   const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
   set('plantStageIcon',stage.icon);
-  set('plantGrowthText',today===4?'Flourishing':today>=2?'Growing':'Beginning');
+  set('plantGrowthText',today===4?'Blooming':today>=2?'Growing':'Beginning');
   set('plantVisual',stage.icon);
   set('plantStageName',stage.name);
   set('rootProgressLabel',`${total} healthy choices logged`);
@@ -409,32 +448,47 @@ const originalSave = typeof save==='function' ? save : null;
 if(originalSave){
   save = function(){
     const result=originalSave.apply(this,arguments);
-    setTimeout(renderRooted,0);
+    setTimeout(renderFlourishBloom,0);
     return result;
   }
 }
 
-// Rooted Build 2: onboarding, progress rings and Today's Root
-const ROOTED_PROFILE_KEY='rooted-profile-v2';
-const ROOTED_ROOTS_KEY='rooted-daily-roots-v2';
+// Flourish & Bloom Build 2: onboarding, progress rings and Today's Root
+const FLOURISH_BLOOM_PROFILE_KEY='flourishBloom-profile-v2';
+const FLOURISH_BLOOM_ROOTS_KEY='flourishBloom-daily-roots-v2';
 
-function rootedProfile(){
-  try{return JSON.parse(localStorage.getItem(ROOTED_PROFILE_KEY))||null}catch(e){return null}
+function flourishBloomProfile(){
+  try{return JSON.parse(localStorage.getItem(FLOURISH_BLOOM_PROFILE_KEY))||null}catch(e){return null}
 }
-function saveRootedProfile(profile){
-  localStorage.setItem(ROOTED_PROFILE_KEY,JSON.stringify(profile));
+function saveFlourishBloomProfile(profile){
+  localStorage.setItem(FLOURISH_BLOOM_PROFILE_KEY,JSON.stringify(profile));
 }
-function rootedDailyRoots(){
-  try{return JSON.parse(localStorage.getItem(ROOTED_ROOTS_KEY))||{}}catch(e){return {}}
+function getDisplayName(){
+  try{
+    const profile=flourishBloomProfile();
+    const name=String(profile?.name||'').trim();
+    return name||'there';
+  }catch(e){return 'there'}
 }
-function rootedTodayKey(){
+function getDisplayNameInitials(){
+  const name=getDisplayName();
+  if(!name||name==='there')return 'FB';
+  const parts=name.split(/\s+/).filter(Boolean);
+  if(!parts.length)return 'FB';
+  if(parts.length===1)return parts[0].slice(0,2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length-1][0]}`.toUpperCase();
+}
+function flourishBloomDailyRoots(){
+  try{return JSON.parse(localStorage.getItem(FLOURISH_BLOOM_ROOTS_KEY))||{}}catch(e){return {}}
+}
+function flourishBloomTodayKey(){
   return new Date().toISOString().slice(0,10);
 }
 
-function setupRootedOnboarding(){
-  const shell=document.getElementById('rootedOnboarding');
+function setupFlourishBloomOnboarding(){
+  const shell=document.getElementById('flourishBloomOnboarding');
   if(!shell)return;
-  const profile=rootedProfile();
+  const profile=flourishBloomProfile();
   if(!profile){
     shell.hidden=false;
     requestAnimationFrame(()=>shell.classList.add('show'));
@@ -459,24 +513,24 @@ function setupRootedOnboarding(){
     const equipment={};
     shell.querySelectorAll('[data-toggle-choice].selected').forEach(x=>equipment[x.dataset.toggleChoice]=true);
     const profile={
-      name:document.getElementById('onboardName')?.value.trim()||'Courtney',
+      name:document.getElementById('onboardName')?.value.trim()||'',
       goal,
       equipment,
       walkGoal:Number(document.getElementById('onboardWalkGoal')?.value||30),
       waterGoal:Number(document.getElementById('onboardWaterGoal')?.value||2.5),
       completedAt:new Date().toISOString()
     };
-    saveRootedProfile(profile);
+    saveFlourishBloomProfile(profile);
     shell.classList.remove('show');
     setTimeout(()=>shell.hidden=true,350);
-    renderRootedPremium();
+    renderFlourishBloomPremium();
   };
   document.getElementById('finishOnboarding')?.addEventListener('click',finish);
   document.getElementById('skipOnboarding')?.addEventListener('click',()=>{
-    saveRootedProfile({name:'Courtney',goal:'Feel healthier',equipment:{dumbbells:true,walkingPad:true,yogaMat:true},walkGoal:30,waterGoal:2.5,completedAt:new Date().toISOString()});
+    saveFlourishBloomProfile({name:'',goal:'Feel healthier',equipment:{dumbbells:true,walkingPad:true,yogaMat:true},walkGoal:30,waterGoal:2.5,completedAt:new Date().toISOString()});
     shell.classList.remove('show');
     setTimeout(()=>shell.hidden=true,350);
-    renderRootedPremium();
+    renderFlourishBloomPremium();
   });
 }
 
@@ -492,16 +546,19 @@ function setRing(id,pct){
   if(el)el.style.setProperty('--progress',Math.max(0,Math.min(100,pct)));
 }
 
-function renderRootedPremium(){
-  const profile=rootedProfile()||{name:'Courtney',walkGoal:30,waterGoal:2.5};
+function renderFlourishBloomPremium(){
+  const profile=flourishBloomProfile()||{walkGoal:30,waterGoal:2.5};
+  const displayName=getDisplayName();
   const hour=new Date().getHours();
   const greeting=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
   const dateLabel=new Intl.DateTimeFormat('en-AU',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
   const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
 
-  set('rootedGreeting',`${greeting}, ${profile.name}.`);
-  set('rootedDateLabel',dateLabel);
-  set('rootedDailyLine','Today is another chance to grow.');
+  set('flourishBloomGreeting',`${greeting}, ${displayName}.`);
+  const settingsBtn=document.getElementById('settingsBtn');
+  if(settingsBtn){settingsBtn.textContent=getDisplayNameInitials();settingsBtn.title=displayName==='there'?'Settings':displayName;}
+  set('flourishBloomDateLabel',dateLabel);
+  set('flourishBloomDailyLine','Today is another chance to grow.');
 
   let planned=0,guide=1600;
   try{
@@ -520,15 +577,15 @@ function renderRootedPremium(){
   set('ringWalkSub',`of ${profile.walkGoal} min`);
 
   setRing('calorieRing',planned/guide*100);
-  setRing('rootedWaterRing',waterLit/profile.waterGoal*100);
+  setRing('flourishBloomWaterRing',waterLit/profile.waterGoal*100);
   setRing('walkRing',walkMinutes/profile.walkGoal*100);
 
-  const total=typeof totalRootedChoices==='function'?totalRootedChoices():0;
+  const total=typeof totalFlourishBloomChoices==='function'?totalFlourishBloomChoices():0;
   const heroPlant=document.getElementById('heroPlant');
   if(heroPlant)heroPlant.textContent=total>=80?'🌳':total>=35?'🪴':total>=12?'🌿':'🌱';
 
-  const roots=rootedDailyRoots();
-  const done=!!roots[rootedTodayKey()];
+  const roots=flourishBloomDailyRoots();
+  const done=!!roots[flourishBloomTodayKey()];
   const rootBtn=document.getElementById('completeTodaysRoot');
   if(rootBtn){
     rootBtn.textContent=done?'✓':'○';
@@ -540,27 +597,27 @@ function renderRootedPremium(){
   if(waterLit<0.5){title='Drink your first bottle';text='Start gently with 500 mL of water.'}
   else if(walkMinutes<profile.walkGoal){title='Make space for your walk';text=`You have ${Math.max(0,profile.walkGoal-walkMinutes)} minutes left today.`}
   else if(planned<1400){title='Nourish yourself properly';text='Your meal plan is a little light today. Add something filling.'}
-  else {title='You are tending your roots';text='Choose one kind thing for your body before the day ends.'}
-  set('todaysRootTitle',done?'Today’s root is complete':title);
+  else {title='You are tending your blooms';text='Choose one kind thing for your body before the day ends.'}
+  set('todaysRootTitle',done?'Today’s bloom is complete':title);
   set('todaysRootText',done?'A small choice still counts. Your garden is growing.':text);
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
-  setupRootedOnboarding();
-  renderRootedPremium();
+  setupFlourishBloomOnboarding();
+  renderFlourishBloomPremium();
   document.getElementById('completeTodaysRoot')?.addEventListener('click',()=>{
-    const roots=rootedDailyRoots();
-    const key=rootedTodayKey();
+    const roots=flourishBloomDailyRoots();
+    const key=flourishBloomTodayKey();
     roots[key]=!roots[key];
-    localStorage.setItem(ROOTED_ROOTS_KEY,JSON.stringify(roots));
-    renderRootedPremium();
+    localStorage.setItem(FLOURISH_BLOOM_ROOTS_KEY,JSON.stringify(roots));
+    renderFlourishBloomPremium();
   });
-  document.addEventListener('click',()=>setTimeout(renderRootedPremium,30));
-  document.addEventListener('change',()=>setTimeout(renderRootedPremium,30));
+  document.addEventListener('click',()=>setTimeout(renderFlourishBloomPremium,30));
+  document.addEventListener('change',()=>setTimeout(renderFlourishBloomPremium,30));
 });
 
-// Rooted Build 3: Coach, weekly focus, dynamic day guidance and monthly review
-const ROOTED_FOCUS_KEY='rooted-weekly-focus-v3';
+// Flourish & Bloom Build 3: Coach, weekly focus, dynamic day guidance and monthly review
+const FLOURISH_BLOOM_FOCUS_KEY='flourishBloom-weekly-focus-v3';
 
 function currentWeekKey(){
   const d=new Date();
@@ -570,15 +627,15 @@ function currentWeekKey(){
 }
 function getWeeklyFocus(){
   try{
-    const data=JSON.parse(localStorage.getItem(ROOTED_FOCUS_KEY))||{};
+    const data=JSON.parse(localStorage.getItem(FLOURISH_BLOOM_FOCUS_KEY))||{};
     return data[currentWeekKey()]||'Hydration';
   }catch(e){return 'Hydration'}
 }
 function saveWeeklyFocus(value){
   let data={};
-  try{data=JSON.parse(localStorage.getItem(ROOTED_FOCUS_KEY))||{}}catch(e){}
+  try{data=JSON.parse(localStorage.getItem(FLOURISH_BLOOM_FOCUS_KEY))||{}}catch(e){}
   data[currentWeekKey()]=value;
-  localStorage.setItem(ROOTED_FOCUS_KEY,JSON.stringify(data));
+  localStorage.setItem(FLOURISH_BLOOM_FOCUS_KEY,JSON.stringify(data));
 }
 
 function workoutCompletedToday(){
@@ -588,7 +645,7 @@ function mealsCompletedToday(){
   try{return selectedMeals().filter(m=>state.mealDone?.[`${dk}-${m.type}`]).length}catch(e){return 0}
 }
 function coachSnapshot(){
-  const profile=rootedProfile()||{walkGoal:30,waterGoal:2.5};
+  const profile=flourishBloomProfile()||{walkGoal:30,waterGoal:2.5};
   const water=(typeof waterCount==='function'?waterCount():0)*0.5;
   const walk=getWalkMinutesToday();
   const workout=workoutCompletedToday();
@@ -627,7 +684,7 @@ function renderCoach(){
     message='Add a filling snack so you are not finishing the day hungry.';
     action='Add nourishment'; target='meals';
   }else{
-    title='You are tending your roots';
+    title='You are tending your blooms';
     message='You have already supported yourself in several ways today.';
     action='See journey'; target='progress';
   }
@@ -646,8 +703,8 @@ function focusProgress(focus){
   if(focus==='Strength') return s.workout?100:0;
   if(focus==='Home cooking') return Math.min(100,(s.meals/3)*100);
   if(focus==='Recovery'){
-    const roots=rootedDailyRoots();
-    return roots[rootedTodayKey()]?100:35;
+    const roots=flourishBloomDailyRoots();
+    return roots[flourishBloomTodayKey()]?100:35;
   }
   return 0;
 }
@@ -721,7 +778,7 @@ function renderMonthlyReview(){
   const data=monthlyReviewData();
   const month=new Intl.DateTimeFormat('en-AU',{month:'long'}).format(new Date());
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
-  set('monthReviewTitle',`${month} in Rooted`);
+  set('monthReviewTitle',`${month} in Flourish & Bloom`);
   set('monthHealthyDays',data.healthyDays);
   set('monthWaterDays',data.waterGoalDays);
   set('monthWalkMinutes',data.walkMinutes);
@@ -729,13 +786,13 @@ function renderMonthlyReview(){
   let badge='Beginning';
   let message='Every small choice you log will begin shaping your month.';
   if(data.healthyDays>=5){badge='Growing';message='You are building a steady pattern, one day at a time.'}
-  if(data.healthyDays>=12){badge='Taking root';message='Your habits are becoming part of your normal routine.'}
-  if(data.healthyDays>=20){badge='Flourishing';message='You have created a beautifully consistent month.'}
+  if(data.healthyDays>=12){badge='Taking hold';message='Your habits are becoming part of your normal routine.'}
+  if(data.healthyDays>=20){badge='Blooming';message='You have created a beautifully consistent month.'}
   set('monthReviewBadge',badge);
   set('monthReviewMessage',message);
 }
 
-function renderRootedBuild3(){
+function renderFlourishBloomBuild3(){
   renderCoach();
   renderWeeklyFocus();
   renderMonthlyReview();
@@ -756,17 +813,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     const nav=document.querySelector(`[data-page="${target}"],[data-go="${target}"]`);
     if(nav)nav.click();
   });
-  renderRootedBuild3();
-  document.addEventListener('click',()=>setTimeout(renderRootedBuild3,40));
-  document.addEventListener('change',()=>setTimeout(renderRootedBuild3,40));
+  renderFlourishBloomBuild3();
+  document.addEventListener('click',()=>setTimeout(renderFlourishBloomBuild3,40));
+  document.addEventListener('change',()=>setTimeout(renderFlourishBloomBuild3,40));
 });
 
-// Rooted V5: Garden, guided workouts, editable settings and safer backups
-const ROOTED_JOURNAL_KEY='rooted-garden-journal-v5';
+// Flourish & Bloom V5: Garden, guided workouts, editable settings and safer backups
+const FLOURISH_BLOOM_JOURNAL_KEY='flourishBloom-garden-journal-v5';
 
-function rootedSettingsProfile(){
-  return rootedProfile()||{
-    name:'Courtney',
+function flourishBloomSettingsProfile(){
+  return flourishBloomProfile()||{
+    name:'',
     goal:'Feel healthier',
     equipment:{dumbbells:true,walkingPad:true,yogaMat:true},
     walkGoal:30,
@@ -777,9 +834,9 @@ function rootedSettingsProfile(){
 }
 
 function openSettings(){
-  const p=rootedSettingsProfile();
+  const p=flourishBloomSettingsProfile();
   const assign=(id,value)=>{const el=document.getElementById(id);if(el)el.value=String(value)};
-  assign('settingName',p.name||'Courtney');
+  assign('settingName',String(p.name||'').trim());
   assign('settingWalkGoal',p.walkGoal||30);
   assign('settingWaterGoal',p.waterGoal||2.5);
   assign('settingWeekdayCalories',p.weekdayCalories||1600);
@@ -790,14 +847,14 @@ function openSettings(){
     settingYogaMat:!!p.equipment?.yogaMat
   };
   Object.entries(checks).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.checked=val});
-  window.RootedNavigation?.showPage('settings');
+  window.FlourishBloomNavigation?.showPage('settings');
 }
 
 function saveSettings(){
-  const current=rootedSettingsProfile();
+  const current=flourishBloomSettingsProfile();
   const p={
     ...current,
-    name:document.getElementById('settingName')?.value.trim()||'Courtney',
+    name:document.getElementById('settingName')?.value.trim()||'',
     walkGoal:Number(document.getElementById('settingWalkGoal')?.value||30),
     waterGoal:Number(document.getElementById('settingWaterGoal')?.value||2.5),
     weekdayCalories:Number(document.getElementById('settingWeekdayCalories')?.value||1600),
@@ -808,10 +865,10 @@ function saveSettings(){
       yogaMat:!!document.getElementById('settingYogaMat')?.checked
     }
   };
-  saveRootedProfile(p);
-  renderRootedPremium();
-  renderRootedBuild3();
-  const btn=document.getElementById('saveRootedSettings');
+  saveFlourishBloomProfile(p);
+  renderFlourishBloomPremium();
+  renderFlourishBloomBuild3();
+  const btn=document.getElementById('saveFlourishBloomSettings');
   if(btn){const old=btn.textContent;btn.textContent='Saved ✓';setTimeout(()=>btn.textContent=old,1300)}
 }
 
@@ -831,17 +888,17 @@ function gardenCounts(){
   Object.entries((state&&state.walking)||{}).forEach(([key,val])=>{
     if(Number(val?.minutes||0)>0){healthyDays.add(key.slice(0,10));moveDays.add(key.slice(0,10))}
   });
-  const roots=Object.values(rootedDailyRoots()).filter(Boolean).length;
+  const roots=Object.values(flourishBloomDailyRoots()).filter(Boolean).length;
   const total=healthyDays.size+roots+Math.floor(waterLogs/5)+moveDays.size;
   return {healthyDays:healthyDays.size,roots,waterLogs,moveDays:moveDays.size,total};
 }
 
 function gardenStage(total){
-  if(total>=90)return {plant:'🌳',label:'Deeply rooted',title:'Your habits have strong roots',next:120};
-  if(total>=50)return {plant:'🌲',label:'Flourishing',title:'Your garden is flourishing',next:90};
+  if(total>=90)return {plant:'🌳',label:'Deeply flourishing',title:'Your habits are growing strong',next:120};
+  if(total>=50)return {plant:'🌲',label:'Blooming',title:'Your garden is flourishing',next:90};
   if(total>=25)return {plant:'🪴',label:'Growing strong',title:'Your consistency is showing',next:50};
-  if(total>=10)return {plant:'🌿',label:'Taking root',title:'Your roots are taking hold',next:25};
-  return {plant:'🌱',label:'Seedling',title:'Your roots are beginning',next:10};
+  if(total>=10)return {plant:'🌿',label:'Taking hold',title:'Your blooms are taking hold',next:25};
+  return {plant:'🌱',label:'Seedling',title:'Your blooms are beginning',next:10};
 }
 
 function renderGarden(){
@@ -853,7 +910,7 @@ function renderGarden(){
   set('gardenStageTitle',stage.title);
   set('gardenStageMessage',counts.total
     ?'Every completed habit is helping this garden become stronger.'
-    :'Complete one small habit today to plant your first root.');
+    :'Complete one small habit today to begin your first bloom.');
   set('gardenHealthyDays',counts.healthyDays);
   set('gardenRoots',counts.roots);
   set('gardenWaterLogs',counts.waterLogs);
@@ -866,17 +923,17 @@ function renderGarden(){
   const journal=document.getElementById('gardenJournal');
   if(journal){
     try{
-      const saved=JSON.parse(localStorage.getItem(ROOTED_JOURNAL_KEY)||'{}');
-      journal.value=saved[rootedTodayKey()]||'';
+      const saved=JSON.parse(localStorage.getItem(FLOURISH_BLOOM_JOURNAL_KEY)||'{}');
+      journal.value=saved[flourishBloomTodayKey()]||'';
     }catch(e){}
   }
 }
 
 function saveGardenJournal(){
   let saved={};
-  try{saved=JSON.parse(localStorage.getItem(ROOTED_JOURNAL_KEY)||'{}')}catch(e){}
-  saved[rootedTodayKey()]=document.getElementById('gardenJournal')?.value.trim()||'';
-  localStorage.setItem(ROOTED_JOURNAL_KEY,JSON.stringify(saved));
+  try{saved=JSON.parse(localStorage.getItem(FLOURISH_BLOOM_JOURNAL_KEY)||'{}')}catch(e){}
+  saved[flourishBloomTodayKey()]=document.getElementById('gardenJournal')?.value.trim()||'';
+  localStorage.setItem(FLOURISH_BLOOM_JOURNAL_KEY,JSON.stringify(saved));
   const status=document.getElementById('gardenJournalSaved');
   if(status){status.textContent='Reflection saved ✓';setTimeout(()=>status.textContent='',1400)}
 }
@@ -961,26 +1018,26 @@ function toggleGuidedTimer(){
   },1000);
 }
 
-function exportRootedV5(){
+function exportFlourishBloomV5(){
   const payload={
     version:5,
     exportedAt:new Date().toISOString(),
     appState:state,
-    profile:rootedProfile(),
-    dailyRoots:rootedDailyRoots(),
-    weeklyFocus:localStorage.getItem(ROOTED_FOCUS_KEY),
-    gardenJournal:localStorage.getItem(ROOTED_JOURNAL_KEY)
+    profile:flourishBloomProfile(),
+    dailyRoots:flourishBloomDailyRoots(),
+    weeklyFocus:localStorage.getItem(FLOURISH_BLOOM_FOCUS_KEY),
+    gardenJournal:localStorage.getItem(FLOURISH_BLOOM_JOURNAL_KEY)
   };
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download=`rooted-backup-${rootedTodayKey()}.json`;
+  a.download=`flourishBloom-backup-${flourishBloomTodayKey()}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
 
-async function importRootedV5(file){
+async function importFlourishBloomV5(file){
   if(!file)return;
   try{
     const data=JSON.parse(await file.text());
@@ -991,10 +1048,10 @@ async function importRootedV5(file){
       state=data;
       localStorage.setItem(KEY,JSON.stringify(state));
     }
-    if(data.profile)saveRootedProfile(data.profile);
-    if(data.dailyRoots)localStorage.setItem(ROOTED_ROOTS_KEY,JSON.stringify(data.dailyRoots));
-    if(data.weeklyFocus)localStorage.setItem(ROOTED_FOCUS_KEY,data.weeklyFocus);
-    if(data.gardenJournal)localStorage.setItem(ROOTED_JOURNAL_KEY,data.gardenJournal);
+    if(data.profile)saveFlourishBloomProfile(data.profile);
+    if(data.dailyRoots)localStorage.setItem(FLOURISH_BLOOM_ROOTS_KEY,JSON.stringify(data.dailyRoots));
+    if(data.weeklyFocus)localStorage.setItem(FLOURISH_BLOOM_FOCUS_KEY,data.weeklyFocus);
+    if(data.gardenJournal)localStorage.setItem(FLOURISH_BLOOM_JOURNAL_KEY,data.gardenJournal);
     location.reload();
   }catch(e){
     alert('That backup file could not be imported.');
@@ -1003,7 +1060,7 @@ async function importRootedV5(file){
 
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('settingsBtn')?.addEventListener('click',openSettings);
-  document.getElementById('saveRootedSettings')?.addEventListener('click',saveSettings);
+  document.getElementById('saveFlourishBloomSettings')?.addEventListener('click',saveSettings);
   document.getElementById('saveGardenJournal')?.addEventListener('click',saveGardenJournal);
   document.getElementById('startGuidedWorkout')?.addEventListener('click',openGuidedWorkout);
   document.getElementById('closeGuidedWorkout')?.addEventListener('click',()=>document.getElementById('guidedWorkoutModal')?.close());
@@ -1021,17 +1078,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     renderGarden();
   });
   document.getElementById('guidedTimerToggle')?.addEventListener('click',toggleGuidedTimer);
-  document.getElementById('settingsExport')?.addEventListener('click',exportRootedV5);
-  document.getElementById('settingsImport')?.addEventListener('change',e=>importRootedV5(e.target.files?.[0]));
+  document.getElementById('settingsExport')?.addEventListener('click',exportFlourishBloomV5);
+  document.getElementById('settingsImport')?.addEventListener('change',e=>importFlourishBloomV5(e.target.files?.[0]));
   document.getElementById('restartOnboarding')?.addEventListener('click',()=>{
-    localStorage.removeItem(ROOTED_PROFILE_KEY);
+    localStorage.removeItem(FLOURISH_BLOOM_PROFILE_KEY);
     location.reload();
   });
-  document.addEventListener('rooted:pagechange',e=>{
+  document.addEventListener('flourishBloom:pagechange',e=>{
     if(e.detail.pageId==='garden')renderGarden();
     if(e.detail.pageId==='settings'){
-      const p=rootedSettingsProfile();
-      document.getElementById('settingName').value=p.name||'Courtney';
+      const p=flourishBloomSettingsProfile();
+      document.getElementById('settingName').value=String(p.name||'').trim();
       document.getElementById('settingWalkGoal').value=String(p.walkGoal||30);
       document.getElementById('settingWaterGoal').value=String(p.waterGoal||2.5);
       document.getElementById('settingWeekdayCalories').value=String(p.weekdayCalories||1600);
@@ -1044,7 +1101,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderGarden();
 });
 
-// Rooted V6: animated hydration aquarium
+// Flourish & Bloom V6: animated hydration aquarium
 const AQUARIUM_FISH=[
   {at:1,emoji:'🐟',name:'Sunny'},
   {at:2,emoji:'🐠',name:'Coral'},
@@ -1063,7 +1120,7 @@ function aquariumWaterCount(){
 }
 
 function aquariumGoalLitres(){
-  return Number((rootedProfile()||{}).waterGoal||2.5);
+  return Number((flourishBloomProfile()||{}).waterGoal||2.5);
 }
 
 function aquariumWaterStreak(){
@@ -1167,7 +1224,7 @@ function clickExistingWaterControl(direction){
 
 function updateAquariumWaterFallback(delta){
   try{
-    const key=typeof dk!=='undefined'?dk:rootedTodayKey();
+    const key=typeof dk!=='undefined'?dk:flourishBloomTodayKey();
     changeWaterCount(delta,key);
     if(typeof save==='function')save();
     else localStorage.setItem(KEY,JSON.stringify(state));
@@ -1179,14 +1236,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('aquariumAddWater')?.addEventListener('click',()=>{
     changeWaterCount(1);
     save();
-    setTimeout(()=>{renderAquarium();renderRootedPremium();},40);
+    setTimeout(()=>{renderAquarium();renderFlourishBloomPremium();},40);
   });
   document.getElementById('aquariumRemoveWater')?.addEventListener('click',()=>{
     changeWaterCount(-1);
     save();
-    setTimeout(()=>{renderAquarium();renderRootedPremium();},40);
+    setTimeout(()=>{renderAquarium();renderFlourishBloomPremium();},40);
   });
-  document.addEventListener('rooted:pagechange',e=>{
+  document.addEventListener('flourishBloom:pagechange',e=>{
     if(e.detail.pageId==='aquarium')renderAquarium();
   });
   document.addEventListener('click',()=>setTimeout(renderAquarium,90));
@@ -1194,10 +1251,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderAquarium();
 });
 
-// Rooted Volume 7 — Living Garden and Weekly Breakdown
-function rootedWeekDayKey(weekNumber, dayIndex){return `w${weekNumber}d${dayIndex}`}
-function rootedDaySummary(weekNumber, dayIndex){
-  const key=rootedWeekDayKey(weekNumber,dayIndex);
+// Flourish & Bloom Volume 7 — Living Garden and Weekly Breakdown
+function flourishBloomWeekDayKey(weekNumber, dayIndex){return `w${weekNumber}d${dayIndex}`}
+function flourishBloomDaySummary(weekNumber, dayIndex){
+  const key=flourishBloomWeekDayKey(weekNumber,dayIndex);
   const workout=workouts[dayIndex];
   const walk=!!state.checks[`${key}-walk`];
   const stretch=!!state.checks[`${key}-stretch`];
@@ -1205,7 +1262,7 @@ function rootedDaySummary(weekNumber, dayIndex){
   const moved=walk||stretch||exerciseKeys.length>0;
   const water=Object.entries(state.water||{}).filter(([k,v])=>k.startsWith(`${key}-`)&&v).length;
   const meals=Object.entries(state.mealDone||{}).filter(([k,v])=>k.startsWith(`${key}-`)&&v).length;
-  const root=!!rootedDailyRoots()[key];
+  const root=!!flourishBloomDailyRoots()[key];
   const perfect=moved&&water>=4&&meals>=3;
   let result='Fresh start';
   if(perfect)result='Perfect day';
@@ -1215,8 +1272,8 @@ function rootedDaySummary(weekNumber, dayIndex){
   else if(meals>0||root)result='Small win';
   return {key,workout,walk,moved,water,meals,root,perfect,result};
 }
-function rootedWeeklyData(){
-  const days=Array.from({length:7},(_,i)=>rootedDaySummary(w,i));
+function flourishBloomWeeklyData(){
+  const days=Array.from({length:7},(_,i)=>flourishBloomDaySummary(w,i));
   return {
     days,
     movement:days.filter(x=>x.moved).length,
@@ -1226,7 +1283,7 @@ function rootedWeeklyData(){
     roots:days.filter(x=>x.root).length
   };
 }
-let rootedLastGardenPoints = null;
+let flourishBloomLastGardenPoints = null;
 function renderLivingGarden(){
   const counts=gardenCounts();
   const butterflies=Math.min(5,Math.floor(counts.total/12));
@@ -1264,16 +1321,16 @@ function renderLivingGarden(){
   const homeButterflies=document.getElementById('homeGardenButterflies');
   if(homeButterflies)homeButterflies.innerHTML=Array.from({length:Math.min(2,butterflies)},(_,i)=>`<span style="left:${12+i*48}%;top:${18+i*16}%;--delay:${i*-1.3}s;--speed:${6+i}s">🦋</span>`).join('');
   const gardenCard=document.querySelector('.home-living-garden');
-  if(rootedLastGardenPoints!==null && counts.total>rootedLastGardenPoints && gardenCard){
+  if(flourishBloomLastGardenPoints!==null && counts.total>flourishBloomLastGardenPoints && gardenCard){
     gardenCard.classList.remove('garden-growth-pop');
     void gardenCard.offsetWidth;
     gardenCard.classList.add('garden-growth-pop');
     setTimeout(()=>gardenCard.classList.remove('garden-growth-pop'),800);
   }
-  rootedLastGardenPoints=counts.total;
+  flourishBloomLastGardenPoints=counts.total;
 }
 function weeklyStory(data){
-  if(!data.movement&&!data.water&&!data.meals&&!data.roots)return 'Your week is ready for its first little win. Log one walk, bottle of water, meal or daily root and your story will begin.';
+  if(!data.movement&&!data.water&&!data.meals&&!data.roots)return 'Your week is ready for its first little win. Log one walk, bottle of water, meal or small step and your story will begin.';
   const parts=[];
   if(data.movement)parts.push(`you moved on ${data.movement} ${data.movement===1?'day':'days'}`);
   if(data.water)parts.push(`logged ${data.water.toFixed(1)} litres of water`);
@@ -1285,7 +1342,7 @@ function weeklyStory(data){
   return text+'You did not need perfection—you kept growing.';
 }
 function renderWeeklyBreakdown(){
-  const data=rootedWeeklyData();
+  const data=flourishBloomWeeklyData();
   const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const list=document.getElementById('weeklyDayList');
   if(list)list.innerHTML=data.days.map((day,i)=>{
@@ -1293,7 +1350,7 @@ function renderWeeklyBreakdown(){
     return `<article class="weekly-day ${i===d?'today':''}"><div class="weekly-day-name"><b>${names[i]}</b><small>${day.workout.focus}</small></div><div class="weekly-icons">${icons}</div><span class="weekly-result ${day.perfect?'perfect':''}">${day.perfect?'⭐ ':''}${day.result}</span></article>`;
   }).join('');
   const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val};
-  set('weeklyStoryLabel',`Week ${w} in Rooted`);
+  set('weeklyStoryLabel',`Week ${w} in Flourish & Bloom`);
   set('weeklyStoryTitle',data.perfect?'You created a beautiful week.':data.movement||data.water||data.meals?'You kept showing up.':'Your week is waiting.');
   set('weeklyStoryText',weeklyStory(data));
   set('weekMovement',data.movement);
@@ -1309,12 +1366,12 @@ function renderWeeklyBreakdown(){
   set('weeklyWorldText',gained?'Your habits are adding new life to your garden and aquarium.':'Movement, hydration and nourishing meals will invite more visitors into your world.');
 }
 
-const rootedV7OriginalRenderGarden=renderGarden;
-renderGarden=function(){rootedV7OriginalRenderGarden();renderLivingGarden();};
+const flourishBloomV7OriginalRenderGarden=renderGarden;
+renderGarden=function(){flourishBloomV7OriginalRenderGarden();renderLivingGarden();};
 document.addEventListener('DOMContentLoaded',()=>{
   renderWeeklyBreakdown();
   renderLivingGarden();
-  document.addEventListener('rooted:pagechange',e=>{
+  document.addEventListener('flourishBloom:pagechange',e=>{
     if(e.detail.pageId==='week')renderWeeklyBreakdown();
     if(e.detail.pageId==='garden')renderLivingGarden();
   });
@@ -1323,11 +1380,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 
-// Rooted Volume 8 — Your Journey
+// Flourish & Bloom Volume 8 — Your Journey
 (() => {
   'use strict';
-  const V8_KEY='rooted-v8-journey';
-  const getMain=()=>{try{return JSON.parse(localStorage.getItem('courtneyResetPremiumV5')||'{}')}catch{return {}}};
+  const V8_KEY='flourishBloom-v8-journey';
+  const getMain=()=>{try{return JSON.parse(localStorage.getItem('flourishBloomPremiumV5')||'{}')}catch{return {}}};
   const getV8=()=>{try{return JSON.parse(localStorage.getItem(V8_KEY)||'{"memories":{},"firstOpened":""}')}catch{return {memories:{},firstOpened:''}}};
   const saveV8=x=>localStorage.setItem(V8_KEY,JSON.stringify(x));
   const el=id=>document.getElementById(id);
@@ -1338,21 +1395,21 @@ document.addEventListener('DOMContentLoaded',()=>{
     const checks=Object.keys(m.checks||{}).filter(k=>m.checks[k]);
     const water=Object.values(m.water||{}).reduce((n,v)=>n+(Number(v)||0),0);
     const meals=truthyCount(m.mealDone);
-    const roots=(()=>{try{return Object.values(JSON.parse(localStorage.getItem('rooted-daily-roots-v5')||'{}')).filter(Boolean).length}catch{return 0}})();
+    const roots=(()=>{try{return Object.values(JSON.parse(localStorage.getItem('flourishBloom-daily-roots-v5')||'{}')).filter(Boolean).length}catch{return 0}})();
     const workouts=checks.filter(k=>k.includes('-ex')||k.endsWith('-walk')).length;
     const movementDays=new Set(checks.filter(k=>k.endsWith('-walk')).map(k=>k.split('-walk')[0])).size;
     const total=workouts+water+meals+roots;
     return {m,checks,water,meals,roots,workouts,movementDays,total};
   }
   const milestones=[
-    {icon:'🏡',title:'Your journey began',need:0,detail:'You opened Rooted and planted the first seed.'},
-    {icon:'🌱',title:'First healthy choice',need:1,detail:'One small action became your first root.'},
+    {icon:'🏡',title:'Your journey began',need:0,detail:'You opened Flourish & Bloom and planted the first seed.'},
+    {icon:'🌱',title:'First healthy choice',need:1,detail:'One small action became your first bloom.'},
     {icon:'💧',title:'First aquarium visitor',need:3,detail:'Hydration brought your first fish home.'},
     {icon:'🌸',title:'First flower',need:7,detail:'A week of little choices helped something bloom.'},
     {icon:'🦋',title:'Butterfly garden',need:15,detail:'Consistency invited a butterfly to stay.'},
-    {icon:'🌳',title:'Strong young tree',need:30,detail:'Thirty growth points became lasting roots.'},
+    {icon:'🌳',title:'Strong young tree',need:30,detail:'Thirty growth points became a lasting bloom.'},
     {icon:'🗺️',title:'A world of your own',need:60,detail:'Your garden, aquarium and journey are flourishing.'},
-    {icon:'🏔️',title:'Rooted for the long run',need:100,detail:'One hundred choices built something remarkable.'}
+    {icon:'🏔️',title:'Flourish & Bloom for the long run',need:100,detail:'One hundred choices built something remarkable.'}
   ];
   function treeStage(total){
     if(total>=100)return ['🌳','A flourishing legacy tree',100];
@@ -1364,10 +1421,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
   function renderWorld(){
     const s=stats(), t=treeStage(s.total), hour=new Date().getHours();
-    put('worldGreeting',hour<12?'Good morning, your world is here.':hour<18?'Good afternoon, welcome back.':'Good evening, come see what grew.');
+    const displayName=getDisplayName();
+    put('worldGreeting',hour<12?`Good morning, ${displayName}. Your world is here.`:hour<18?`Good afternoon, ${displayName}. Welcome back.`:`Good evening, ${displayName}. Come see what grew.`);
     put('worldTitle',s.total>=30?'Your world is flourishing.':s.total?'Your little world is growing.':'Your little world is ready.');
-    put('worldMessage',s.total?`${s.total} supportive choices have added life to this world.`:'Your first supportive choice will plant the first root.');
-    put('worldGardenStatus',s.total>=15?'Butterflies visiting':s.total>=7?'Flowers blooming':s.total?'New roots growing':'Waking up');
+    put('worldMessage',s.total?`${s.total} supportive choices have added life to this world.`:'Your first supportive choice will start your first bloom.');
+    put('worldGardenStatus',s.total>=15?'Butterflies visiting':s.total>=7?'Flowers blooming':s.total?'New blooms growing':'Waking up');
     put('worldAquariumStatus',s.water?`${(s.water*.5).toFixed(1)} L logged in your journey`:'Ready for its first fish');
     put('worldJourneyStatus',`${milestones.filter(x=>s.total>=x.need).length} of ${milestones.length} milestones`);
     put('worldMemoryStatus',s.total?'Your story is taking shape':'Your first chapter awaits');
@@ -1387,7 +1445,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const weekNum=typeof w!=='undefined'?w:1;
     const movement=s.movementDays, litres=s.water*.5;
     let story='Your week is ready for its first little win.';
-    if(s.total)story=`You kept showing up. Your journey now holds ${s.total} supportive choices, ${movement} movement ${movement===1?'day':'days'} and ${litres.toFixed(1)} litres logged. `+(s.total>=15?'Butterflies have started finding their way to your garden.':'Your roots are getting stronger.');
+    if(s.total)story=`You kept showing up. Your journey now holds ${s.total} supportive choices, ${movement} movement ${movement===1?'day':'days'} and ${litres.toFixed(1)} litres logged. `+(s.total>=15?'Butterflies have started finding their way to your garden.':'Your blooms are getting stronger.');
     return {weekNum,story,s};
   }
   function renderMemory(){
@@ -1396,30 +1454,30 @@ document.addEventListener('DOMContentLoaded',()=>{
     v.memories[key]={week:snap.weekNum,story:snap.story,total:snap.s.total,date:new Date().toISOString()};saveV8(v);
     const entries=Object.values(v.memories).sort((a,b)=>b.week-a.week);
     put('memoryHeadline',snap.s.total?'You are writing a story worth keeping.':'Your first chapter is beginning.');
-    put('memorySummary',entries.length===1?'Your weekly memories will collect here as Rooted grows with you.':`${entries.length} weekly chapters are saved on this device.`);
+    put('memorySummary',entries.length===1?'Your weekly memories will collect here as Flourish & Bloom grows with you.':`${entries.length} weekly chapters are saved on this device.`);
     const box=el('memoryTimeline');if(!box)return;
     const unlocked=milestones.filter(m=>snap.s.total>=m.need).slice(-3).reverse();
-    box.innerHTML=[...entries.map(x=>`<article class="memory-entry"><div class="memory-dot">📖</div><div class="memory-card"><small>Week ${x.week}</small><h3>This week in Rooted</h3><p>${x.story}</p></div></article>`),...unlocked.map(x=>`<article class="memory-entry"><div class="memory-dot">${x.icon}</div><div class="memory-card"><small>Milestone</small><h3>${x.title}</h3><p>${x.detail}</p></div></article>`)].join('');
+    box.innerHTML=[...entries.map(x=>`<article class="memory-entry"><div class="memory-dot">📖</div><div class="memory-card"><small>Week ${x.week}</small><h3>This week in Flourish & Bloom</h3><p>${x.story}</p></div></article>`),...unlocked.map(x=>`<article class="memory-entry"><div class="memory-dot">${x.icon}</div><div class="memory-card"><small>Milestone</small><h3>${x.title}</h3><p>${x.detail}</p></div></article>`)].join('');
   }
-  function rootedCoachV8(){
+  function flourishBloomCoachV8(){
     const s=stats();let title='A gentle next step',msg='One small choice is enough to move today forward.',page='world';
     if(s.water<5){title='Your aquarium is waiting';msg=`${Math.max(1,5-s.water)} more 500 mL ${5-s.water===1?'bottle':'bottles'} would complete a 2.5 L hydration day.`;page='aquarium'}
     else if(s.movementDays<3){title='A little movement would help';msg='A gentle walk today can strengthen your journey path—no perfect workout required.';page='workout'}
     else if(s.total<15){title='A butterfly is getting closer';msg=`Only ${15-s.total} more growth points until the Butterfly Garden milestone.`;page='journey-map'}
     else {title='Look what you have built';msg='Your world has enough history for a beautiful trip down Memory Lane.';page='memory'}
-    put('coachTitle',title);put('coachMessage',msg);const b=el('coachAction');if(b){b.textContent=page==='aquarium'?'Add water':page==='workout'?'Start moving':page==='memory'?'Open Memory Lane':'View milestone';b.classList.add('ready');b.onclick=()=>window.RootedNavigation?.showPage(page)}
+    put('coachTitle',title);put('coachMessage',msg);const b=el('coachAction');if(b){b.textContent=page==='aquarium'?'Add water':page==='workout'?'Start moving':page==='memory'?'Open Memory Lane':'View milestone';b.classList.add('ready');b.onclick=()=>window.FlourishBloomNavigation?.showPage(page)}
   }
-  function renderAllV8(){renderWorld();renderJourney();renderMemory();rootedCoachV8()}
-  document.addEventListener('rooted:pagechange',e=>{if(e.detail.pageId==='world')renderWorld();if(e.detail.pageId==='journey-map')renderJourney();if(e.detail.pageId==='memory')renderMemory()});
+  function renderAllV8(){renderWorld();renderJourney();renderMemory();flourishBloomCoachV8()}
+  document.addEventListener('flourishBloom:pagechange',e=>{if(e.detail.pageId==='world')renderWorld();if(e.detail.pageId==='journey-map')renderJourney();if(e.detail.pageId==='memory')renderMemory()});
   document.addEventListener('click',e=>{if(e.target.closest('[data-go="world"],[data-go="journey-map"],[data-go="memory"]'))setTimeout(renderAllV8,30)},true);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderAllV8,{once:true});else renderAllV8();
 })();
 
 
-// Rooted 9 — Interactive Living World. Isolated storage and additive rendering.
+// Flourish & Bloom 9 — Interactive Living World. Isolated storage and additive rendering.
 (() => {
   'use strict';
-  const KEY='rooted-v9-interactive';
+  const KEY='flourishBloom-v9-interactive';
   const defaults={moods:{},featuredFlower:'🌼',memories:[],ambient:'off',lastCelebratedPoints:0};
   const load=()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return {...defaults}}};
   const save=x=>localStorage.setItem(KEY,JSON.stringify(x));
@@ -1437,11 +1495,11 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(let i=0;i<365;i++){if(data.moods[dayKey(cursor)])n++;else if(i>0)break;cursor.setDate(cursor.getDate()-1)}return n;
   }
   function renderGreeting(){
-    const h=new Date().getHours(),p=points(),name=(typeof rootedProfile==='function'&&rootedProfile()?.name)||'Courtney';
+    const h=new Date().getHours(),p=points(),name=getDisplayName();
     const greeting=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
-    const lines=p===0?'Your garden is ready for one tiny beginning.':p<10?'Your roots are waking up—one little choice is enough.':p<25?'Your consistency is turning into new leaves.':'Come see what your kindness to yourself has grown.';
-    if($('rootedGreeting'))$('rootedGreeting').textContent=`${greeting}, ${name}.`;
-    if($('rootedDailyLine'))$('rootedDailyLine').textContent=lines;
+    const lines=p===0?'Your garden is ready for one tiny beginning.':p<10?'Your blooms are waking up—one little choice is enough.':p<25?'Your consistency is turning into new leaves.':'Come see what your kindness to yourself has grown.';
+    if($('flourishBloomGreeting'))$('flourishBloomGreeting').textContent=`${greeting}, ${name}.`;
+    if($('flourishBloomDailyLine'))$('flourishBloomDailyLine').textContent=lines;
     const streak=gentleStreak();if($('interactiveStreak'))$('interactiveStreak').textContent=`${streak} ${streak===1?'day':'days'}`;
     $('interactiveStreakIcon')?.classList.toggle('sleeping',streak===0);
   }
@@ -1476,7 +1534,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
   function celebrate(){
     if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-    const wrap=document.createElement('div');wrap.className='rooted-celebration';const bits=['🍃','🌿','✨','🌸'];for(let i=0;i<18;i++){const s=document.createElement('span');s.textContent=bits[i%bits.length];s.style.left=`${Math.random()*100}%`;s.style.setProperty('--drift',`${(Math.random()-.5)*160}px`);s.style.animationDelay=`${Math.random()*.35}s`;wrap.appendChild(s)}document.body.appendChild(wrap);setTimeout(()=>wrap.remove(),2200);
+    const wrap=document.createElement('div');wrap.className='flourishBloom-celebration';const bits=['🍃','🌿','✨','🌸'];for(let i=0;i<18;i++){const s=document.createElement('span');s.textContent=bits[i%bits.length];s.style.left=`${Math.random()*100}%`;s.style.setProperty('--drift',`${(Math.random()-.5)*160}px`);s.style.animationDelay=`${Math.random()*.35}s`;wrap.appendChild(s)}document.body.appendChild(wrap);setTimeout(()=>wrap.remove(),2200);
   }
   function checkCelebration(){const data=load(),p=points();if(data.lastCelebratedPoints&&p>data.lastCelebratedPoints)celebrate();data.lastCelebratedPoints=p;save(data)}
   function renderPrompt(){const el=$('journalPrompt');if(el)el.textContent=prompts[(new Date().getDate()-1)%prompts.length]}
@@ -1501,18 +1559,18 @@ document.addEventListener('DOMContentLoaded',()=>{
     $('newJournalPrompt')?.addEventListener('click',()=>{const el=$('journalPrompt');if(el){const cur=prompts.indexOf(el.textContent);el.textContent=prompts[(cur+1)%prompts.length]}});
     $('plantMemoryBtn')?.addEventListener('click',()=>{const title=$('memoryTitleInput')?.value.trim(),note=$('memoryNoteInput')?.value.trim();if(!title||!note){alert('Add a title and a little note first.');return}const d=load();d.memories.push({title,note,date:new Date().toISOString()});save(d);$('memoryTitleInput').value='';$('memoryNoteInput').value='';renderMemoryTree();celebrate()});
     $('memoryLeavesList')?.addEventListener('click',e=>{const b=e.target.closest('[data-delete-memory]');if(!b)return;const d=load();d.memories.splice(Number(b.dataset.deleteMemory),1);save(d);renderMemoryTree()});
-    document.addEventListener('rooted:pagechange',e=>{if(e.detail.pageId!=='garden')stopAmbient();setTimeout(renderAll,50)});
+    document.addEventListener('flourishBloom:pagechange',e=>{if(e.detail.pageId!=='garden')stopAmbient();setTimeout(renderAll,50)});
     document.addEventListener('change',()=>setTimeout(renderAll,120));document.addEventListener('click',e=>{if(!e.target.closest('#homeMoodPicker,.ambient-buttons,.memory-form,.memory-leaves-list'))setTimeout(renderAll,120)});
     document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAmbient()});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind();renderAll()},{once:true});else{bind();renderAll()}
 })();
 
-// Rooted 10 — Reading Corner, Future Letters, Garden Snapshots, Achievement Book and Evening Wrap-up.
+// Flourish & Bloom 10 — Reading Corner, Future Letters, Garden Snapshots, Achievement Book and Evening Wrap-up.
 // All new information lives under one isolated key so existing planner data is never rewritten.
 (() => {
   'use strict';
-  const KEY='rooted-v10-story-features';
+  const KEY='flourishBloom-v10-story-features';
   const defaults={books:[],letters:[],snapshots:[],eveningNotes:{},lastSundaySnapshot:''};
   const $=id=>document.getElementById(id);
   const esc=s=>String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -1523,7 +1581,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const streak=()=>{try{return typeof calcStreak==='function'?(Number(calcStreak())||0):0}catch{return 0}};
   const water=()=>{try{return typeof waterCount==='function'?(Number(waterCount())||0):0}catch{return 0}};
   const checkedToday=()=>{try{const k=key();return Object.entries(state?.checks||{}).filter(([id,v])=>v&&id.includes(k)).length}catch{return 0}};
-  const flower=()=>{try{const d=JSON.parse(localStorage.getItem('rooted-v9-interactive')||'{}');return d.featuredFlower||'🌼'}catch{return '🌼'}};
+  const flower=()=>{try{const d=JSON.parse(localStorage.getItem('flourishBloom-v9-interactive')||'{}');return d.featuredFlower||'🌼'}catch{return '🌼'}};
   const season=()=>{const m=new Date().getMonth()+1;return [12,1,2].includes(m)?'Summer':[3,4,5].includes(m)?'Autumn':[6,7,8].includes(m)?'Winter':'Spring'};
 
   function renderReading(){
@@ -1549,7 +1607,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const sky=season()==='Winter'?'#dce8e7':season()==='Autumn'?'#f3d6b5':season()==='Summer'?'#cfe9dc':'#dcebd9';
     const books=Math.min(bookCount,8);const bookIcons=Array.from({length:books},(_,i)=>['📕','📗','📘','📙'][i%4]).join('');
     const safeDate=date.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}).replace(/&/g,'&amp;');
-    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" rx="40" fill="${sky}"/><circle cx="675" cy="110" r="52" fill="#fff4b8"/><path d="M0 390 Q160 330 320 390 T640 390 T960 390 V600 H0Z" fill="#8fb27d"/><text x="400" y="345" text-anchor="middle" font-size="150">${stage}</text><text x="120" y="475" font-size="48">${flower()} 🌼 🌷</text><text x="555" y="480" font-size="35">🪑 ${bookIcons}</text><text x="40" y="65" font-family="Arial" font-size="30" fill="#3f5c45">Rooted · ${safeDate}</text><text x="40" y="105" font-family="Arial" font-size="22" fill="#55705b">${total} growth points · ${season()}</text></svg>`;
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" rx="40" fill="${sky}"/><circle cx="675" cy="110" r="52" fill="#fff4b8"/><path d="M0 390 Q160 330 320 390 T640 390 T960 390 V600 H0Z" fill="#8fb27d"/><text x="400" y="345" text-anchor="middle" font-size="150">${stage}</text><text x="120" y="475" font-size="48">${flower()} 🌼 🌷</text><text x="555" y="480" font-size="35">🪑 ${bookIcons}</text><text x="40" y="65" font-family="Arial" font-size="30" fill="#3f5c45">Flourish & Bloom · ${safeDate}</text><text x="40" y="105" font-family="Arial" font-size="22" fill="#55705b">${total} growth points · ${season()}</text></svg>`;
     return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
   }
   function addSnapshot(auto=false){
@@ -1563,12 +1621,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   function badges(){const d=load(),p=points(),s=streak(),w=water(),books=d.books.length,snaps=d.snapshots.length,letters=d.letters.length;return [
-    ['🌱','First Root','Complete your first supportive action',p>=1],['🌿','Taking Hold','Reach 10 growth points',p>=10],['🌸','In Bloom','Reach 25 growth points',p>=25],['🌳','Deep Roots','Reach 50 growth points',p>=50],['🔥','Three Gentle Days','Build a 3-day streak',s>=3],['💧','Hydration Friend','Log four water bottles',w>=4],['📚','Bookish Beginning','Finish your first book',books>=1],['📖','Little Library','Finish 10 books',books>=10],['💌','Kind to Future Me','Seal your first letter',letters>=1],['📸','Time Capsule','Save four garden snapshots',snaps>=4],['🌙','Soft Landing','Save an evening reflection',Object.keys(d.eveningNotes).length>=1]
+    ['🌱','First Bloom','Complete your first supportive action',p>=1],['🌿','Taking Hold','Reach 10 growth points',p>=10],['🌸','In Bloom','Reach 25 growth points',p>=25],['🌳','Strong Bloom','Reach 50 growth points',p>=50],['🔥','Three Gentle Days','Build a 3-day streak',s>=3],['💧','Hydration Friend','Log four water bottles',w>=4],['📚','Bookish Beginning','Finish your first book',books>=1],['📖','Little Library','Finish 10 books',books>=10],['💌','Kind to Future Me','Seal your first letter',letters>=1],['📸','Time Capsule','Save four garden snapshots',snaps>=4],['🌙','Soft Landing','Save an evening reflection',Object.keys(d.eveningNotes).length>=1]
   ]}
   function renderAchievements(){const all=badges(),unlocked=all.filter(x=>x[3]).length;if($('worldAchievementsStatus'))$('worldAchievementsStatus').textContent=`${unlocked} of ${all.length} unlocked`;const box=$('scrapbookBadges');if(box)box.innerHTML=all.map((a,i)=>`<article class="scrapbook-badge ${a[3]?'':'locked'}" style="--tilt:${i%2?'1.2deg':'-1.2deg'}"><span>${a[3]?a[0]:'🔒'}</span><b>${a[1]}</b><small>${a[3]?'Unlocked · ':''}${a[2]}</small></article>`).join('')}
 
   function renderEvening(){
-    const d=load(),tasks=checkedToday(),p=points(),moods=(()=>{try{return JSON.parse(localStorage.getItem('rooted-v9-interactive')||'{}').moods||{}}catch{return {}}})(),mood=moods[key()]||0,moodIcon=['','😔','😕','😐','🙂','😁'][mood]||'—';
+    const d=load(),tasks=checkedToday(),p=points(),moods=(()=>{try{return JSON.parse(localStorage.getItem('flourishBloom-v9-interactive')||'{}').moods||{}}catch{return {}}})(),mood=moods[key()]||0,moodIcon=['','😔','😕','😐','🙂','😁'][mood]||'—';
     if($('eveningTitle'))$('eveningTitle').textContent=tasks?`You completed ${tasks} ${tasks===1?'thing':'things'} today.`:'Rest is allowed to be part of the plan.';
     if($('eveningMessage'))$('eveningMessage').textContent=tasks?'Your garden noticed every one of them.':'Tomorrow does not need a perfect version of you—just the real one.';
     const stats=$('eveningStats');if(stats)stats.innerHTML=`<div class="evening-stat"><span>✓</span><b>${tasks}</b><small>completed today</small></div><div class="evening-stat"><span>🌱</span><b>${p}</b><small>total growth</small></div><div class="evening-stat"><span>${moodIcon}</span><b>${mood?'Checked in':'Not logged'}</b><small>today’s mood</small></div><div class="evening-stat"><span>📚</span><b>${d.books.length}</b><small>finished books</small></div>`;
@@ -1585,7 +1643,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     $('saveGardenSnapshot')?.addEventListener('click',()=>addSnapshot(false));
     $('snapshotGallery')?.addEventListener('click',e=>{const b=e.target.closest('[data-delete-snapshot]');if(!b)return;const d=load();d.snapshots.splice(Number(b.dataset.deleteSnapshot),1);save(d);renderAll10()});
     $('saveEveningNote')?.addEventListener('click',()=>{const d=load();d.eveningNotes[key()]=$('eveningNote')?.value.trim()||'';save(d);if($('eveningSaved'))$('eveningSaved').textContent='Tonight’s note is saved.';renderAchievements()});
-    document.addEventListener('rooted:pagechange',()=>setTimeout(renderAll10,30));document.addEventListener('change',()=>setTimeout(renderAll10,100));
+    document.addEventListener('flourishBloom:pagechange',()=>setTimeout(renderAll10,30));document.addEventListener('change',()=>setTimeout(renderAll10,100));
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind10();renderAll10()},{once:true});else{bind10();renderAll10()}
 })();

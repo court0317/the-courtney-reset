@@ -17,6 +17,6 @@ Recipes are stored inside the existing Flourish & Bloom app state, so they are i
 UPLOAD TO GITHUB
 1. Unzip this file.
 2. Open the unzipped folder.
-3. Upload every file inside it to the root of the Flourish & Bloom GitHub repository.
+3. Upload every file inside it to the root of the-flourish & bloom-and-bloom GitHub repository.
 4. Replace existing files and commit the changes.
 5. Wait 1–2 minutes, then refresh the live app.

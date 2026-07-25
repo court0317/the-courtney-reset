@@ -1,36 +1,42 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#7f9079"><meta name="description" content="Rooted personalised 8-week fitness, meals, leftovers and real-life planning app"><link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon-192.svg"><link rel="stylesheet" href="styles.css?v=rooted900"><title>Rooted</title></head>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#7f9079"><meta name="description" content="Flourish & Bloom is a calm wellness planner for movement, meals, hydration, journaling and gentle progress tracking."><link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon-192.svg"><link rel="stylesheet" href="styles.css?v=flourish900"><title>Flourish & Bloom</title>
+<meta name="application-name" content="Flourish & Bloom">
+<meta name="apple-mobile-web-app-title" content="Flourish & Bloom">
+<meta property="og:title" content="Flourish & Bloom">
+<meta property="og:description" content="A calm wellness planner for movement, meals, hydration and daily growth.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://flourish-and-bloom-app.github.io/"></head>
 <body>
-<div id="rootedSplash" class="rooted-splash" aria-hidden="true">
+<div id="flourishBloomSplash" class="flourishBloom-splash" aria-hidden="true">
   <div class="splash-mark">
-    <svg viewBox="0 0 120 120" role="img" aria-label="Rooted leaf">
+    <svg viewBox="0 0 120 120" role="img" aria-label="Flourish & Bloom leaf">
       <path d="M61 100C61 67 73 39 102 19C99 52 84 76 61 90" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
       <path d="M59 91C49 69 33 53 16 45C17 68 31 86 59 96" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
       <path d="M60 101V59" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
     </svg>
   </div>
-  <h1><span class="brand-leaf">🌿</span> Rooted</h1>
+  <h1><span class="brand-leaf">🌿</span> Flourish & Bloom</h1>
   <p>Small habits. Strong foundations.</p>
 </div>
 
 <div id="confetti"></div>
 
-<div id="rootedOnboarding" class="onboarding-shell" hidden>
+<div id="flourishBloomOnboarding" class="onboarding-shell" hidden>
   <div class="onboarding-card">
     <button id="skipOnboarding" class="onboarding-skip">Skip</button>
 
     <section class="onboarding-step active" data-step="1">
       <div class="onboarding-art">🌱</div>
-      <span class="eyebrow">Welcome to Rooted</span>
-      <h1>Small habits become strong roots.</h1>
+      <span class="eyebrow">Welcome to Flourish & Bloom</span>
+      <h1>Small habits become strong blooms.</h1>
       <p>You do not need to be perfect. You only need to keep growing.</p>
       <button class="primary onboarding-next">Let’s begin</button>
     </section>
 
     <section class="onboarding-step" data-step="2">
       <span class="eyebrow">About you</span>
-      <h2>What should Rooted call you?</h2>
+      <h2>What should Flourish & Bloom call you?</h2>
       <label class="field-label">First name
-        <input id="onboardName" type="text" value="Courtney" autocomplete="given-name">
+        <input id="onboardName" type="text" value="" autocomplete="given-name" placeholder="Your name">
       </label>
       <h3>Your main focus</h3>
       <div class="choice-grid">
@@ -79,8 +85,8 @@
       <div class="onboarding-art">🪴</div>
       <span class="eyebrow">You’re ready</span>
       <h2>Let’s grow something that lasts.</h2>
-      <p>Rooted will use your choices to personalise movement, meals, water and daily goals.</p>
-      <button id="finishOnboarding" class="primary">Open Rooted</button>
+      <p>Flourish & Bloom will use your choices to personalise movement, meals, water and daily goals.</p>
+      <button id="finishOnboarding" class="primary">Open Flourish & Bloom</button>
     </section>
 
     <div class="onboarding-dots">
@@ -90,9 +96,9 @@
 </div>
 
 <div class="app">
-<header class="top"><div class="rooted-brand-lockup" aria-label="Rooted"><div class="rooted-logo-mark" aria-hidden="true"><svg viewBox="0 0 340 88" role="img"><g class="logo-sprout"><path d="M170 30v18"/><path d="M170 34c-17 0-25-10-27-22 15-2 27 5 27 22Z"/><path d="M170 34c17 0 25-10 27-22-15-2-27 5-27 22Z"/><path class="logo-soil" d="M144 50c13-6 39-6 52 0"/></g><g class="logo-flourish left"><path d="M36 62c12-10 22-14 34-14"/><path d="M47 55c-2-9 1-14 8-17 4 8 1 14-8 17Z"/><path d="M58 50c3-8 8-11 16-10-1 8-7 12-16 10Z"/></g><g class="logo-flourish right"><path d="M304 62c-12-10-22-14-34-14"/><path d="M293 55c2-9-1-14-8-17-4 8-1 14 8 17Z"/><path d="M282 50c-3-8-8-11-16-10 1 8 7 12 16 10Z"/></g><text x="170" y="78" text-anchor="middle">rooted</text></svg></div><div class="rooted-logo-date" id="todayDate"></div></div><button class="avatar" id="settingsBtn">CR</button></header>
+<header class="top"><div class="flourishBloom-brand-lockup" aria-label="Flourish & Bloom"><div class="flourishBloom-logo-mark" aria-hidden="true"><svg viewBox="0 0 340 88" role="img"><g class="logo-sprout"><path d="M170 30v18"/><path d="M170 34c-17 0-25-10-27-22 15-2 27 5 27 22Z"/><path d="M170 34c17 0 25-10 27-22-15-2-27 5-27 22Z"/><path class="logo-soil" d="M144 50c13-6 39-6 52 0"/></g><g class="logo-flourish & bloom left"><path d="M36 62c12-10 22-14 34-14"/><path d="M47 55c-2-9 1-14 8-17 4 8 1 14-8 17Z"/><path d="M58 50c3-8 8-11 16-10-1 8-7 12-16 10Z"/></g><g class="logo-flourish & bloom right"><path d="M304 62c-12-10-22-14-34-14"/><path d="M293 55c2-9-1-14-8-17-4 8-1 14 8 17Z"/><path d="M282 50c-3-8-8-11-16-10 1 8 7 12 16 10Z"/></g><text x="170" y="78" text-anchor="middle">Flourish & Bloom</text></svg></div><div class="flourishBloom-logo-date" id="todayDate"></div></div><button class="avatar" id="settingsBtn">FB</button></header>
 <main>
-<section id="today" class="page active rooted-home-v2">
+<section id="today" class="page active flourishBloom-home-v2">
   <div class="legacy-home-hooks" aria-hidden="true">
     <div id="countdownCard"></div><div id="moveRing"></div><span id="movePct"></span><div id="waterRing"></div><span id="waterPct"></span><div id="proteinRing"></div><span id="proteinPct"></span>
     <span id="focusTitle"></span><span id="dayBadge"></span><div id="todayQuick"></div><span id="streak"></span><span id="programPct"></span><span id="coachText"></span>
@@ -100,8 +106,8 @@
 
   <section class="home-hero-card">
     <div class="home-hero-copy">
-      <h2 id="rootedGreeting">Good morning, Courtney.</h2>
-      <p id="rootedDailyLine">Today is another chance to grow.</p>
+      <h2 id="flourishBloomGreeting">Good morning, there.</h2>
+      <p id="flourishBloomDailyLine">Today is another chance to grow.</p>
       <span class="journey-note"><b id="homeJourneyDays">2</b> days into your journey</span>
     </div>
     <div class="home-garden-art" aria-hidden="true">
@@ -110,7 +116,7 @@
     </div>
   </section>
 
-  <section class="rooted-daily-strip card" aria-label="Daily Rooted check-in">
+  <section class="flourishBloom-daily-strip card" aria-label="Daily Flourish & Bloom check-in">
     <div class="daily-streak"><span class="streak-flame" id="interactiveStreakIcon">🔥</span><div><small>Gentle streak</small><b id="interactiveStreak">0 days</b></div></div>
     <div class="daily-mood"><small>How are you feeling?</small><div id="homeMoodPicker" class="mood-picker compact" role="group" aria-label="Choose today's mood">
       <button type="button" data-mood="1" aria-label="Rough">😔</button><button type="button" data-mood="2" aria-label="Low">😕</button><button type="button" data-mood="3" aria-label="Okay">😐</button><button type="button" data-mood="4" aria-label="Good">🙂</button><button type="button" data-mood="5" aria-label="Great">😁</button>
@@ -127,7 +133,7 @@
     </div>
     <div class="home-living-garden-copy">
       <span class="eyebrow">Your Living Garden</span>
-      <h2 id="homeGardenTitle">Your roots are beginning</h2>
+      <h2 id="homeGardenTitle">Your blooms are beginning</h2>
       <p id="homeGardenMessage">Complete one small habit to help your garden grow.</p>
       <div class="home-garden-meter"><span id="homeGardenProgress"></span></div>
       <small id="homeGardenProgressText">0 growth points</small><span class="home-garden-link">View garden →</span>
@@ -145,7 +151,7 @@
       </button>
       <button class="progress-row" data-focus-go="meals">
         <span class="progress-icon hydrate">💧</span>
-        <span class="progress-copy"><span><b>Hydrate</b><small><strong id="ringWater">0.0</strong> litres <span id="ringWaterSub">of 2.5 L</span></small></span><i class="linear-track" id="rootedWaterRing"><em></em></i></span>
+        <span class="progress-copy"><span><b>Hydrate</b><small><strong id="ringWater">0.0</strong> litres <span id="ringWaterSub">of 2.5 L</span></small></span><i class="linear-track" id="flourishBloomWaterRing"><em></em></i></span>
         <span class="row-arrow">›</span>
       </button>
       <button class="progress-row" data-focus-go="workout">
@@ -156,8 +162,8 @@
     </div>
   </section>
 
-  <section class="rooted-focus home-focus-card">
-    <div class="section-head rooted-section-head">
+  <section class="flourishBloom-focus home-focus-card">
+    <div class="section-head flourishBloom-section-head">
       <div><span class="eyebrow">Today’s focus</span><h2 id="focusTitleDisplay">Choose one gentle win</h2></div>
       <div class="growth-pill"><span id="plantStageIcon">🌱</span><b id="plantGrowthText">Growing</b></div>
     </div>
@@ -169,8 +175,8 @@
     </div>
   </section>
 
-  <section class="rooted-coach card home-coach-card">
-    <div class="coach-orb">🌿</div><div class="coach-copy"><span class="eyebrow">Rooted coach</span><h2 id="coachTitle">A gentle nudge</h2><p id="coachMessage">One small choice is enough to move today forward.</p></div><button id="coachAction" class="outline coach-action">Show me</button>
+  <section class="flourishBloom-coach card home-coach-card">
+    <div class="coach-orb">🌿</div><div class="coach-copy"><span class="eyebrow">Flourish & Bloom coach</span><h2 id="coachTitle">A gentle nudge</h2><p id="coachMessage">One small choice is enough to move today forward.</p></div><button id="coachAction" class="outline coach-action">Show me</button>
   </section>
 
   <section class="weekly-focus card home-week-card">
@@ -224,7 +230,7 @@
    <div class="section-head">
      <div><span class="eyebrow">Your recipe book</span><h3>📖 My Recipes</h3></div>
    </div>
-   <p class="sub">Save your own meals, photos, ingredients and method. They stay private on this device and sync to your Rooted cloud account when you’re signed in.</p>
+   <p class="sub">Save your own meals, photos, ingredients and method. They stay private on this device and sync to your Flourish & Bloom cloud account when you’re signed in.</p>
    <div class="recipe-cta-row">
      <button class="primary recipe-cta" id="addRecipeBtn" type="button">➕ Add Recipe</button>
      <button class="outline recipe-cta" id="importRecipeBtn" type="button">🔗 Import from URL</button>
@@ -335,14 +341,14 @@
       <div class="garden-ground">🌱 🌿 🌱 🌿 🌱</div>
     </div>
     <span class="eyebrow" id="gardenStageLabel">Seedling</span>
-    <h2 id="gardenStageTitle">Your roots are beginning</h2>
+    <h2 id="gardenStageTitle">Your blooms are beginning</h2>
     <p id="gardenStageMessage">Every completed habit gives your garden a little more life.</p>
     <div class="garden-progress"><span id="gardenProgressBar"></span></div>
     <small id="gardenProgressText">0 choices completed</small>
   </div>
   <div class="garden-grid">
     <div class="stat"><small>Healthy days</small><strong id="gardenHealthyDays">0</strong></div>
-    <div class="stat"><small>Roots completed</small><strong id="gardenRoots">0</strong></div>
+    <div class="stat"><small>Bloom steps completed</small><strong id="gardenRoots">0</strong></div>
     <div class="stat"><small>Water logs</small><strong id="gardenWaterLogs">0</strong></div>
     <div class="stat"><small>Movement days</small><strong id="gardenMoveDays">0</strong></div>
   </div>
@@ -381,7 +387,7 @@
     <div><span class="eyebrow">Your weekly journal</span><h2>This Week</h2></div>
   </div>
   <div class="card weekly-story-card">
-    <span class="eyebrow" id="weeklyStoryLabel">Week 1 in Rooted</span>
+    <span class="eyebrow" id="weeklyStoryLabel">Week 1 in Flourish & Bloom</span>
     <h2 id="weeklyStoryTitle">You kept growing.</h2>
     <p id="weeklyStoryText">Your weekly story will grow as you log movement, water and meals.</p>
   </div>
@@ -405,13 +411,13 @@
   <div class="page-title"><button class="back" data-go="today">‹</button><div><span class="eyebrow">Look back gently</span><h2>Calendar history</h2></div></div>
   <div class="card history-controls"><button id="historyPrev" class="outline">‹ Previous</button><div><b id="historyMonthLabel"></b><small id="historyMonthSummary"></small></div><button id="historyNext" class="outline">Next ›</button></div>
   <div id="historyCalendar" class="history-calendar card"></div>
-  <div id="historyDayDetail" class="card history-detail"><span class="eyebrow">Select a day</span><h3>Your daily roots</h3><p class="sub">Tap a date to see what you logged.</p></div>
+  <div id="historyDayDetail" class="card history-detail"><span class="eyebrow">Select a day</span><h3>Your daily blooms</h3><p class="sub">Tap a date to see what you logged.</p></div>
 </section>
 
 <section id="settings" class="page" hidden>
   <div class="page-title">
     <button class="back" data-go="today">‹</button>
-    <div><span class="eyebrow">Personalise Rooted</span><h2>Settings</h2></div>
+    <div><span class="eyebrow">Personalise Flourish & Bloom</span><h2>Settings</h2></div>
   </div>
   <div class="card settings-form">
     <label>First name<input id="settingName" type="text"></label>
@@ -444,7 +450,7 @@
         <option value="1900">1,900 kcal</option>
       </select>
     </label>
-    <button id="saveRootedSettings" class="primary wide">Save settings</button>
+    <button id="saveFlourishBloomSettings" class="primary wide">Save settings</button>
   </div>
   <div class="card">
     <h3>Equipment</h3>
@@ -465,12 +471,12 @@
 
   <div class="card">
     <div class="section-head"><div><span class="eyebrow">History & insights</span><h3>Your progress calendar</h3></div><span>📅</span></div>
-    <p class="sub">Open any past day to see movement, hydration, meals and daily roots.</p>
+    <p class="sub">Open any past day to see movement, hydration, meals and daily blooms.</p>
     <button id="openCalendarHistory" class="outline wide" type="button">Open calendar history</button>
   </div>
   <div class="card settings-form">
     <span class="eyebrow">Comfort & accessibility</span><h3>Display preferences</h3>
-    <label class="settings-toggle"><span><b>Larger text</b><small>Increase text throughout Rooted</small></span><input id="settingLargeText" type="checkbox"></label>
+    <label class="settings-toggle"><span><b>Larger text</b><small>Increase text throughout Flourish & Bloom</small></span><input id="settingLargeText" type="checkbox"></label>
     <label class="settings-toggle"><span><b>Reduce motion</b><small>Limit butterflies, fish and celebration movement</small></span><input id="settingReduceMotion" type="checkbox"></label>
     <label class="settings-toggle"><span><b>High contrast</b><small>Strengthen text and card borders</small></span><input id="settingHighContrast" type="checkbox"></label>
     <button id="saveAccessibility" class="primary wide">Save display preferences</button>
@@ -542,7 +548,7 @@
 <section id="world" class="page" hidden>
   <div class="page-title"><button class="back" data-go="today">‹</button><div><span class="eyebrow">Everything you are growing</span><h2>Your World</h2></div></div>
   <section class="world-overview card">
-    <div><span class="eyebrow" id="worldGreeting">Welcome home</span><h2 id="worldTitle">Your little world is taking root.</h2><p id="worldMessage">Every supportive choice adds something here.</p></div>
+    <div><span class="eyebrow" id="worldGreeting">Welcome home</span><h2 id="worldTitle">Your little world is blooming.</h2><p id="worldMessage">Every supportive choice adds something here.</p></div>
     <div class="world-orbit" aria-hidden="true"><span class="orbit-sun">☀️</span><span class="orbit-garden">🌿</span><span class="orbit-fish">🐠</span><span class="orbit-butterfly">🦋</span></div>
   </section>
   <div class="world-grid">
@@ -570,7 +576,7 @@
 
 <section id="memory" class="page" hidden>
   <div class="page-title"><button class="back" data-go="world">‹</button><div><span class="eyebrow">Look how far you have come</span><h2>Memory Lane</h2></div></div>
-  <div class="card memory-hero"><span class="eyebrow">Your Rooted story</span><h2 id="memoryHeadline">Your first chapter is beginning.</h2><p id="memorySummary">Weekly stories, meaningful wins and milestones will collect here.</p></div>
+  <div class="card memory-hero"><span class="eyebrow">Your Flourish & Bloom story</span><h2 id="memoryHeadline">Your first chapter is beginning.</h2><p id="memorySummary">Weekly stories, meaningful wins and milestones will collect here.</p></div>
   <div id="memoryTimeline" class="memory-timeline"></div>
 
   <div class="card memory-tree-card">
@@ -617,13 +623,13 @@
 
 <section id="garden-snapshots" class="page" hidden>
   <div class="page-title"><button class="back" data-go="world">‹</button><div><span class="eyebrow">Your garden through time</span><h2>Garden Snapshots</h2></div></div>
-  <div class="card snapshot-intro"><div><span class="eyebrow">A visual diary</span><h3>Watch your world grow week by week.</h3><p>Rooted saves a Sunday snapshot when you open the app. You can also save one whenever today feels worth remembering.</p></div><button id="saveGardenSnapshot" class="primary" type="button">Save today’s snapshot</button></div>
+  <div class="card snapshot-intro"><div><span class="eyebrow">A visual diary</span><h3>Watch your world grow week by week.</h3><p>Flourish & Bloom saves a Sunday snapshot when you open the app. You can also save one whenever today feels worth remembering.</p></div><button id="saveGardenSnapshot" class="primary" type="button">Save today’s snapshot</button></div>
   <div id="snapshotGallery" class="snapshot-gallery"></div>
 </section>
 
 <section id="achievement-book" class="page" hidden>
   <div class="page-title"><button class="back" data-go="world">‹</button><div><span class="eyebrow">Every win belongs here</span><h2>Achievement Book</h2></div></div>
-  <div class="card scrapbook-cover"><span>🌿</span><h2>Courtney’s Rooted Scrapbook</h2><p>Not perfection—proof that you kept showing up.</p></div>
+  <div class="card scrapbook-cover"><span>🌿</span><h2>Your Flourish & Bloom Scrapbook</h2><p>Not perfection—proof that you kept showing up.</p></div>
   <div id="scrapbookBadges" class="scrapbook-grid"></div>
 </section>
 
@@ -640,19 +646,16 @@
 <div class="card todays-root-card">
   <div class="root-icon">🌿</div>
   <div>
-    <span class="eyebrow">Today’s root</span>
+    <span class="eyebrow">Today’s bloom step</span>
     <h2 id="todaysRootTitle">Take your first step</h2>
     <p id="todaysRootText">Complete one small habit to help your garden grow.</p>
   </div>
-  <button id="completeTodaysRoot" class="root-check" aria-label="Complete today’s root">○</button>
-</div>
-
-
+  <button id="completeTodaysRoot" class="root-check" aria-label="Complete today’s bloom step">○</button>
 <section class="monthly-review card">
   <div class="section-head">
     <div>
       <span class="eyebrow">Your month</span>
-      <h2 id="monthReviewTitle">This month in Rooted</h2>
+      <h2 id="monthReviewTitle">This month in Flourish & Bloom</h2>
     </div>
     <span class="month-badge" id="monthReviewBadge">Growing</span>
   </div>
@@ -667,7 +670,7 @@
 
 
 
-<button class="world-shortcut card" data-go="world"><span class="world-shortcut-icon">🌍</span><div><small>Rooted Volume 8</small><b>Your World, Journey Path & Memory Lane</b></div><span>›</span></button>
+<button class="world-shortcut card" data-go="world"><span class="world-shortcut-icon">🌍</span><div><small>Flourish & Bloom Volume 8</small><b>Your World, Journey Path & Memory Lane</b></div><span>›</span></button>
 
 <button class="week-shortcut card" data-go="week"><span>📖</span><div><small>This week</small><b id="weekShortcutText">See your weekly breakdown and story</b></div><span>›</span></button>
 
@@ -683,10 +686,10 @@
   <span>›</span>
 </button>
 
-<button class="garden-shortcut card" data-go="garden"><span>🌿</span><div><small>Your garden</small><b>See what your habits are growing</b></div><span>›</span></button><div class="card rooted-growth-card">
+<button class="garden-shortcut card" data-go="garden"><span>🌿</span><div><small>Your garden</small><b>See what your habits are growing</b></div><span>›</span></button><div class="card flourishBloom-growth-card">
   <div class="plant-visual" id="plantVisual">🌱</div>
   <div class="plant-copy">
-    <span class="eyebrow">Your roots</span>
+    <span class="eyebrow">Your blooms</span>
     <h2 id="plantStageName">Seedling</h2>
     <p id="plantMessage">Every walk, workout, meal and bottle of water helps you grow.</p>
     <div class="root-progress"><span id="rootProgressBar"></span></div>
@@ -815,13 +818,13 @@
   <div id="recipeImportError" class="recipe-import-error" aria-live="polite"></div>
 </dialog>
 
-<dialog id="mealPickerModal"><button class="modal-close">×</button><span class="eyebrow">Courtney approved</span><h2>Choose a meal</h2>
+<dialog id="mealPickerModal"><button class="modal-close">×</button><span class="eyebrow">Choose a meal</span><h2>Choose a meal</h2>
  <div class="picker-row"><label>Meal<select id="pickerMealType"><option>Lunch</option><option>Dinner</option><option>Breakfast</option><option>Snack</option></select></label><label>Effort<select id="pickerEffort"><option value="barely">Barely any</option><option value="easy" selected>Easy</option><option value="cook">Happy to cook</option></select></label></div>
  <div class="craving-grid" id="cravingGrid"></div><div id="recipeChoices"></div></dialog>
 <dialog id="leftoverModal"><button class="modal-close">×</button><span class="eyebrow">Use what you have</span><h2>Choose leftovers</h2><label>Use for<select id="leftoverMealType"><option>Lunch</option><option>Dinner</option></select></label><div id="leftoverChoices"></div></dialog>
 <dialog id="takeawayModal"><button class="modal-close">×</button><span class="eyebrow">No guilt, just dinner</span><h2>Takeaway tonight</h2><label>Use for<select id="takeawayMealType"><option>Dinner</option><option>Lunch</option></select></label><div class="takeaway-grid" id="takeawayChoices"></div><label>Or type your order<input id="customTakeaway" type="text" placeholder="e.g. burger and small chips"></label><div class="button-row"><button class="outline" id="takeawayNoTrack">Save without tracking</button><button class="primary" id="takeawaySave">Save order</button></div></dialog>
-<script>window.APP_DATA={"workouts":[{"day":"Monday","focus":"Glutes & Legs","walk":30,"icon":"\ud83c\udf51","ex":[{"name":"Goblet Squat","sets":3,"reps":"10","rest":60,"how":"Hold one dumbbell at your chest. Sit your hips down and back, keep your chest lifted and knees tracking over your toes.","easy":"Use bodyweight and squat to a chair.","hard":"Use a heavier dumbbell or pause for 2 seconds at the bottom."},{"name":"Romanian Deadlift","sets":3,"reps":"10","rest":60,"how":"Hold dumbbells close to your thighs, soften your knees, push your hips back and keep your spine neutral.","easy":"Use one dumbbell held with both hands.","hard":"Slow the lowering phase to 3 seconds."},{"name":"Dumbbell Glute Bridge","sets":3,"reps":"15","rest":45,"how":"Lie on your mat with knees bent. Rest one dumbbell across your hips, drive through your heels and squeeze your glutes at the top.","easy":"Remove the dumbbell.","hard":"Pause for 2 seconds at the top."},{"name":"Side-lying Leg Lift","sets":3,"reps":"12 each side","rest":45,"how":"Lie on your side on the mat, keep your hips stacked and lift the top leg with your heel leading.","easy":"Use a smaller range of motion.","hard":"Hold for 2 seconds at the top of each rep."},{"name":"Fire Hydrants","sets":3,"reps":"12 each side","rest":45,"how":"Start on hands and knees. Keep your hips square and lift one knee out to the side without twisting.","easy":"Lift the knee only partway.","hard":"Slow each rep and pause at the top."}]},{"day":"Tuesday","focus":"Upper Body","walk":30,"icon":"\ud83d\udcaa","ex":[{"name":"Dumbbell Shoulder Press","sets":3,"reps":"10","rest":60,"how":"Sit or stand tall, brace your core and press the dumbbells overhead without leaning back.","easy":"Sit down and use lighter dumbbells.","hard":"Increase the weight or alternate arms."},{"name":"Bent-over Dumbbell Row","sets":3,"reps":"10","rest":60,"how":"Hinge at your hips, keep your back neutral and pull your elbows toward your ribs.","easy":"Support one hand on a chair or couch.","hard":"Pause at the top of each rep."},{"name":"Floor Chest Press","sets":3,"reps":"10","rest":60,"how":"Lie on your mat, lower your elbows gently to the floor and press the dumbbells above your chest.","easy":"Use lighter dumbbells.","hard":"Use a slow 3-second lower."},{"name":"Bicep Curl","sets":3,"reps":"12","rest":45,"how":"Keep your elbows tucked beside your body and curl without swinging.","easy":"Curl one arm at a time.","hard":"Pause halfway or increase the weight."},{"name":"Overhead Tricep Extension","sets":3,"reps":"12","rest":45,"how":"Hold one dumbbell overhead, keep your elbows pointing forward and straighten your arms.","easy":"Use a lighter dumbbell.","hard":"Slow the lowering phase."}]},{"day":"Wednesday","focus":"Pilates & Core","walk":35,"icon":"\ud83e\uddd8","ex":[{"name":"Dead Bug","sets":3,"reps":"8 each side","rest":40,"how":"Lie on your mat and keep your lower back gently pressed down while moving opposite arm and leg.","easy":"Move only your legs or tap one heel at a time.","hard":"Hold one light dumbbell above your chest."},{"name":"Bird Dog","sets":3,"reps":"8 each side","rest":40,"how":"From hands and knees, reach the opposite arm and leg long without twisting your hips.","easy":"Move one limb at a time.","hard":"Hold each extension for 3 seconds."},{"name":"Glute Bridge Hold","sets":3,"reps":"25 seconds","rest":40,"how":"Lift your hips, keep your ribs down and squeeze your glutes for the full hold.","easy":"Hold for 15 seconds.","hard":"Rest one dumbbell across your hips."},{"name":"Side-lying Leg Circles","sets":3,"reps":"8 each direction","rest":40,"how":"Lie on your side with hips stacked and draw small controlled circles with the top leg.","easy":"Make the circles smaller.","hard":"Keep the leg slightly higher."},{"name":"Modified Side Plank","sets":3,"reps":"15 seconds each","rest":45,"how":"Support yourself on your forearm and bent lower knee, keeping your shoulder away from your ear.","easy":"Hold for 10 seconds.","hard":"Straighten both legs."}]},{"day":"Thursday","focus":"Glute Builder","walk":30,"icon":"\ud83d\udd25","ex":[{"name":"Dumbbell Hip Thrust","sets":3,"reps":"12","rest":60,"how":"Rest your upper back on a sturdy couch, place a dumbbell across your hips and squeeze your glutes at the top.","easy":"Do a glute bridge on the mat.","hard":"Use a heavier dumbbell or pause at the top."},{"name":"Reverse Lunge","sets":3,"reps":"8 each side","rest":60,"how":"Step backward, lower gently and keep your front foot planted.","easy":"Hold a chair or wall for balance.","hard":"Hold dumbbells by your sides."},{"name":"Sumo Squat","sets":3,"reps":"12","rest":60,"how":"Take a wide stance, turn your toes slightly out and sit straight down while holding one dumbbell.","easy":"Use bodyweight only.","hard":"Use a heavier dumbbell."},{"name":"Frog Pumps","sets":3,"reps":"20","rest":45,"how":"Lie on your mat with the soles of your feet together and knees open. Perform short controlled glute lifts.","easy":"Do 12\u201315 reps.","hard":"Rest one dumbbell across your hips."},{"name":"Donkey Kicks","sets":3,"reps":"12 each side","rest":45,"how":"From hands and knees, press one heel upward while keeping your core braced and back neutral.","easy":"Use a smaller range of motion.","hard":"Pause for 2 seconds at the top."}]},{"day":"Friday","focus":"Full Body","walk":25,"icon":"\u26a1","ex":[{"name":"Dumbbell Squat","sets":3,"reps":"10","rest":60,"how":"Hold dumbbells by your sides, keep your chest lifted and squat with control.","easy":"Squat to a chair without weights.","hard":"Increase the weight."},{"name":"Dumbbell Deadlift","sets":3,"reps":"10","rest":60,"how":"Push your hips back, keep the weights close to your legs and stand by squeezing your glutes.","easy":"Use one dumbbell.","hard":"Slow the lowering phase."},{"name":"One-arm Dumbbell Row","sets":3,"reps":"10 each side","rest":50,"how":"Brace one hand on a chair or couch and pull the dumbbell toward your hip.","easy":"Use a lighter weight.","hard":"Pause at the top."},{"name":"Incline Push-up","sets":3,"reps":"8","rest":60,"how":"Place your hands on a wall, bench or sturdy couch and keep your body in one straight line.","easy":"Use a wall.","hard":"Use a lower surface."},{"name":"Standing Knee Drive","sets":3,"reps":"12 each side","rest":40,"how":"Brace your core and drive one knee upward with control.","easy":"Hold a chair for balance.","hard":"Hold one light dumbbell at your chest."}]},{"day":"Saturday","focus":"Long Walk & Core","walk":50,"icon":"\ud83d\udeb6","ex":[{"name":"Heel Taps","sets":3,"reps":"12 each side","rest":40,"how":"Lie on your mat with knees bent and reach toward each heel while keeping your ribs down.","easy":"Bring your heels closer.","hard":"Move your heels farther away."},{"name":"Seated Knee Tucks","sets":3,"reps":"10","rest":45,"how":"Sit on your mat, lean back slightly, brace your core and draw your knees toward your chest.","easy":"Keep one foot down.","hard":"Keep both feet lifted."},{"name":"Standing Side Crunch","sets":3,"reps":"12 each side","rest":40,"how":"Bring your rib toward your hip without pulling on your neck.","easy":"Hold a chair for balance.","hard":"Hold one light dumbbell."},{"name":"Bridge March","sets":3,"reps":"10 each side","rest":45,"how":"Hold a glute bridge and slowly lift one foot at a time while keeping your hips level.","easy":"Do a regular bridge hold.","hard":"Rest one light dumbbell across your hips."}]},{"day":"Sunday","focus":"Recovery & Reset","walk":25,"icon":"\ud83c\udf3f","ex":[{"name":"Gentle Mobility","sets":1,"reps":"10 minutes","rest":0,"how":"Move gently through your shoulders, spine, hips and ankles on your yoga mat.","easy":"Stay seated where needed.","hard":"Hold each stretch slightly longer."},{"name":"Meal Planning","sets":1,"reps":"10 minutes","rest":0,"how":"Choose your meals and check what you already have at home.","easy":"Plan dinners only.","hard":"Prepare two lunches as well."},{"name":"Weekly Check-in","sets":1,"reps":"5 minutes","rest":0,"how":"Record your weight, measurements, energy and biggest win.","easy":"Record only your win and energy.","hard":"Add private progress photos for yourself."}]}]};</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js?v=rooted310cloud"></script><script src="cloud-sync.js?v=rooted310cloud"></script><script src="navigation.js?v=rooted900"></script><script src="app.js?v=rooted331"></script><script src="rooted-recipes.js?v=rooted331"></script><script src="v81.js?v=rooted900"></script><script>
-// Rooted 8.1.3 — independent calendar navigation fallback.
+<script>window.APP_DATA={"workouts":[{"day":"Monday","focus":"Glutes & Legs","walk":30,"icon":"\ud83c\udf51","ex":[{"name":"Goblet Squat","sets":3,"reps":"10","rest":60,"how":"Hold one dumbbell at your chest. Sit your hips down and back, keep your chest lifted and knees tracking over your toes.","easy":"Use bodyweight and squat to a chair.","hard":"Use a heavier dumbbell or pause for 2 seconds at the bottom."},{"name":"Romanian Deadlift","sets":3,"reps":"10","rest":60,"how":"Hold dumbbells close to your thighs, soften your knees, push your hips back and keep your spine neutral.","easy":"Use one dumbbell held with both hands.","hard":"Slow the lowering phase to 3 seconds."},{"name":"Dumbbell Glute Bridge","sets":3,"reps":"15","rest":45,"how":"Lie on your mat with knees bent. Rest one dumbbell across your hips, drive through your heels and squeeze your glutes at the top.","easy":"Remove the dumbbell.","hard":"Pause for 2 seconds at the top."},{"name":"Side-lying Leg Lift","sets":3,"reps":"12 each side","rest":45,"how":"Lie on your side on the mat, keep your hips stacked and lift the top leg with your heel leading.","easy":"Use a smaller range of motion.","hard":"Hold for 2 seconds at the top of each rep."},{"name":"Fire Hydrants","sets":3,"reps":"12 each side","rest":45,"how":"Start on hands and knees. Keep your hips square and lift one knee out to the side without twisting.","easy":"Lift the knee only partway.","hard":"Slow each rep and pause at the top."}]},{"day":"Tuesday","focus":"Upper Body","walk":30,"icon":"\ud83d\udcaa","ex":[{"name":"Dumbbell Shoulder Press","sets":3,"reps":"10","rest":60,"how":"Sit or stand tall, brace your core and press the dumbbells overhead without leaning back.","easy":"Sit down and use lighter dumbbells.","hard":"Increase the weight or alternate arms."},{"name":"Bent-over Dumbbell Row","sets":3,"reps":"10","rest":60,"how":"Hinge at your hips, keep your back neutral and pull your elbows toward your ribs.","easy":"Support one hand on a chair or couch.","hard":"Pause at the top of each rep."},{"name":"Floor Chest Press","sets":3,"reps":"10","rest":60,"how":"Lie on your mat, lower your elbows gently to the floor and press the dumbbells above your chest.","easy":"Use lighter dumbbells.","hard":"Use a slow 3-second lower."},{"name":"Bicep Curl","sets":3,"reps":"12","rest":45,"how":"Keep your elbows tucked beside your body and curl without swinging.","easy":"Curl one arm at a time.","hard":"Pause halfway or increase the weight."},{"name":"Overhead Tricep Extension","sets":3,"reps":"12","rest":45,"how":"Hold one dumbbell overhead, keep your elbows pointing forward and straighten your arms.","easy":"Use a lighter dumbbell.","hard":"Slow the lowering phase."}]},{"day":"Wednesday","focus":"Pilates & Core","walk":35,"icon":"\ud83e\uddd8","ex":[{"name":"Dead Bug","sets":3,"reps":"8 each side","rest":40,"how":"Lie on your mat and keep your lower back gently pressed down while moving opposite arm and leg.","easy":"Move only your legs or tap one heel at a time.","hard":"Hold one light dumbbell above your chest."},{"name":"Bird Dog","sets":3,"reps":"8 each side","rest":40,"how":"From hands and knees, reach the opposite arm and leg long without twisting your hips.","easy":"Move one limb at a time.","hard":"Hold each extension for 3 seconds."},{"name":"Glute Bridge Hold","sets":3,"reps":"25 seconds","rest":40,"how":"Lift your hips, keep your ribs down and squeeze your glutes for the full hold.","easy":"Hold for 15 seconds.","hard":"Rest one dumbbell across your hips."},{"name":"Side-lying Leg Circles","sets":3,"reps":"8 each direction","rest":40,"how":"Lie on your side with hips stacked and draw small controlled circles with the top leg.","easy":"Make the circles smaller.","hard":"Keep the leg slightly higher."},{"name":"Modified Side Plank","sets":3,"reps":"15 seconds each","rest":45,"how":"Support yourself on your forearm and bent lower knee, keeping your shoulder away from your ear.","easy":"Hold for 10 seconds.","hard":"Straighten both legs."}]},{"day":"Thursday","focus":"Glute Builder","walk":30,"icon":"\ud83d\udd25","ex":[{"name":"Dumbbell Hip Thrust","sets":3,"reps":"12","rest":60,"how":"Rest your upper back on a sturdy couch, place a dumbbell across your hips and squeeze your glutes at the top.","easy":"Do a glute bridge on the mat.","hard":"Use a heavier dumbbell or pause at the top."},{"name":"Reverse Lunge","sets":3,"reps":"8 each side","rest":60,"how":"Step backward, lower gently and keep your front foot planted.","easy":"Hold a chair or wall for balance.","hard":"Hold dumbbells by your sides."},{"name":"Sumo Squat","sets":3,"reps":"12","rest":60,"how":"Take a wide stance, turn your toes slightly out and sit straight down while holding one dumbbell.","easy":"Use bodyweight only.","hard":"Use a heavier dumbbell."},{"name":"Frog Pumps","sets":3,"reps":"20","rest":45,"how":"Lie on your mat with the soles of your feet together and knees open. Perform short controlled glute lifts.","easy":"Do 12\u201315 reps.","hard":"Rest one dumbbell across your hips."},{"name":"Donkey Kicks","sets":3,"reps":"12 each side","rest":45,"how":"From hands and knees, press one heel upward while keeping your core braced and back neutral.","easy":"Use a smaller range of motion.","hard":"Pause for 2 seconds at the top."}]},{"day":"Friday","focus":"Full Body","walk":25,"icon":"\u26a1","ex":[{"name":"Dumbbell Squat","sets":3,"reps":"10","rest":60,"how":"Hold dumbbells by your sides, keep your chest lifted and squat with control.","easy":"Squat to a chair without weights.","hard":"Increase the weight."},{"name":"Dumbbell Deadlift","sets":3,"reps":"10","rest":60,"how":"Push your hips back, keep the weights close to your legs and stand by squeezing your glutes.","easy":"Use one dumbbell.","hard":"Slow the lowering phase."},{"name":"One-arm Dumbbell Row","sets":3,"reps":"10 each side","rest":50,"how":"Brace one hand on a chair or couch and pull the dumbbell toward your hip.","easy":"Use a lighter weight.","hard":"Pause at the top."},{"name":"Incline Push-up","sets":3,"reps":"8","rest":60,"how":"Place your hands on a wall, bench or sturdy couch and keep your body in one straight line.","easy":"Use a wall.","hard":"Use a lower surface."},{"name":"Standing Knee Drive","sets":3,"reps":"12 each side","rest":40,"how":"Brace your core and drive one knee upward with control.","easy":"Hold a chair for balance.","hard":"Hold one light dumbbell at your chest."}]},{"day":"Saturday","focus":"Long Walk & Core","walk":50,"icon":"\ud83d\udeb6","ex":[{"name":"Heel Taps","sets":3,"reps":"12 each side","rest":40,"how":"Lie on your mat with knees bent and reach toward each heel while keeping your ribs down.","easy":"Bring your heels closer.","hard":"Move your heels farther away."},{"name":"Seated Knee Tucks","sets":3,"reps":"10","rest":45,"how":"Sit on your mat, lean back slightly, brace your core and draw your knees toward your chest.","easy":"Keep one foot down.","hard":"Keep both feet lifted."},{"name":"Standing Side Crunch","sets":3,"reps":"12 each side","rest":40,"how":"Bring your rib toward your hip without pulling on your neck.","easy":"Hold a chair for balance.","hard":"Hold one light dumbbell."},{"name":"Bridge March","sets":3,"reps":"10 each side","rest":45,"how":"Hold a glute bridge and slowly lift one foot at a time while keeping your hips level.","easy":"Do a regular bridge hold.","hard":"Rest one light dumbbell across your hips."}]},{"day":"Sunday","focus":"Recovery & Reset","walk":25,"icon":"\ud83c\udf3f","ex":[{"name":"Gentle Mobility","sets":1,"reps":"10 minutes","rest":0,"how":"Move gently through your shoulders, spine, hips and ankles on your yoga mat.","easy":"Stay seated where needed.","hard":"Hold each stretch slightly longer."},{"name":"Meal Planning","sets":1,"reps":"10 minutes","rest":0,"how":"Choose your meals and check what you already have at home.","easy":"Plan dinners only.","hard":"Prepare two lunches as well."},{"name":"Weekly Check-in","sets":1,"reps":"5 minutes","rest":0,"how":"Record your weight, measurements, energy and biggest win.","easy":"Record only your win and energy.","hard":"Add private progress photos for yourself."}]}]};</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js?v=flourish310cloud"></script><script src="cloud-sync.js?v=flourish310cloud"></script><script src="navigation.js?v=flourish900"></script><script src="app.js?v=flourish331"></script><script src="flourishBloom-recipes.js?v=flourish331"></script><script src="v81.js?v=flourish900"></script><script>
+// Flourish & Bloom 8.1.3 — independent calendar navigation fallback.
 (() => {
   'use strict';
   function openCalendarHistory(event) {
@@ -831,7 +834,7 @@
     }
     const target = document.getElementById('history');
     if (!target) {
-      alert('Calendar history could not be opened. Please refresh Rooted and try again.');
+      alert('Calendar history could not be opened. Please refresh Flourish & Bloom and try again.');
       return;
     }
     document.querySelectorAll('.page').forEach(page => {
@@ -844,7 +847,7 @@
     try { window.history.replaceState(null, '', '#history'); } catch (_) { location.hash = 'history'; }
     window.scrollTo(0, 0);
     try {
-      document.dispatchEvent(new CustomEvent('rooted:pagechange', { detail: { pageId: 'history' } }));
+      document.dispatchEvent(new CustomEvent('flourishBloom:pagechange', { detail: { pageId: 'history' } }));
     } catch (_) {}
     // Render immediately even if the page-change listener was missed.
     document.getElementById('historyMonthLabel')?.scrollIntoView({ block: 'nearest' });
@@ -855,7 +858,7 @@
     document.querySelector('#history .back')?.addEventListener('click', event => {
       event.preventDefault();
       event.stopImmediatePropagation();
-      window.RootedNavigation?.showPage?.('today');
+      window.FlourishBloomNavigation?.showPage?.('today');
     }, true);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind, { once: true });
