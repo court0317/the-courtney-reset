@@ -1,11 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#7f9079"><meta name="description" content="Rooted personalised 8-week fitness, meals, leftovers and real-life planning app"><link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon-192.svg"><link rel="stylesheet" href="styles.css?v=rooted813"><title>Rooted</title></head>
 <body>
-
-<div class="r2hero">
-<div><div class="small">Monday</div><h1>Good Morning</h1><p>Your garden is thriving 🌿</p></div>
-<div class="plant">🌸🦋</div>
-</div>
-
 <div id="rootedSplash" class="rooted-splash" aria-hidden="true">
   <div class="splash-mark">
     <svg viewBox="0 0 120 120" role="img" aria-label="Rooted leaf">
@@ -19,6 +13,12 @@
 </div>
 
 <div id="confetti"></div>
+<section class="hero-alpha">
+<div class="scene">🦋🌿🌸</div>
+<h1>Welcome back, Courtney</h1>
+<p>Your world is growing one habit at a time.</p>
+</section>
+
 
 <div id="rootedOnboarding" class="onboarding-shell" hidden>
   <div class="onboarding-card">
@@ -99,58 +99,18 @@
 <header class="top"><div><div class="eyebrow" id="todayDate"></div><h1>Rooted</h1></div><button class="avatar" id="settingsBtn">CR</button></header>
 <main>
 <section id="today" class="page active">
- <div id="countdownCard" class="hero"></div>
- <div class="rings">
-  <div class="ring-card"><div class="ring" id="moveRing"><span id="movePct">0%</span></div><small>Daily plan</small></div>
-  <div class="ring-card"><div class="ring" id="waterRing"><span id="waterPct">0%</span></div><small>Water</small></div>
-  <div class="ring-card"><div class="ring" id="proteinRing"><span id="proteinPct">0%</span></div><small>Protein</small></div>
- </div>
+ <section class="hero compact-hero">
+<div id="countdownCard" class="hero-inner"></div>
+<div class="progress-list">
+<div class="progress-row"><span>💧 Water</span><span id="waterPct">0%</span></div>
+<div class="progress-row"><span>🚶 Daily plan</span><span id="movePct">0%</span></div>
+<div class="progress-row"><span>🥩 Protein</span><span id="proteinPct">0%</span></div>
+</div></section>
  <div class="card"><div class="section-head"><div><span class="eyebrow">Today’s focus</span><h2 id="focusTitle"></h2></div><span class="badge" id="dayBadge"></span></div><div id="todayQuick"></div><button class="primary wide" data-go="workout">Start workout</button></div>
  <div class="grid2"><div class="stat"><small>Current streak</small><strong id="streak">0 days</strong></div><div class="stat"><small>Program progress</small><strong id="programPct">0%</strong></div></div>
  <div class="card"><span class="eyebrow">Coach Courtney</span><p class="coach" id="coachText"></p></div>
  
 
-
-<section class="rooted-hero">
-  <div class="hero-copy">
-    <span class="eyebrow" id="rootedDateLabel">Today</span>
-    <h1 id="rootedGreeting">Good morning, Courtney.</h1>
-    <p id="rootedDailyLine">Today is another chance to grow.</p>
-  </div>
-  <div class="hero-plant" id="heroPlant">🌱</div>
-</section>
-
-<section class="ring-grid">
-  <button class="ring-card" data-focus-go="meals">
-    <div class="progress-ring" id="calorieRing" style="--progress:0">
-      <span><b id="ringCalories">0</b><small>kcal</small></span>
-    </div>
-    <div><b>Nourish</b><small id="ringCaloriesSub">of 1,600</small></div>
-  </button>
-  <button class="ring-card" data-focus-go="meals">
-    <div class="progress-ring water-ring" id="rootedWaterRing" style="--progress:0">
-      <span><b id="ringWater">0.0</b><small>litres</small></span>
-    </div>
-    <div><b>Hydrate</b><small id="ringWaterSub">of 2.5 L</small></div>
-  </button>
-  <button class="ring-card" data-focus-go="workout">
-    <div class="progress-ring walk-ring" id="walkRing" style="--progress:0">
-      <span><b id="ringWalk">0</b><small>minutes</small></span>
-    </div>
-    <div><b>Move</b><small id="ringWalkSub">of 30 min</small></div>
-  </button>
-</section>
-
-
-<section class="rooted-coach card">
-  <div class="coach-orb">🌿</div>
-  <div class="coach-copy">
-    <span class="eyebrow">Rooted coach</span>
-    <h2 id="coachTitle">A gentle nudge</h2>
-    <p id="coachMessage">One small choice is enough to move today forward.</p>
-  </div>
-  <button id="coachAction" class="outline coach-action">Show me</button>
-</section>
 
 <section class="weekly-focus card">
   <div class="section-head">
