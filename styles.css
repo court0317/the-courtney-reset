@@ -394,3 +394,39 @@ html.rooted-large-text{font-size:18px}html.rooted-high-contrast body{color:#2027
 .home-focus-card{margin-top:20px;padding:20px;border-radius:24px;background:#f2efe7}.home-coach-card,.home-week-card{border-radius:24px}
 @keyframes rootedFloat{0%,100%{transform:translate(0,0) rotate(-5deg)}50%{transform:translate(7px,-8px) rotate(6deg)}}
 @media(max-width:430px){.home-hero-card{min-height:152px;padding:20px}.home-hero-copy{max-width:70%}.home-garden-art{min-width:88px;height:104px}.home-plant{font-size:52px}.home-flowers{font-size:21px}.progress-row{padding:13px 14px;grid-template-columns:42px 1fr 14px}.progress-icon{width:42px;height:42px}.progress-copy>span{align-items:flex-start;flex-direction:column;gap:1px}.progress-copy small{white-space:normal}}
+
+
+/* Rooted 8.2.1 — Living Garden home preview */
+.home-living-garden{
+  width:100%;display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:15px;
+  align-items:center;text-align:left;color:var(--ink);cursor:pointer;padding:14px;
+  border:1px solid rgba(112,137,94,.14);overflow:hidden;position:relative;
+}
+.home-living-garden:active{transform:scale(.99)}
+.home-living-garden-scene{
+  position:relative;height:112px;border-radius:20px;overflow:hidden;
+  background:linear-gradient(#dfeeda 0%,#f7f0d8 67%,#a8bd7c 68%,#75945b 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.5);
+}
+.home-garden-sun{position:absolute;right:9px;top:8px;font-size:1.35rem;animation:gardenGlow 4s ease-in-out infinite}
+.home-garden-main-plant{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:3.7rem;line-height:1;filter:drop-shadow(0 7px 8px rgba(49,72,44,.18));animation:homeGardenSway 4s ease-in-out infinite}
+.home-garden-ground{position:absolute;left:0;right:0;bottom:1px;text-align:center;font-size:.82rem;white-space:nowrap;opacity:.86}
+.home-garden-flowers span,.home-garden-butterflies span{position:absolute;display:block;filter:drop-shadow(0 3px 4px rgba(50,68,45,.15))}
+.home-garden-flowers span{bottom:10px;font-size:1rem;animation:flowerPop .5s both}
+.home-garden-butterflies span{font-size:.95rem;animation:butterflyFloat var(--speed,6s) ease-in-out infinite;animation-delay:var(--delay,0s)}
+@keyframes homeGardenSway{0%,100%{transform:translateX(-50%) rotate(-1deg)}50%{transform:translateX(-50%) translateY(-3px) rotate(1deg)}}
+.home-living-garden-copy{min-width:0}
+.home-living-garden-copy .eyebrow{display:block;margin-bottom:4px}
+.home-living-garden-copy h2{font-family:Georgia,serif;font-size:1.24rem;line-height:1.15;margin:0 0 6px}
+.home-living-garden-copy p{margin:0;color:var(--muted);font-size:.79rem;line-height:1.35}
+.home-garden-meter{height:7px;background:#e4dfd3;border-radius:999px;overflow:hidden;margin:10px 0 5px}
+.home-garden-meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sage),#b7c596);border-radius:inherit;transition:width .5s ease}
+.home-living-garden-copy small{color:var(--muted);font-size:.69rem}
+.home-living-garden-arrow{font-size:2rem;color:var(--sage2);padding-right:2px}
+@media(max-width:520px){
+  .home-living-garden{grid-template-columns:94px minmax(0,1fr) auto;gap:11px;padding:11px}
+  .home-living-garden-scene{height:98px}
+  .home-garden-main-plant{font-size:3.15rem}
+  .home-living-garden-copy h2{font-size:1.08rem}
+  .home-living-garden-copy p{font-size:.74rem}
+}

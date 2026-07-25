@@ -1269,6 +1269,27 @@ function renderLivingGarden(){
   if(flowerLayer)flowerLayer.innerHTML=Array.from({length:flowers},(_,i)=>`<span style="left:${4+(i*11)%88}%;animation-delay:${i*.08}s">${flowerIcons[i%flowerIcons.length]}</span>`).join('');
   const visitorLayer=document.getElementById('gardenVisitors');
   if(visitorLayer)visitorLayer.innerHTML=visitors.map((icon,i)=>`<span style="left:${10+i*31}%;top:${48-i*12}%;animation-delay:${i*-2}s">${icon}</span>`).join('');
+
+  // The Home preview uses the same counts and stage as the full Garden page.
+  const stage=gardenStage(counts.total);
+  const homePlant=document.getElementById('homeGardenPlant');
+  if(homePlant)homePlant.textContent=stage.plant;
+  const homeTitle=document.getElementById('homeGardenTitle');
+  if(homeTitle)homeTitle.textContent=stage.title;
+  const homeMessage=document.getElementById('homeGardenMessage');
+  if(homeMessage)homeMessage.textContent=counts.total
+    ? `${counts.total} supportive choices are bringing your garden to life.`
+    : 'Complete one small habit to help your garden grow.';
+  const prior=stage.next===10?0:stage.next===25?10:stage.next===50?25:stage.next===90?50:90;
+  const pct=Math.max(0,Math.min(100,((counts.total-prior)/(stage.next-prior))*100));
+  const homeBar=document.getElementById('homeGardenProgress');
+  if(homeBar)homeBar.style.width=`${pct}%`;
+  const homeProgressText=document.getElementById('homeGardenProgressText');
+  if(homeProgressText)homeProgressText.textContent=`${counts.total} growth points • next stage at ${stage.next}`;
+  const homeFlowers=document.getElementById('homeGardenFlowers');
+  if(homeFlowers)homeFlowers.innerHTML=Array.from({length:Math.min(5,flowers)},(_,i)=>`<span style="left:${7+(i*19)%82}%;animation-delay:${i*.08}s">${flowerIcons[i%flowerIcons.length]}</span>`).join('');
+  const homeButterflies=document.getElementById('homeGardenButterflies');
+  if(homeButterflies)homeButterflies.innerHTML=Array.from({length:Math.min(2,butterflies)},(_,i)=>`<span style="left:${12+i*48}%;top:${18+i*16}%;--delay:${i*-1.3}s;--speed:${6+i}s">🦋</span>`).join('');
 }
 function weeklyStory(data){
   if(!data.movement&&!data.water&&!data.meals&&!data.roots)return 'Your week is ready for its first little win. Log one walk, bottle of water, meal or daily root and your story will begin.';
