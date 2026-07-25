@@ -1,21 +1,15 @@
-# Courtney Reset — Premium V4
+# The Courtney Reset — Version 5
 
-Upload every file in this folder to the root of the existing `the-courtney-reset` GitHub repository. Replace the existing files and commit the changes.
+New in this version:
+- Easy Monday–Friday meals and more energetic weekend options
+- Courtney-approved meal picker
+- Optional breakfast and one-tap skip
+- Leftover serve tracking
+- Takeaway option, including “don’t track tonight”
+- “Too tired” real-life mode
+- No mushrooms or tomatoes
+- Garlic-light and dairy-adaptable meal notes
+- Smart weekly grocery list
+- Automatic start on Monday 27 July 2026
 
-## New features
-- Premium dashboard and automatic greeting/date
-- Countdown/start-date calendar for Monday 27 July 2026
-- Three visual progress rings
-- Per-set workout tracking
-- Weight and reps logging per exercise
-- Built-in rest timer
-- Exercise technique, easier and harder options
-- Meal calories and protein estimates
-- Individual and whole-day meal swaps
-- Automatic weekly grocery list
-- Weight progress graph
-- Achievements and workout confetti
-- Export/import backup
-- Offline installable app
-
-Calorie and protein figures are approximate and are intended for planning rather than medical nutrition advice.
+Upload every file to the root of the GitHub repository. Open the Pages link once with `?v=5` to refresh the installed app.

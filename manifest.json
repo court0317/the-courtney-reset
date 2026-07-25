@@ -1,7 +1,7 @@
 {
-  "name": "Courtney Reset",
+  "name": "The Courtney Reset",
   "short_name": "Courtney Reset",
-  "description": "Courtney's premium 8-week fitness, meals and progress app",
+  "description": "Courtney's personalised 8-week fitness and real-life meal planner",
   "start_url": "./?v=4",
   "display": "standalone",
   "background_color": "#f6f1e8",
