@@ -1045,3 +1045,153 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
   renderGarden();
 });
+
+// Rooted V6: animated hydration aquarium
+const AQUARIUM_FISH=[
+  {at:1,emoji:'🐟',name:'Sunny'},
+  {at:2,emoji:'🐠',name:'Coral'},
+  {at:3,emoji:'🐡',name:'Puff'},
+  {at:4,emoji:'🐟',name:'Ripple'},
+  {at:5,emoji:'🐠',name:'Sage'},
+  {at:6,emoji:'🐡',name:'Bubbles'}
+];
+
+function aquariumWaterCount(){
+  try{
+    if(typeof waterCount==='function')return Number(waterCount()||0);
+    const today=(state&&state.water&&state.water[dk])||0;
+    return Number(today||0);
+  }catch(e){return 0}
+}
+
+function aquariumGoalLitres(){
+  return Number((rootedProfile()||{}).waterGoal||2.5);
+}
+
+function aquariumWaterStreak(){
+  let streak=0;
+  const goalBottles=Math.ceil(aquariumGoalLitres()/0.5);
+  const d=new Date();
+  for(let i=0;i<365;i++){
+    const key=d.toISOString().slice(0,10);
+    let count=0;
+    try{count=Number((state&&state.water&&state.water[key])||0)}catch(e){}
+    if(count>=goalBottles)streak++;
+    else if(i>0)break;
+    else if(i===0 && count<goalBottles){}
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+function aquariumLevelName(percent){
+  if(percent>=100)return 'Full';
+  if(percent>=75)return 'Deep';
+  if(percent>=50)return 'Half full';
+  if(percent>=25)return 'Shallow';
+  if(percent>0)return 'Starting';
+  return 'Empty';
+}
+
+function aquariumMessage(count,percent){
+  if(count===0)return 'Log your first bottle to add water to the tank.';
+  if(percent<40)return 'The tank is filling and your first fish has arrived.';
+  if(percent<80)return 'Your aquarium is coming alive. Keep sipping.';
+  if(percent<100)return 'Almost full — the fish are loving it in here.';
+  return 'Hydration goal complete. Your aquarium is thriving today!';
+}
+
+function renderAquariumFish(count){
+  const layer=document.getElementById('tankFishLayer');
+  if(!layer)return;
+  layer.innerHTML='';
+  AQUARIUM_FISH.filter(f=>count>=f.at).forEach((fish,index)=>{
+    const el=document.createElement('span');
+    el.className=`tank-fish fish-${index+1}`;
+    el.textContent=fish.emoji;
+    el.title=fish.name;
+    el.style.setProperty('--delay',`${index*-0.9}s`);
+    el.style.setProperty('--duration',`${7+(index%3)*2}s`);
+    el.style.setProperty('--y',`${14+(index*15)%68}%`);
+    layer.appendChild(el);
+  });
+}
+
+function renderFishUnlocks(count){
+  const list=document.getElementById('fishUnlockList');
+  if(!list)return;
+  list.innerHTML=AQUARIUM_FISH.slice(0,5).map(f=>`
+    <div class="fish-unlock ${count>=f.at?'unlocked':'locked'}">
+      <span>${count>=f.at?f.emoji:'◌'}</span>
+      <div><b>${count>=f.at?f.name:'Mystery fish'}</b><small>${f.at*500} mL</small></div>
+      <strong>${count>=f.at?'✓':'🔒'}</strong>
+    </div>
+  `).join('');
+}
+
+function renderAquarium(){
+  const count=aquariumWaterCount();
+  const litres=count*0.5;
+  const goal=aquariumGoalLitres();
+  const percent=Math.max(0,Math.min(100,(litres/goal)*100));
+  const fill=Math.max(5,percent);
+  const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
+
+  set('aquariumLitres',litres.toFixed(1));
+  set('aquariumGoal',goal);
+  set('aquariumFishCount',Math.min(count,AQUARIUM_FISH.length));
+  set('aquariumPercent',`${Math.round(percent)}%`);
+  set('aquariumStreak',`${aquariumWaterStreak()} days`);
+  set('aquariumLevelName',aquariumLevelName(percent));
+  set('aquariumMessage',aquariumMessage(count,percent));
+  set('aquariumStatusBadge',percent>=100?'Thriving':percent>=60?'Swimming':count?'Filling up':'Waking up');
+  set('aquariumShortcutText',count?`${litres.toFixed(1)} L logged • ${Math.min(count,AQUARIUM_FISH.length)} fish swimming`:'Fill your tank with today’s water');
+
+  const water=document.getElementById('tankWater');
+  if(water)water.style.height=`${fill}%`;
+  const bar=document.getElementById('aquariumFillBar');
+  if(bar)bar.style.width=`${percent}%`;
+  renderAquariumFish(count);
+  renderFishUnlocks(count);
+}
+
+function clickExistingWaterControl(direction){
+  const candidates=[...document.querySelectorAll('button')];
+  if(direction==='add'){
+    const btn=candidates.find(b=>/add.*water|500\s?ml|\+\s*water/i.test(b.textContent||''));
+    if(btn && btn.id!=='aquariumAddWater'){btn.click();return true}
+  }else{
+    const btn=candidates.find(b=>/undo.*water|remove.*water|minus.*water/i.test(b.textContent||''));
+    if(btn && btn.id!=='aquariumRemoveWater'){btn.click();return true}
+  }
+  return false;
+}
+
+function updateAquariumWaterFallback(delta){
+  try{
+    if(!state.water)state.water={};
+    const key=typeof dk!=='undefined'?dk:rootedTodayKey();
+    const current=Number(state.water[key]||0);
+    state.water[key]=Math.max(0,current+delta);
+    if(typeof save==='function')save();
+    else localStorage.setItem(KEY,JSON.stringify(state));
+    if(typeof render==='function')render();
+  }catch(e){}
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('aquariumAddWater')?.addEventListener('click',()=>{
+    if(!clickExistingWaterControl('add'))updateAquariumWaterFallback(1);
+    setTimeout(()=>{renderAquarium();renderRootedPremium();},80);
+  });
+  document.getElementById('aquariumRemoveWater')?.addEventListener('click',()=>{
+    if(!clickExistingWaterControl('remove'))updateAquariumWaterFallback(-1);
+    setTimeout(()=>{renderAquarium();renderRootedPremium();},80);
+  });
+  document.addEventListener('rooted:pagechange',e=>{
+    if(e.detail.pageId==='aquarium')renderAquarium();
+  });
+  document.addEventListener('click',()=>setTimeout(renderAquarium,90));
+  document.addEventListener('change',()=>setTimeout(renderAquarium,90));
+  renderAquarium();
+});

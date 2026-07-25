@@ -1,10 +1,10 @@
-const CACHE='rooted-v5';
+const CACHE='rooted-v6';
 const ASSETS=[
   './',
-  './index.html?v=rooted5',
-  './styles.css?v=rooted5',
-  './navigation.js?v=rooted5',
-  './app.js?v=rooted5',
+  './index.html?v=rooted6',
+  './styles.css?v=rooted6',
+  './navigation.js?v=rooted6',
+  './app.js?v=rooted6',
   './manifest.json',
   './icon.svg',
   './icon-192.svg',
@@ -30,6 +30,6 @@ self.addEventListener('fetch',event=>{
         caches.open(CACHE).then(cache=>cache.put(event.request,copy));
         return response;
       })
-      .catch(()=>caches.match(event.request).then(cached=>cached||caches.match('./index.html?v=rooted5')))
+      .catch(()=>caches.match(event.request).then(cached=>cached||caches.match('./index.html?v=rooted6')))
   );
 });

@@ -1,16 +1,17 @@
-# Rooted V5
+# Rooted V6
 
-New in this build:
-- Guided workout mode with exercise-by-exercise progression and rest timer
-- Full Garden screen with plant stages and growth progress
-- Daily garden reflections
-- Settings page opened from the profile button
-- Editable name, water goal, walking goal, calorie guides and equipment
-- Expanded backup and restore for profile, roots, focus and garden journal
-- Existing meals, workouts, shopping, journey, coach and navigation retained
+New in Volume 6:
+- Animated hydration aquarium
+- Tank water rises with each 500 mL water log
+- A new fish appears with each bottle
+- Fish collection and unlock milestones
+- Hydration goal percentage, tank level and water streak
+- Add or undo water directly from the aquarium
+- Aquarium shortcut on the Today screen
+- Existing Garden, guided workouts, meals, settings, backups and stable navigation retained
 
 Upload every file to the repository root and replace the previous files.
 
 Open once after GitHub Pages updates:
 
-`https://court0317.github.io/the-courtney-reset/?v=rooted5#today`
+`https://court0317.github.io/the-courtney-reset/?v=rooted6#aquarium`
