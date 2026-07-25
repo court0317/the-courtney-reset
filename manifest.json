@@ -1,11 +1,11 @@
 {
-  "name": "The Courtney Reset",
+  "name": "Courtney Reset",
   "short_name": "Courtney Reset",
-  "description": "An interactive 8-week home fitness, meal and habit tracker.",
-  "start_url": "./",
+  "description": "Courtney's premium 8-week fitness, meals and progress app",
+  "start_url": "./?v=4",
   "display": "standalone",
-  "background_color": "#f7f2e9",
-  "theme_color": "#81907c",
+  "background_color": "#f6f1e8",
+  "theme_color": "#7f9079",
   "icons": [
     {
       "src": "icon-192.svg",
