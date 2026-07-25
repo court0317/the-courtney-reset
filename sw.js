@@ -1,4 +1,4 @@
-const CACHE='rooted-v923-polish';
+const CACHE='rooted-v10-story-world';
 const ASSETS=[
   './',
   './index.html?v=rooted900',

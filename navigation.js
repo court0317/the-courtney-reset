@@ -2,7 +2,7 @@
 (() => {
   'use strict';
 
-  const VALID_PAGES = new Set(['today', 'workout', 'meals', 'shop', 'progress', 'garden', 'settings', 'aquarium', 'week', 'world', 'journey-map', 'memory', 'history']);
+  const VALID_PAGES = new Set(['today', 'workout', 'meals', 'shop', 'progress', 'garden', 'settings', 'aquarium', 'week', 'world', 'journey-map', 'memory', 'history', 'reading-corner', 'future-letters', 'garden-snapshots', 'achievement-book', 'evening-wrap']);
 
   function showPage(pageId, updateHash = true) {
     if (!VALID_PAGES.has(pageId) || !document.getElementById(pageId)) {

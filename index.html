@@ -520,6 +520,11 @@
     <button class="world-place aquarium-place" data-go="aquarium"><span>🐠</span><div><small>Hydration</small><b>Aquarium</b><em id="worldAquariumStatus">Empty tank</em></div></button>
     <button class="world-place journey-place" data-go="journey-map"><span>🗺️</span><div><small>Your milestones</small><b>Journey Path</b><em id="worldJourneyStatus">Your first step awaits</em></div></button>
     <button class="world-place memory-place" data-go="memory"><span>📖</span><div><small>Stories worth keeping</small><b>Memory Lane</b><em id="worldMemoryStatus">Your story is beginning</em></div></button>
+    <button class="world-place reading-place" data-go="reading-corner"><span>📚</span><div><small>Your bookish nook</small><b>Reading Corner</b><em id="worldReadingStatus">Ready for your first book</em></div></button>
+    <button class="world-place letters-place" data-go="future-letters"><span>💌</span><div><small>Words for later</small><b>Letters to Future You</b><em id="worldLettersStatus">Write something kind</em></div></button>
+    <button class="world-place snapshots-place" data-go="garden-snapshots"><span>📸</span><div><small>Watch it evolve</small><b>Garden Snapshots</b><em id="worldSnapshotsStatus">Save this chapter</em></div></button>
+    <button class="world-place achievements-place" data-go="achievement-book"><span>🏅</span><div><small>Your wins</small><b>Achievement Book</b><em id="worldAchievementsStatus">Your first badge awaits</em></div></button>
+    <button class="world-place evening-place" data-go="evening-wrap"><span>🌙</span><div><small>Close the day gently</small><b>Evening Wrap-up</b><em>See what you grew today</em></div></button>
   </div>
   <section class="card legacy-card">
     <div class="legacy-tree" id="legacyTree">🌱</div>
@@ -549,6 +554,54 @@
     <div id="memoryLeavesList" class="memory-leaves-list"></div>
   </div>
 
+</section>
+
+<section id="reading-corner" class="page" hidden>
+  <div class="page-title"><button class="back" data-go="world">‹</button><div><span class="eyebrow">A cosy corner of your world</span><h2>Reading Corner</h2></div></div>
+  <section class="reading-scene card">
+    <div class="reading-sky">✨ <span>🌙</span></div>
+    <div id="readingBookStack" class="reading-book-stack" aria-label="Your finished book stack">📕</div>
+    <div class="reading-chair">🪑</div><div class="reading-lamp">🕯️</div><div class="reading-plant">🪴</div>
+    <p id="readingSceneMessage">Every finished book adds another little book to your nook.</p>
+  </section>
+  <div class="card reading-log-card">
+    <div class="section-head"><div><span class="eyebrow">Finished something?</span><h3>Add it to your shelf</h3></div><span id="readingCountBadge" class="season-badge">0 books</span></div>
+    <div class="reading-form"><input id="readingTitleInput" maxlength="100" placeholder="Book title"><input id="readingAuthorInput" maxlength="80" placeholder="Author (optional)"><button id="addFinishedBook" class="primary wide" type="button">Add finished book</button></div>
+    <div id="finishedBooksList" class="finished-books-list"></div>
+  </div>
+</section>
+
+<section id="future-letters" class="page" hidden>
+  <div class="page-title"><button class="back" data-go="world">‹</button><div><span class="eyebrow">A kindness waiting for you</span><h2>Letters to Future You</h2></div></div>
+  <div id="readyLetterBanner" class="card ready-letter-banner" hidden><span>💌</span><div><b>A letter is ready to open</b><p>Past you left something here.</p></div></div>
+  <div class="card future-letter-form">
+    <span class="eyebrow">Write from this moment</span><h3>What would future you need to hear?</h3>
+    <input id="futureLetterTitle" maxlength="80" placeholder="A title for this letter">
+    <textarea id="futureLetterBody" maxlength="1200" placeholder="Write honestly. It stays sealed until the date you choose."></textarea>
+    <label>Open on<input id="futureLetterDate" type="date"></label>
+    <div class="letter-quick-dates"><button type="button" data-letter-months="1">1 month</button><button type="button" data-letter-months="3">3 months</button><button type="button" data-letter-months="6">6 months</button><button type="button" data-letter-months="12">1 year</button></div>
+    <button id="sealFutureLetter" class="primary wide" type="button">Seal this letter</button>
+  </div>
+  <div id="futureLettersList" class="future-letters-list"></div>
+</section>
+
+<section id="garden-snapshots" class="page" hidden>
+  <div class="page-title"><button class="back" data-go="world">‹</button><div><span class="eyebrow">Your garden through time</span><h2>Garden Snapshots</h2></div></div>
+  <div class="card snapshot-intro"><div><span class="eyebrow">A visual diary</span><h3>Watch your world grow week by week.</h3><p>Rooted saves a Sunday snapshot when you open the app. You can also save one whenever today feels worth remembering.</p></div><button id="saveGardenSnapshot" class="primary" type="button">Save today’s snapshot</button></div>
+  <div id="snapshotGallery" class="snapshot-gallery"></div>
+</section>
+
+<section id="achievement-book" class="page" hidden>
+  <div class="page-title"><button class="back" data-go="world">‹</button><div><span class="eyebrow">Every win belongs here</span><h2>Achievement Book</h2></div></div>
+  <div class="card scrapbook-cover"><span>🌿</span><h2>Courtney’s Rooted Scrapbook</h2><p>Not perfection—proof that you kept showing up.</p></div>
+  <div id="scrapbookBadges" class="scrapbook-grid"></div>
+</section>
+
+<section id="evening-wrap" class="page" hidden>
+  <div class="page-title"><button class="back" data-go="world">‹</button><div><span class="eyebrow">A gentle ending</span><h2>Evening Wrap-up</h2></div></div>
+  <section class="evening-hero card"><div class="evening-moon">🌙</div><span class="eyebrow">Today mattered</span><h2 id="eveningTitle">You kept showing up.</h2><p id="eveningMessage">Small things still count.</p></section>
+  <div id="eveningStats" class="evening-stats"></div>
+  <div class="card evening-note"><span class="eyebrow">One line for tonight</span><textarea id="eveningNote" maxlength="300" placeholder="Something I want to remember about today…"></textarea><button id="saveEveningNote" type="button" class="primary wide">Save tonight’s note</button><p id="eveningSaved" class="sub"></p></div>
 </section>
 
 </main>

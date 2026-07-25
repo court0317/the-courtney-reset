@@ -23,3 +23,7 @@ Rooted 2.0 recovery build: rebuilt home UI from stable v8.1.3 while preserving a
 - Interactive Memory Tree with locally saved moments
 
 All Rooted 9 data is additive and stored separately under `rooted-v9-interactive`. Existing planner data and features are unchanged.
+
+
+## Rooted 10 — Story World
+Adds the Reading Corner, Letters to Future You, weekly Garden Snapshots, Achievement Scrapbook and Evening Wrap-up. New feature data is stored separately under `rooted-v10-story-features`; existing planner data is unchanged.

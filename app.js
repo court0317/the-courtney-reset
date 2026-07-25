@@ -1535,3 +1535,85 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind();renderAll()},{once:true});else{bind();renderAll()}
 })();
+
+// Rooted 10 — Reading Corner, Future Letters, Garden Snapshots, Achievement Book and Evening Wrap-up.
+// All new information lives under one isolated key so existing planner data is never rewritten.
+(() => {
+  'use strict';
+  const KEY='rooted-v10-story-features';
+  const defaults={books:[],letters:[],snapshots:[],eveningNotes:{},lastSundaySnapshot:''};
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const load=()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return {...defaults}}};
+  const save=d=>localStorage.setItem(KEY,JSON.stringify(d));
+  const key=(date=new Date())=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  const points=()=>{try{return typeof gardenCounts==='function'?(gardenCounts().total||0):0}catch{return 0}};
+  const streak=()=>{try{return typeof calcStreak==='function'?(Number(calcStreak())||0):0}catch{return 0}};
+  const water=()=>{try{return typeof waterCount==='function'?(Number(waterCount())||0):0}catch{return 0}};
+  const checkedToday=()=>{try{const k=key();return Object.entries(state?.checks||{}).filter(([id,v])=>v&&id.includes(k)).length}catch{return 0}};
+  const flower=()=>{try{const d=JSON.parse(localStorage.getItem('rooted-v9-interactive')||'{}');return d.featuredFlower||'🌼'}catch{return '🌼'}};
+  const season=()=>{const m=new Date().getMonth()+1;return [12,1,2].includes(m)?'Summer':[3,4,5].includes(m)?'Autumn':[6,7,8].includes(m)?'Winter':'Spring'};
+
+  function renderReading(){
+    const d=load(),count=d.books.length;
+    const stack=$('readingBookStack');
+    if(stack){const icons=['📕','📗','📘','📙','📓'];stack.textContent=count?Array.from({length:Math.min(count,18)},(_,i)=>icons[i%icons.length]).join(' '):'📕';}
+    if($('readingCountBadge'))$('readingCountBadge').textContent=`${count} ${count===1?'book':'books'}`;
+    if($('readingSceneMessage'))$('readingSceneMessage').textContent=count===0?'Every finished book adds another little book to your nook.':count<5?'Your reading corner is starting to feel cosy.':count<15?'That stack is becoming a proper little library.':'Your garden has its own glorious book tower.';
+    if($('worldReadingStatus'))$('worldReadingStatus').textContent=count?`${count} finished ${count===1?'book':'books'}`:'Ready for your first book';
+    const list=$('finishedBooksList');if(list)list.innerHTML=d.books.slice().reverse().map((b,ri)=>`<article class="finished-book"><span>📚</span><div><b>${esc(b.title)}</b><small>${esc(b.author||'Author not added')} · ${new Date(b.finished).toLocaleDateString('en-AU')}</small></div><button type="button" data-delete-book="${d.books.length-1-ri}" aria-label="Remove book">×</button></article>`).join('')||'<p class="sub">Your finished books will collect here.</p>';
+  }
+
+  function renderLetters(){
+    const d=load(),now=Date.now(),ready=d.letters.filter(x=>new Date(x.openOn+'T00:00:00').getTime()<=now).length;
+    if($('readyLetterBanner'))$('readyLetterBanner').hidden=ready===0;
+    if($('worldLettersStatus'))$('worldLettersStatus').textContent=ready?`${ready} ready to open`:d.letters.length?`${d.letters.length} sealed`:'Write something kind';
+    const list=$('futureLettersList');if(!list)return;
+    list.innerHTML=d.letters.slice().reverse().map((l,ri)=>{const idx=d.letters.length-1-ri,isReady=new Date(l.openOn+'T00:00:00').getTime()<=now;return `<article class="future-letter-card ${isReady?'ready':'sealed'}"><span>${isReady?'💌':'🔒'}</span><div><b>${esc(l.title)}</b><small>${isReady?'Ready to open':'Opens'} ${new Date(l.openOn+'T00:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})}</small><p class="letter-body">${isReady?esc(l.body):'This letter is safely sealed.'}</p></div><button type="button" data-delete-letter="${idx}" aria-label="Delete letter">×</button></article>`}).join('')||'<div class="card"><p class="sub">No sealed letters yet. Leave a little kindness here for later.</p></div>';
+  }
+
+  function snapshotSvg(total,bookCount,date){
+    const stage=total<5?'🌱':total<15?'🌿':total<30?'🌷':total<50?'🌻':'🌳';
+    const sky=season()==='Winter'?'#dce8e7':season()==='Autumn'?'#f3d6b5':season()==='Summer'?'#cfe9dc':'#dcebd9';
+    const books=Math.min(bookCount,8);const bookIcons=Array.from({length:books},(_,i)=>['📕','📗','📘','📙'][i%4]).join('');
+    const safeDate=date.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}).replace(/&/g,'&amp;');
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" rx="40" fill="${sky}"/><circle cx="675" cy="110" r="52" fill="#fff4b8"/><path d="M0 390 Q160 330 320 390 T640 390 T960 390 V600 H0Z" fill="#8fb27d"/><text x="400" y="345" text-anchor="middle" font-size="150">${stage}</text><text x="120" y="475" font-size="48">${flower()} 🌼 🌷</text><text x="555" y="480" font-size="35">🪑 ${bookIcons}</text><text x="40" y="65" font-family="Arial" font-size="30" fill="#3f5c45">Rooted · ${safeDate}</text><text x="40" y="105" font-family="Arial" font-size="22" fill="#55705b">${total} growth points · ${season()}</text></svg>`;
+    return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  }
+  function addSnapshot(auto=false){
+    const d=load(),today=key();if(auto&&d.snapshots.some(x=>x.day===today))return;
+    const now=new Date();d.snapshots.push({day:today,date:now.toISOString(),points:points(),books:d.books.length,image:snapshotSvg(points(),d.books.length,now)});d.snapshots=d.snapshots.slice(-30);if(auto)d.lastSundaySnapshot=today;save(d);renderSnapshots();
+  }
+  function maybeSundaySnapshot(){const now=new Date(),d=load();if(now.getDay()===0&&d.lastSundaySnapshot!==key())addSnapshot(true)}
+  function renderSnapshots(){
+    const d=load();if($('worldSnapshotsStatus'))$('worldSnapshotsStatus').textContent=d.snapshots.length?`${d.snapshots.length} moments saved`:'Save this chapter';
+    const box=$('snapshotGallery');if(!box)return;box.innerHTML=d.snapshots.slice().reverse().map((s,ri)=>`<article class="snapshot-card"><img src="${s.image}" alt="Garden snapshot from ${new Date(s.date).toLocaleDateString('en-AU')}"><div><button type="button" data-delete-snapshot="${d.snapshots.length-1-ri}" aria-label="Delete snapshot">×</button><b>${new Date(s.date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})}</b><small>${s.points} growth points · ${s.books} books</small></div></article>`).join('')||'<div class="card"><p class="sub">Your first garden snapshot will appear here.</p></div>';
+  }
+
+  function badges(){const d=load(),p=points(),s=streak(),w=water(),books=d.books.length,snaps=d.snapshots.length,letters=d.letters.length;return [
+    ['🌱','First Root','Complete your first supportive action',p>=1],['🌿','Taking Hold','Reach 10 growth points',p>=10],['🌸','In Bloom','Reach 25 growth points',p>=25],['🌳','Deep Roots','Reach 50 growth points',p>=50],['🔥','Three Gentle Days','Build a 3-day streak',s>=3],['💧','Hydration Friend','Log four water bottles',w>=4],['📚','Bookish Beginning','Finish your first book',books>=1],['📖','Little Library','Finish 10 books',books>=10],['💌','Kind to Future Me','Seal your first letter',letters>=1],['📸','Time Capsule','Save four garden snapshots',snaps>=4],['🌙','Soft Landing','Save an evening reflection',Object.keys(d.eveningNotes).length>=1]
+  ]}
+  function renderAchievements(){const all=badges(),unlocked=all.filter(x=>x[3]).length;if($('worldAchievementsStatus'))$('worldAchievementsStatus').textContent=`${unlocked} of ${all.length} unlocked`;const box=$('scrapbookBadges');if(box)box.innerHTML=all.map((a,i)=>`<article class="scrapbook-badge ${a[3]?'':'locked'}" style="--tilt:${i%2?'1.2deg':'-1.2deg'}"><span>${a[3]?a[0]:'🔒'}</span><b>${a[1]}</b><small>${a[3]?'Unlocked · ':''}${a[2]}</small></article>`).join('')}
+
+  function renderEvening(){
+    const d=load(),tasks=checkedToday(),p=points(),moods=(()=>{try{return JSON.parse(localStorage.getItem('rooted-v9-interactive')||'{}').moods||{}}catch{return {}}})(),mood=moods[key()]||0,moodIcon=['','😔','😕','😐','🙂','😁'][mood]||'—';
+    if($('eveningTitle'))$('eveningTitle').textContent=tasks?`You completed ${tasks} ${tasks===1?'thing':'things'} today.`:'Rest is allowed to be part of the plan.';
+    if($('eveningMessage'))$('eveningMessage').textContent=tasks?'Your garden noticed every one of them.':'Tomorrow does not need a perfect version of you—just the real one.';
+    const stats=$('eveningStats');if(stats)stats.innerHTML=`<div class="evening-stat"><span>✓</span><b>${tasks}</b><small>completed today</small></div><div class="evening-stat"><span>🌱</span><b>${p}</b><small>total growth</small></div><div class="evening-stat"><span>${moodIcon}</span><b>${mood?'Checked in':'Not logged'}</b><small>today’s mood</small></div><div class="evening-stat"><span>📚</span><b>${d.books.length}</b><small>finished books</small></div>`;
+    if($('eveningNote'))$('eveningNote').value=d.eveningNotes[key()]||'';
+  }
+
+  function renderAll10(){renderReading();renderLetters();renderSnapshots();renderAchievements();renderEvening();maybeSundaySnapshot()}
+  function bind10(){
+    $('addFinishedBook')?.addEventListener('click',()=>{const title=$('readingTitleInput')?.value.trim(),author=$('readingAuthorInput')?.value.trim();if(!title){alert('Add the book title first.');return}const d=load();d.books.push({title,author,finished:new Date().toISOString()});save(d);$('readingTitleInput').value='';$('readingAuthorInput').value='';renderAll10();});
+    $('finishedBooksList')?.addEventListener('click',e=>{const b=e.target.closest('[data-delete-book]');if(!b)return;const d=load();d.books.splice(Number(b.dataset.deleteBook),1);save(d);renderAll10()});
+    document.querySelectorAll('[data-letter-months]').forEach(b=>b.addEventListener('click',()=>{const dt=new Date();dt.setMonth(dt.getMonth()+Number(b.dataset.letterMonths));if($('futureLetterDate'))$('futureLetterDate').value=key(dt)}));
+    $('sealFutureLetter')?.addEventListener('click',()=>{const title=$('futureLetterTitle')?.value.trim(),body=$('futureLetterBody')?.value.trim(),openOn=$('futureLetterDate')?.value;if(!title||!body||!openOn){alert('Add a title, your letter, and an opening date first.');return}if(new Date(openOn+'T00:00:00')<=new Date()){alert('Choose a future date so the letter can stay sealed for you.');return}const d=load();d.letters.push({title,body,openOn,created:new Date().toISOString()});save(d);$('futureLetterTitle').value='';$('futureLetterBody').value='';$('futureLetterDate').value='';renderAll10();});
+    $('futureLettersList')?.addEventListener('click',e=>{const b=e.target.closest('[data-delete-letter]');if(!b)return;const d=load();d.letters.splice(Number(b.dataset.deleteLetter),1);save(d);renderAll10()});
+    $('saveGardenSnapshot')?.addEventListener('click',()=>addSnapshot(false));
+    $('snapshotGallery')?.addEventListener('click',e=>{const b=e.target.closest('[data-delete-snapshot]');if(!b)return;const d=load();d.snapshots.splice(Number(b.dataset.deleteSnapshot),1);save(d);renderAll10()});
+    $('saveEveningNote')?.addEventListener('click',()=>{const d=load();d.eveningNotes[key()]=$('eveningNote')?.value.trim()||'';save(d);if($('eveningSaved'))$('eveningSaved').textContent='Tonight’s note is saved.';renderAchievements()});
+    document.addEventListener('rooted:pagechange',()=>setTimeout(renderAll10,30));document.addEventListener('change',()=>setTimeout(renderAll10,100));
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind10();renderAll10()},{once:true});else{bind10();renderAll10()}
+})();
