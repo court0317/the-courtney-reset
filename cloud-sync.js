@@ -10,6 +10,7 @@
     window.supabase?.createClient
   );
   const FLOURISH_BLOOM_PREFIXES = ['flourishBloom', 'flourishBloom-'];
+  const APP_STATE_TABLE = 'rooted_app_state';
   const CLOUD_META_KEY = 'flourishBloom-cloud-meta-v1';
   const DEVICE_ID_KEY = 'flourishBloom-device-id-v1';
   let client = null;
@@ -87,27 +88,57 @@
     window.dispatchEvent(new CustomEvent('flourishBloom:cloud-sync-updated', { detail: { source: 'cloud' } }));
   }
 
+  function clearSyncWarning() {
+    document.getElementById('flourishBloomSyncWarning')?.remove();
+  }
+
+  function showSyncWarning(message) {
+    let banner = document.getElementById('flourishBloomSyncWarning');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'flourishBloomSyncWarning';
+      banner.setAttribute('role', 'status');
+      banner.setAttribute('aria-live', 'polite');
+      banner.style.position = 'fixed';
+      banner.style.right = '16px';
+      banner.style.bottom = '16px';
+      banner.style.maxWidth = 'min(420px, calc(100vw - 32px))';
+      banner.style.padding = '10px 12px';
+      banner.style.borderRadius = '10px';
+      banner.style.fontSize = '13px';
+      banner.style.lineHeight = '1.35';
+      banner.style.background = '#fff4da';
+      banner.style.color = '#5d4300';
+      banner.style.border = '1px solid #dfc88a';
+      banner.style.boxShadow = '0 8px 18px rgba(0, 0, 0, 0.08)';
+      banner.style.zIndex = '10000';
+      document.body.appendChild(banner);
+    }
+    banner.textContent = message;
+  }
+
   async function pushSnapshot(showStatus) {
     if (!client || !currentUser) return false;
     setCloudStatus('syncing', 'Saving…');
     const payload = snapshot();
     const { error } = await client
-      .from('flourishBloom_app_state')
+      .from(APP_STATE_TABLE)
       .upsert({ user_id: currentUser.id, data: payload, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) {
       console.error('Flourish & Bloom cloud save failed', error);
       setCloudStatus('error', 'Not synced');
-      if (showStatus) alert(`Flourish & Bloom could not save to the cloud yet. ${friendlyError(error)}`);
+      if (showStatus) showSyncWarning(`Cloud sync warning: ${friendlyError(error)}`);
       return false;
     }
     localStorage.setItem(CLOUD_META_KEY, JSON.stringify({ lastPushedAt: new Date().toISOString() }));
     setCloudStatus('synced', 'Saved');
+    clearSyncWarning();
     return true;
   }
 
   async function pullOrMigrate() {
     const { data, error } = await client
-      .from('flourishBloom_app_state')
+      .from(APP_STATE_TABLE)
       .select('data, updated_at')
       .eq('user_id', currentUser.id)
       .maybeSingle();
@@ -132,6 +163,7 @@
       await pushSnapshot(false);
     }
     setCloudStatus('synced', 'Saved');
+    clearSyncWarning();
   }
 
   function friendlyError(error) {
@@ -304,7 +336,8 @@
       currentUser = session.user;
       await pullOrMigrate().catch(error => {
         console.error(error);
-        alert(`Flourish & Bloom cloud setup needs attention. ${friendlyError(error)}`);
+        showSyncWarning(`Cloud sync warning: ${friendlyError(error)}`);
+        setCloudStatus('error', 'Not synced');
       });
       hideGate();
       setTimeout(injectAccountControls, 0);
@@ -316,6 +349,7 @@
         document.getElementById('flourishBloomAuthGate')?.remove();
         createGate();
         setCloudStatus('saved', 'Not signed in');
+        clearSyncWarning();
         return;
       }
       if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && sessionNow?.user) {
@@ -325,6 +359,9 @@
           hideGate();
           setTimeout(injectAccountControls, 0);
         } catch (error) {
+          console.error(error);
+          showSyncWarning(`Cloud sync warning: ${friendlyError(error)}`);
+          setCloudStatus('error', 'Not synced');
           setAuthMessage(friendlyError(error), true);
         }
       }
