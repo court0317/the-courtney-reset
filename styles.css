@@ -17,3 +17,32 @@ dialog select,dialog input{width:100%;border:1px solid #d7d4cc;border-radius:14p
 
 .video-link{display:flex;align-items:center;justify-content:center;margin-top:16px;text-decoration:none}
 .video-note{font-size:.78rem;color:var(--muted);line-height:1.4;margin:8px 2px 0}
+
+/* Version 6.2 */
+.smart-panel{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;margin:18px 0;box-shadow:var(--shadow)}
+.mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mode-card{border:1px solid var(--line);background:var(--soft);border-radius:18px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:4px}
+.mode-card span{font-size:1.4rem}.mode-card small{color:var(--muted);line-height:1.25}
+.mode-card.active{outline:2px solid var(--accent);background:var(--accent-soft)}
+.mode-message{margin:12px 2px 0;color:var(--muted);font-size:.9rem}
+.walk-log-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.walk-log-grid label{font-size:.75rem;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.walk-log-grid input,.leftover-form input,.weight-log-row input{border:1px solid var(--line);background:var(--input);color:var(--text);border-radius:12px;padding:11px;min-width:0}
+.leftover-form{display:grid;grid-template-columns:2fr .8fr 1.3fr auto;gap:8px}
+.leftover-list{display:grid;gap:10px;margin-top:14px}
+.leftover-card{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);background:var(--soft);padding:12px;border-radius:16px}
+.leftover-card small{display:block;color:var(--muted);margin-top:4px}
+.leftover-actions{display:flex;gap:6px;flex-shrink:0}
+.empty-state{color:var(--muted);text-align:center;padding:16px}
+.weight-log-box{margin-top:14px;border:1px solid var(--line);background:var(--soft);padding:12px;border-radius:16px}
+.weight-log-box label{display:block;font-weight:700;margin-bottom:8px}
+.weight-log-row{display:flex;align-items:center;gap:8px}.weight-log-row input{flex:1}
+body[data-workout-mode="low"] .low-energy-muted{opacity:.72}
+body[data-workout-mode="sore"] .sore-hidden{display:none!important}
+body[data-workout-mode="skip"] .rest-hidden{display:none!important}
+@media(max-width:680px){
+  .walk-log-grid{grid-template-columns:1fr 1fr}
+  .leftover-form{grid-template-columns:1fr 1fr}
+  .leftover-form input[type="text"]{grid-column:1/-1}
+  .leftover-form button{grid-column:1/-1}
+}

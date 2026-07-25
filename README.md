@@ -1,17 +1,19 @@
-# The Courtney Reset — Version 6.1
+# The Courtney Reset — Version 6.2
 
-## Equipment correction
-Every programmed workout now uses only:
+## New
+- Normal, low-energy, sore-day and rest-day workout modes
+- Walking pad logging for minutes, speed and distance
+- Dumbbell weight memory for each exercise
+- Fridge leftovers tracker with serves and age prompts
+- Exercise video search remains available inside every exercise guide
+- No Oura data entry and no freezer features
+
+## Equipment
 - Dumbbells
 - Walking pad
 - Yoga mat
-- An ordinary chair, wall or couch for balance/support where needed
+- Optional chair, wall or couch for support
 
-No resistance bands, sliders, ankle weights, foam rollers or gym equipment are required.
-
-## Exercise demonstrations
-Tap **How to** or **Technique**, then tap **Watch a video demonstration**.  
-The app opens a YouTube search for that exact exercise and beginner-friendly proper form.
-
-## Update
-Upload every file to the root of the GitHub repository, replacing the current files. Then open the Pages site once with `?v=6.1`.
+## Install
+Upload all files to the root of the GitHub repository, replacing the current files.
+Then open the GitHub Pages site once using `?v=6.2`.

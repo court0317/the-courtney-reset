@@ -114,4 +114,125 @@ document.querySelectorAll('[data-go]').forEach(x=>x.onclick=()=>go(x.dataset.go)
 swapAll.onclick=()=>{state.dayMeals[dk]=defaultDayMeals(d,w);save()};clearShop.onclick=()=>{state.shopping={};save()};chooseMealBtn.onclick=()=>openMealPicker('Dinner');leftoversBtn.onclick=openLeftovers;takeawayBtn.onclick=openTakeaway;tooTiredBtn.onclick=tooTired;skipBreakfastBtn.onclick=skipBreakfast;pickerMealType.onchange=()=>buildCravings('all');pickerEffort.onchange=()=>buildCravings('all');takeawaySave.onclick=()=>saveTakeaway(null,false);takeawayNoTrack.onclick=()=>saveTakeaway(null,true);
 saveCheckin.onclick=()=>{state.checkins[w]={weight:weight.value,waist:waist.value,hips:hips.value,energy:energy.value,win:win.value};save();alert('Week '+w+' saved')};exportBtn.onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='courtney-reset-backup-v5.json';a.click()};importFile.onchange=async()=>{try{state=JSON.parse(await importFile.files[0].text());save()}catch{alert('That file could not be read')}};resetBtn.onclick=()=>{if(confirm('Reset all progress?')){localStorage.removeItem(KEY);location.reload()}};
 timerToggle.onclick=()=>{if(timerInt){clearInterval(timerInt);timerInt=null;timerToggle.textContent='Start'}else{timerInt=setInterval(timerTick,1000);timerToggle.textContent='Pause'}};timerMinus.onclick=()=>{timer=Math.max(0,timer-15);timerValue.textContent=timer};timerPlus.onclick=()=>{timer+=15;timerValue.textContent=timer};
-if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=6.1').catch(()=>{}));render();
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=6.2').catch(()=>{}));render();
+
+
+// --- Version 6.2 practical upgrades ---
+(() => {
+  const KEY = 'courtneyResetV62';
+  const state = JSON.parse(localStorage.getItem(KEY) || '{"mode":"normal","walks":[],"weights":{},"leftovers":[]}');
+  const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+
+  // Energy modes
+  const modeMessages = {
+    normal: 'Your full workout is ready.',
+    low: 'Low-energy mode: complete 2 sets instead of 3 and shorten the walk by 10 minutes.',
+    sore: 'Sore-day mode: skip strength work and do a gentle walk plus 10 minutes of mobility.',
+    skip: 'Rest today. Nothing is lost—just continue with the next day tomorrow.'
+  };
+  const applyMode = (mode) => {
+    state.mode = mode; save();
+    document.querySelectorAll('.mode-card').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    const msg = document.getElementById('modeMessage');
+    if (msg) msg.textContent = modeMessages[mode];
+    document.body.dataset.workoutMode = mode;
+    document.querySelectorAll('.exercise-card, .exercise').forEach((card) => {
+      card.classList.remove('low-energy-muted','sore-hidden','rest-hidden');
+      if (mode === 'low') card.classList.add('low-energy-muted');
+      if (mode === 'sore') card.classList.add('sore-hidden');
+      if (mode === 'skip') card.classList.add('rest-hidden');
+    });
+  };
+  document.querySelectorAll('.mode-card').forEach(b => b.addEventListener('click', () => applyMode(b.dataset.mode)));
+  applyMode(state.mode || 'normal');
+
+  // Walking pad log
+  const renderWalkSummary = () => {
+    const el = document.getElementById('walkSummary');
+    if (!el) return;
+    const recent = state.walks.slice(-7);
+    const mins = recent.reduce((n,w)=>n+(Number(w.minutes)||0),0);
+    const km = recent.reduce((n,w)=>n+(Number(w.distance)||0),0);
+    el.textContent = recent.length ? `Last 7 logged walks: ${mins} minutes • ${km.toFixed(1)} km` : 'No walks logged yet.';
+  };
+  document.getElementById('saveWalkBtn')?.addEventListener('click', () => {
+    const minutes = Number(document.getElementById('walkMinutes')?.value || 0);
+    const speed = Number(document.getElementById('walkSpeed')?.value || 0);
+    const distance = Number(document.getElementById('walkDistance')?.value || 0);
+    if (!minutes && !distance) { alert('Add your minutes or distance first.'); return; }
+    state.walks.push({date:new Date().toISOString().slice(0,10), minutes, speed, distance});
+    save(); renderWalkSummary();
+    ['walkMinutes','walkSpeed','walkDistance'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  });
+  renderWalkSummary();
+
+  // Dumbbell weight memory in exercise modal
+  let currentExercise = '';
+  const oldOpenGuide = window.openGuide;
+  if (typeof oldOpenGuide === 'function') {
+    window.openGuide = function(e) {
+      currentExercise = e?.name || '';
+      oldOpenGuide(e);
+      const input = document.getElementById('exerciseWeight');
+      const label = document.getElementById('lastExerciseWeight');
+      const saved = state.weights[currentExercise];
+      if (input) input.value = '';
+      if (label) label.textContent = saved ? `Last used: ${saved} kg` : 'No weight saved yet.';
+    };
+  }
+  document.getElementById('saveExerciseWeight')?.addEventListener('click', () => {
+    const value = Number(document.getElementById('exerciseWeight')?.value || 0);
+    if (!currentExercise || !value) { alert('Enter the dumbbell weight first.'); return; }
+    state.weights[currentExercise] = value;
+    save();
+    const label = document.getElementById('lastExerciseWeight');
+    if (label) label.textContent = `Saved: ${value} kg`;
+  });
+
+  // Fridge leftovers
+  const daysOld = (iso) => Math.floor((Date.now() - new Date(iso+'T12:00:00').getTime()) / 86400000);
+  const renderLeftovers = () => {
+    const list = document.getElementById('leftoverList');
+    if (!list) return;
+    if (!state.leftovers.length) {
+      list.innerHTML = '<p class="empty-state">Nothing waiting in the fridge.</p>';
+      return;
+    }
+    list.innerHTML = state.leftovers.map((x,i) => {
+      const age = daysOld(x.cooked);
+      const status = age <= 0 ? 'Cooked today' : age === 1 ? 'Eat today or tomorrow' : age === 2 ? 'Best eaten today' : 'Check before eating';
+      return `<article class="leftover-card">
+        <div><b>${x.name}</b><small>${x.serves} serve${x.serves===1?'':'s'} • ${status}</small></div>
+        <div class="leftover-actions">
+          <button data-use-leftover="${i}" class="secondary">Use 1</button>
+          <button data-remove-leftover="${i}" class="ghost">Remove</button>
+        </div>
+      </article>`;
+    }).join('');
+  };
+  document.getElementById('addLeftoverBtn')?.addEventListener('click', () => {
+    const name = document.getElementById('leftoverName')?.value.trim();
+    const serves = Number(document.getElementById('leftoverServes')?.value || 0);
+    const cooked = document.getElementById('leftoverCooked')?.value || new Date().toISOString().slice(0,10);
+    if (!name || !serves) { alert('Add the meal name and number of serves.'); return; }
+    state.leftovers.push({name, serves, cooked});
+    save(); renderLeftovers();
+    document.getElementById('leftoverName').value='';
+    document.getElementById('leftoverServes').value='';
+  });
+  document.addEventListener('click', (e) => {
+    const use = e.target.closest('[data-use-leftover]');
+    const remove = e.target.closest('[data-remove-leftover]');
+    if (use) {
+      const i = Number(use.dataset.useLeftover);
+      state.leftovers[i].serves -= 1;
+      if (state.leftovers[i].serves <= 0) state.leftovers.splice(i,1);
+      save(); renderLeftovers();
+    }
+    if (remove) {
+      state.leftovers.splice(Number(remove.dataset.removeLeftover),1);
+      save(); renderLeftovers();
+    }
+  });
+  renderLeftovers();
+})();
