@@ -1,5 +1,8 @@
 (() => {
   'use strict';
+  if (window.__flourishBloomRecipesInitialized) return;
+  window.__flourishBloomRecipesInitialized = true;
+
   const STORAGE_KEY = 'flourishBloom-my-recipes-v1';
   const TAG_OPTIONS = ['Breakfast','Lunch','Dinner','Snack','Dessert'];
   const BUNDLED_RECIPE_IDS = new Set([
@@ -36,6 +39,19 @@
   let currentStep = 1;
   let recipeToastTimer = null;
   let draftRestoreTimer = null;
+
+  function closeRecipeModal(id) {
+    const modal = $(id);
+    if (!modal) return;
+    if (modal.open) modal.close();
+    modal.removeAttribute('open');
+  }
+
+  function closeAllRecipeModals() {
+    closeRecipeModal('recipeImportModal');
+    closeRecipeModal('recipeEditorModal');
+    closeRecipeModal('recipeViewModal');
+  }
 
   function loadRecipes() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
@@ -668,6 +684,10 @@
       if ($('recipeImportModal')?.open) restoreRecipeDraftIntoImport();
     }
   });
+  document.addEventListener('flourishBloom:pagechange', event => {
+    if (event?.detail?.pageId !== 'meals') closeAllRecipeModals();
+  });
+  closeAllRecipeModals();
   initialiseRecipes();
   window.FlourishBloomRecipes = {
     getRecipes: () => recipes,

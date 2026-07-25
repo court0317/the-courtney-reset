@@ -1,4 +1,4 @@
-const CACHE='flourish-and-bloom-v1';
+const CACHE='flourish-and-bloom-v2';
 const ASSETS=[
   './',
   './index.html?v=flourish-and-bloom',
