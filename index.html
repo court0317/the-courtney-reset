@@ -223,9 +223,9 @@
  <section class="card my-recipes-card" id="myRecipesSection">
    <div class="section-head">
      <div><span class="eyebrow">Your recipe book</span><h3>📖 My Recipes</h3></div>
-     <button class="primary" id="addRecipeBtn" type="button">+ Add recipe</button>
    </div>
-   <p class="sub">Save your own meals, photos, ingredients and method. They stay private in your Rooted account.</p>
+   <p class="sub">Save your own meals, photos, ingredients and method. They stay private on this device and sync to your Rooted cloud account when you’re signed in.</p>
+   <button class="primary recipe-cta" id="addRecipeBtn" type="button">➕ Add Recipe</button>
    <div class="recipe-tools">
      <input id="recipeSearch" type="search" placeholder="Search my recipes…" aria-label="Search my recipes">
      <button class="outline" id="recipeFavouritesBtn" type="button">♡ Favourites</button>
@@ -716,12 +716,26 @@
     <div class="form-four">
       <label>Calories<input id="recipeCalories" type="number" min="0" placeholder="450"></label>
       <label>Protein (g)<input id="recipeProtein" type="number" min="0" placeholder="35"></label>
+      <label>Carbs (g)<input id="recipeCarbs" type="number" min="0" placeholder="45"></label>
+      <label>Fat (g)<input id="recipeFat" type="number" min="0" placeholder="12"></label>
+    </div>
+    <label>Fibre (g)<input id="recipeFiber" type="number" min="0" placeholder="8"></label>
+    <div class="form-two">
       <label>Prep (min)<input id="recipePrep" type="number" min="0" placeholder="15"></label>
       <label>Cook (min)<input id="recipeCook" type="number" min="0" placeholder="30"></label>
     </div>
     <label>Ingredients <small>One per line</small><textarea id="recipeIngredients" required rows="6" placeholder="500 g chicken breast&#10;1 kg pumpkin&#10;400 mL coconut milk"></textarea></label>
     <label>Method<textarea id="recipeMethod" required rows="7" placeholder="1. Dice the pumpkin…&#10;2. Cook the chicken…"></textarea></label>
-    <label>Tags <small>Separate with commas</small><input id="recipeTags" placeholder="slow cooker, high protein, budget"></label>
+    <div class="recipe-tags-picker">
+      <span class="eyebrow">Tags</span>
+      <div class="recipe-tag-grid">
+        <button class="recipe-tag-chip" type="button" data-recipe-tag="Breakfast">Breakfast</button>
+        <button class="recipe-tag-chip" type="button" data-recipe-tag="Lunch">Lunch</button>
+        <button class="recipe-tag-chip" type="button" data-recipe-tag="Dinner">Dinner</button>
+        <button class="recipe-tag-chip" type="button" data-recipe-tag="Snack">Snack</button>
+        <button class="recipe-tag-chip" type="button" data-recipe-tag="Dessert">Dessert</button>
+      </div>
+    </div>
     <label class="recipe-favourite-check"><input id="recipeFavourite" type="checkbox"> Add to favourites</label>
     <button class="primary recipe-save" type="submit">Save recipe</button>
   </form>
