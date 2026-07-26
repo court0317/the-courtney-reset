@@ -53,6 +53,9 @@
     closeRecipeModal('recipeViewModal');
   }
 
+  // Defensive reset: no recipe dialog should appear until its button is tapped.
+  closeAllRecipeModals();
+
   function loadRecipes() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
     catch (_) { return []; }

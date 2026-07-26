@@ -678,3 +678,11 @@ dialog[open]{
     max-height:min(82vh,760px);
   }
 }
+
+/* Flourish & Bloom 3.6.2 — closed dialogs must never render as page content */
+dialog:not([open]){
+  display:none!important;
+}
+dialog.recipe-import-modal[open]{
+  display:grid!important;
+}

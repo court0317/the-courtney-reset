@@ -1,0 +1,8 @@
+Flourish & Bloom 3.6.2
+
+Recipe modal startup fix
+
+- Fixed the recipe import box appearing as ordinary page content on startup.
+- Closed dialogs are now force-hidden until the user deliberately opens them.
+- Added a defensive startup reset for all recipe dialogs.
+- Updated cache-busting and the service-worker cache so the correction loads after deployment.
