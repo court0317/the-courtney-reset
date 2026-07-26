@@ -169,6 +169,77 @@ function setWaterCount(next,dayKey=dk){
  return count;
 }
 function changeWaterCount(delta,dayKey=dk){return setWaterCount(waterCount(dayKey)+delta,dayKey)}
+function isIsoDateKey(value){return /^\d{4}-\d{2}-\d{2}$/.test(String(value||''))}
+function asNumber(value){
+ const num=Number(value);
+ return Number.isFinite(num)?num:0;
+}
+function ensureWalkStores(){
+ if(!state.walking||typeof state.walking!=='object')state.walking={};
+ if(!state.walkLogs||typeof state.walkLogs!=='object')state.walkLogs={};
+ if(!Array.isArray(state.walks))state.walks=[];
+}
+function aggregateLegacyWalkForDate(dateKey){
+ ensureWalkStores();
+ const totals={minutes:0,speed:0,distance:0};
+ state.walks.forEach(item=>{
+   if(String(item?.date||'').slice(0,10)!==dateKey)return;
+   totals.minutes+=asNumber(item?.minutes);
+   totals.distance+=asNumber(item?.distance);
+   if(!totals.speed&&asNumber(item?.speed)>0)totals.speed=asNumber(item?.speed);
+ });
+ return totals;
+}
+function walkEntryForDate(dateKey){
+ ensureWalkStores();
+ const fromLogs=state.walkLogs?.[dateKey];
+ if(fromLogs&&typeof fromLogs==='object'){
+   return {minutes:asNumber(fromLogs.minutes),speed:asNumber(fromLogs.speed),distance:asNumber(fromLogs.distance)};
+ }
+ const fromWalking=state.walking?.[dateKey];
+ if(fromWalking&&typeof fromWalking==='object'){
+   return {minutes:asNumber(fromWalking.minutes),speed:asNumber(fromWalking.speed),distance:asNumber(fromWalking.distance)};
+ }
+ return aggregateLegacyWalkForDate(dateKey);
+}
+function upsertLegacyWalk(dateKey,entry){
+ ensureWalkStores();
+ const next=state.walks.filter(item=>String(item?.date||'').slice(0,10)!==dateKey);
+ next.push({date:dateKey,minutes:asNumber(entry.minutes),speed:asNumber(entry.speed),distance:asNumber(entry.distance)});
+ state.walks=next;
+}
+function saveWalkForDate(dateKey,minutes,speed,distance){
+ ensureWalkStores();
+ const safeKey=isIsoDateKey(dateKey)?dateKey:new Date().toISOString().slice(0,10);
+ const existing=walkEntryForDate(safeKey);
+ const next={
+   minutes:Math.max(0,existing.minutes+asNumber(minutes)),
+   speed:asNumber(speed)||existing.speed,
+   distance:Math.max(0,existing.distance+asNumber(distance))
+ };
+ state.walkLogs[safeKey]=next;
+ upsertLegacyWalk(safeKey,next);
+ if(safeKey===new Date().toISOString().slice(0,10)){
+   state.walking[dk]=next;
+   state.checks[`${dk}-walk`]=next.minutes>0;
+ }
+ return next;
+}
+function walkDaysCount(){
+ ensureWalkStores();
+ const days=new Set();
+ Object.entries(state.walkLogs||{}).forEach(([key,val])=>{
+   if(isIsoDateKey(key)&&asNumber(val?.minutes)>0)days.add(key);
+ });
+ Object.entries(state.walking||{}).forEach(([key,val])=>{
+   if(isIsoDateKey(key)&&asNumber(val?.minutes)>0)days.add(key);
+ });
+ state.walks.forEach(item=>{
+   const dateKey=String(item?.date||'').slice(0,10);
+   if(isIsoDateKey(dateKey)&&asNumber(item?.minutes)>0)days.add(dateKey);
+ });
+ return days.size;
+}
 function proteinData(){let list=selectedMeals(),done=list.filter(m=>state.mealDone[`${dk}-${m.type}`]);return{done:done.reduce((a,m)=>a+(m.protein||0),0),total:list.reduce((a,m)=>a+(m.protein||0),0)}}
 function programProgress(){let done=0,total=0;for(let ww=1;ww<=8;ww++)for(let dd=0;dd<7;dd++){let wo=workouts[dd],k=`w${ww}d${dd}`;total++;if(state.checks[`${k}-walk`])done++;total++;if(wo.ex.every((e,i)=>Array.from({length:ww>=5&&i<2?e.sets+1:e.sets},(_,n)=>state.checks[`${k}-ex${i}-set${n+1}`]).every(Boolean)))done++}return pct(done,total)}
 function setRing(el,val){el.style.background=`conic-gradient(var(--sage) ${val}%,#e2e5df ${val}%)`}
@@ -326,11 +397,37 @@ if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWork
   document.querySelectorAll('.mode-card').forEach(b => b.addEventListener('click', () => applyMode(b.dataset.mode)));
   applyMode(state.mode || 'normal');
 
+  const migrateLegacyWalksToMainState = () => {
+    if (!Array.isArray(state.walks) || !state.walks.length) return;
+    const appState = window.FlourishBloomAppState;
+    if (!appState) return;
+    let changed = false;
+    state.walks.forEach(item => {
+      const dateKey = String(item?.date || '').slice(0,10);
+      const minutes = asNumber(item?.minutes);
+      const speed = asNumber(item?.speed);
+      const distance = asNumber(item?.distance);
+      if (!isIsoDateKey(dateKey) || (!minutes && !distance)) return;
+      const existing = walkEntryForDate(dateKey);
+      if (existing.minutes > 0 || existing.distance > 0) return;
+      saveWalkForDate(dateKey, minutes, speed, distance);
+      changed = true;
+    });
+    if (changed) window.FlourishBloomAppStateSave?.();
+  };
+  migrateLegacyWalksToMainState();
+
   // Walking pad log
   const renderWalkSummary = () => {
     const el = document.getElementById('walkSummary');
     if (!el) return;
-    const recent = state.walks.slice(-7);
+    const appState = window.FlourishBloomAppState || {};
+    const logs = appState.walkLogs || {};
+    const recent = Object.entries(logs)
+      .filter(([key,val]) => isIsoDateKey(key) && asNumber(val?.minutes) > 0)
+      .sort((a,b) => a[0].localeCompare(b[0]))
+      .slice(-7)
+      .map(([date,value]) => ({ date, minutes: asNumber(value?.minutes), distance: asNumber(value?.distance) }));
     const mins = recent.reduce((n,w)=>n+(Number(w.minutes)||0),0);
     const km = recent.reduce((n,w)=>n+(Number(w.distance)||0),0);
     el.textContent = recent.length ? `Last 7 logged walks: ${mins} minutes • ${km.toFixed(1)} km` : 'No walks logged yet.';
@@ -340,8 +437,14 @@ if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWork
     const speed = Number(document.getElementById('walkSpeed')?.value || 0);
     const distance = Number(document.getElementById('walkDistance')?.value || 0);
     if (!minutes && !distance) { alert('Add your minutes or distance first.'); return; }
-    state.walks.push({date:new Date().toISOString().slice(0,10), minutes, speed, distance});
-    save(); renderWalkSummary();
+    const todayKey = new Date().toISOString().slice(0,10);
+    saveWalkForDate(todayKey, minutes, speed, distance);
+    window.FlourishBloomAppStateSave?.();
+    if (typeof renderFlourishBloomPremium === 'function') renderFlourishBloomPremium();
+    if (typeof renderFlourishBloomBuild3 === 'function') renderFlourishBloomBuild3();
+    if (typeof renderAllV8 === 'function') renderAllV8();
+    save();
+    renderWalkSummary();
     ['walkMinutes','walkSpeed','walkDistance'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   });
   renderWalkSummary();
@@ -453,8 +556,7 @@ function flourishBloomHabitScore(){
     if(waterCount()>=5) score++;
     const workoutDone=!!(state.completedWorkouts?.[dk] || state.workoutDone?.[dk]);
     if(workoutDone) score++;
-    const walk=state.walking?.[dk] || state.walkLogs?.[dk];
-    if((walk?.minutes||0)>=20) score++;
+    if(getWalkMinutesToday()>=20) score++;
   }catch(e){}
   return score;
 }
@@ -466,8 +568,7 @@ function totalFlourishBloomChoices(){
     total += Object.values(state.mealDone||{}).filter(Boolean).length;
     total += Object.values(state.completedWorkouts||{}).filter(Boolean).length;
     total += Object.values(state.workoutDone||{}).filter(Boolean).length;
-    total += Object.values(state.walking||{}).filter(v=>(v?.minutes||0)>0).length;
-    total += Object.values(state.walkLogs||{}).filter(v=>(v?.minutes||0)>0).length;
+    total += walkDaysCount();
   }catch(e){}
   return total;
 }
@@ -598,8 +699,11 @@ function setupFlourishBloomOnboarding(){
 
 function getWalkMinutesToday(){
   try{
-    const walk=state.walking?.[dk]||state.walkLogs?.[dk]||{};
-    return Number(walk.minutes||0);
+    const dateKey=flourishBloomTodayKey();
+    const walk=walkEntryForDate(dateKey);
+    if(asNumber(walk.minutes)>0)return asNumber(walk.minutes);
+    const legacyByProgramDay=state.walking?.[dk]||state.walkLogs?.[dk]||{};
+    return Number(legacyByProgramDay.minutes||0);
   }catch(e){return 0}
 }
 
@@ -809,6 +913,7 @@ function monthlyReviewData(){
   const waterDays={};
   let walkMinutes=0;
   let workouts=0;
+  const walkMinutesByDay={};
 
   Object.entries((state&&state.water)||{}).forEach(([key,value])=>{
     if(!value || !key.startsWith(prefix))return;
@@ -827,12 +932,20 @@ function monthlyReviewData(){
   });
   const walkMaps=[(state&&state.walking)||{},(state&&state.walkLogs)||{}];
   walkMaps.forEach(map=>Object.entries(map).forEach(([key,value])=>{
-    if(key.startsWith(prefix)){
-      const mins=Number(value?.minutes||0);
-      walkMinutes+=mins;
-      if(mins>0)healthyDays.add(key.slice(0,10));
-    }
+    if(!isIsoDateKey(key) || !key.startsWith(prefix))return;
+    const day=key.slice(0,10);
+    const mins=Number(value?.minutes||0);
+    walkMinutesByDay[day]=Math.max(Number(walkMinutesByDay[day]||0),mins);
+    if(mins>0)healthyDays.add(day);
   }));
+  (state.walks||[]).forEach(item=>{
+    const day=String(item?.date||'').slice(0,10);
+    if(!isIsoDateKey(day) || !day.startsWith(prefix) || walkMinutesByDay[day])return;
+    const mins=asNumber(item?.minutes);
+    walkMinutesByDay[day]=mins;
+    if(mins>0)healthyDays.add(day);
+  });
+  walkMinutes=Object.values(walkMinutesByDay).reduce((sum,val)=>sum+asNumber(val),0);
   const waterGoalDays=Object.values(waterDays).filter(count=>count>=5).length;
   return {healthyDays:healthyDays.size,waterGoalDays,walkMinutes,workouts};
 }
@@ -949,6 +1062,14 @@ function gardenCounts(){
   });
   Object.entries((state&&state.walking)||{}).forEach(([key,val])=>{
     if(Number(val?.minutes||0)>0){healthyDays.add(key.slice(0,10));moveDays.add(key.slice(0,10))}
+  });
+  Object.entries((state&&state.walkLogs)||{}).forEach(([key,val])=>{
+    const day=String(key).slice(0,10);
+    if(Number(val?.minutes||0)>0&&isIsoDateKey(day)){healthyDays.add(day);moveDays.add(day)}
+  });
+  (state.walks||[]).forEach(item=>{
+    const day=String(item?.date||'').slice(0,10);
+    if(asNumber(item?.minutes)>0&&isIsoDateKey(day)){healthyDays.add(day);moveDays.add(day)}
   });
   const roots=Object.values(flourishBloomDailyRoots()).filter(Boolean).length;
   const total=healthyDays.size+roots+Math.floor(waterLogs/5)+moveDays.size;
