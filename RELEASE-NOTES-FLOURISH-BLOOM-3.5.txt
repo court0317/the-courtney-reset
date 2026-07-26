@@ -1,0 +1,18 @@
+FLOURISH & BLOOM 3.5 — CLOUD GARDEN REFRESH
+
+VISUAL REFRESH
+- Introduced the signature cloud-and-garden visual identity.
+- Added a soft sky-to-cream app background with subtle drifting clouds.
+- Redesigned the home hero with a layered sky, hills, plant, flowers and cloud details.
+- Refined the Living Garden card into a fuller illustrated scene.
+- Added a polished cloud garden splash/loading screen.
+- Standardised card radii, shadows, buttons, inputs and modal styling.
+- Improved the sticky header and profile button.
+- Rebuilt the bottom navigation as a floating, glass-style navigation dock.
+- Added smoother page, cloud, plant and sun motion with reduced-motion support.
+
+FUNCTIONAL SAFETY
+- Existing recipes, tracking, onboarding, garden, local data and cloud sync are preserved.
+- Updated service-worker cache to v3.5 so installed phones receive the redesign.
+- Updated all local asset version strings to flourish350.
+- JavaScript and manifest syntax checks passed.

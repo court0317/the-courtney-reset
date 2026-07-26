@@ -506,3 +506,138 @@ nav .nav.active span{transform:translateY(-1px)}
 
 /* Flourish & Bloom 3.3.1 — My Recipes */
 .my-recipes-card{margin-top:16px;overflow:hidden}.my-recipes-card .section-head{align-items:center}.recipe-tools{display:flex;gap:10px;margin:14px 0}.recipe-tools input{flex:1;min-width:0}.recipe-tools .active{background:#edf2e9;border-color:#6f8466;color:#3d5637}.recipe-cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}.recipe-cta{width:100%;margin-bottom:0;padding:14px 16px;font-weight:800}.my-recipes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.saved-recipe{border:1px solid rgba(75,91,70,.16);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.72);cursor:pointer;box-shadow:0 8px 24px rgba(49,64,47,.06)}.saved-recipe-photo{height:145px;background:linear-gradient(145deg,#edf3e8,#dfe9d8);display:grid;place-items:center;font-size:42px}.saved-recipe-photo img{width:100%;height:100%;object-fit:cover}.saved-recipe-body{padding:14px}.saved-recipe-top{display:flex;justify-content:space-between;align-items:center}.saved-recipe h4{font-size:18px;margin:4px 0 6px}.saved-recipe p{margin:0 0 12px;color:var(--muted,#667064);font-size:13px}.recipe-heart{border:0;background:transparent;font-size:23px;color:#7b4d51;padding:0}.saved-recipe-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}.recipe-empty{grid-column:1/-1;padding:24px;text-align:center;border:1px dashed rgba(75,91,70,.25);border-radius:16px}.recipe-tools select{min-width:170px}.recipe-tools .outline,.recipe-tools select{padding:12px 13px;border-radius:12px}.recipe-modal{width:min(760px,calc(100% - 24px));max-height:90vh;overflow:auto}.recipe-stepper{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px}.recipe-step-pill{border:1px solid rgba(61,73,58,.18);background:#f7f7f2;border-radius:999px;padding:8px 11px;font:inherit;font-weight:700;color:#53604d}.recipe-step-pill.active{background:#dfe9d8;border-color:#6f8466;color:#365230}.recipe-step-panel{display:none;gap:12px}.recipe-step-panel.active{display:grid}.recipe-form{display:grid;gap:14px}.recipe-form label{display:grid;gap:6px;font-weight:700;color:#3d493a}.recipe-form input,.recipe-form select,.recipe-form textarea,.recipe-tools input,.recipe-tools select{width:100%;box-sizing:border-box;border:1px solid rgba(61,73,58,.2);border-radius:12px;padding:12px;background:#fff;font:inherit;color:inherit}.recipe-form textarea{resize:vertical}.recipe-form-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:6px}.recipe-draft-status{min-height:20px;color:#5e714f;font-size:.9rem;font-weight:700}.recipe-counter-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.recipe-counter-pill{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;background:#eef3ea;color:#4f654f;font-weight:700;font-size:.78rem}.recipe-preview-card{border:1px solid rgba(61,73,58,.14);border-radius:16px;padding:12px;background:#faf8f3}.recipe-preview-list{display:grid;gap:8px;margin-top:8px}.recipe-preview-list div{padding:8px 10px;border-radius:12px;background:#f1f4ea;color:#43513d;font-size:.92rem}.recipe-photo-field{border:1px dashed rgba(61,73,58,.3);border-radius:14px;padding:14px}.recipe-photo-preview{width:100%;max-height:220px;object-fit:cover;border-radius:16px;margin-top:10px}.recipe-tags-picker{display:grid;gap:8px}.recipe-tag-grid{display:flex;flex-wrap:wrap;gap:8px}.recipe-tag-chip{border:1px solid rgba(61,73,58,.18);background:#f7f7f2;border-radius:999px;padding:8px 11px;font:inherit;font-weight:700;color:#4c5949}.recipe-tag-chip.active{background:#dfe9d8;border-color:#6f8466;color:#365230}.saved-recipe{position:relative;display:grid;gap:0;transition:transform .18s ease,box-shadow .18s ease}.saved-recipe:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(49,64,47,.12)}.saved-recipe-photo{height:140px;background:linear-gradient(145deg,#edf3e8,#dfe9d8);display:grid;place-items:center;font-size:42px}.saved-recipe-photo img{width:100%;height:100%;object-fit:cover}.saved-recipe-body{padding:14px}.saved-recipe-top{display:flex;justify-content:space-between;align-items:center}.saved-recipe h4{font-size:18px;margin:4px 0 6px}.saved-recipe p{margin:0 0 10px;color:var(--muted,#667064);font-size:13px}.saved-recipe-meta{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px}.saved-recipe-meta span{display:inline-flex;align-items:center;padding:6px 8px;border-radius:999px;background:#eef3ea;color:#4f644f;font-size:.76rem;font-weight:700}.saved-recipe-tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}.saved-recipe-chip{display:inline-flex;padding:5px 8px;border-radius:999px;background:#f7f4eb;color:#6b6a5d;font-size:.72rem;font-weight:700}.saved-recipe-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}.saved-recipe-action-row{display:flex;gap:8px;flex-wrap:wrap}.recipe-heart{border:0;background:transparent;font-size:23px;color:#7b4d51;padding:0}.recipe-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(8px);padding:12px 16px;border-radius:999px;background:rgba(44,58,43,.95);color:#fff;font-weight:700;box-shadow:0 16px 38px rgba(41,54,41,.2);z-index:12000;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease}.recipe-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.recipe-card-shell{display:grid;gap:16px}.recipe-view-photo{width:100%;max-height:280px;object-fit:cover;border-radius:20px}.recipe-view-photo-placeholder{min-height:220px;display:grid;place-items:center;border-radius:20px;background:linear-gradient(145deg,#edf3e8,#dfe9d8);font-size:3rem}.recipe-card-copy{display:grid;gap:12px}.recipe-meta{display:flex;flex-wrap:wrap;gap:8px;color:#5b6459}.recipe-macro-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.recipe-macro-grid div{background:#f6f3eb;border:1px solid rgba(61,73,58,.1);border-radius:14px;padding:10px;text-align:center}.recipe-macro-grid b{display:block;font-size:1rem}.recipe-macro-grid small{display:block;color:var(--muted,#667064);font-size:.72rem;margin-top:2px}.recipe-section{display:grid;gap:8px}.recipe-ingredient-list{margin:0;padding-left:18px;display:grid;gap:6px;color:#475446}.recipe-method-full{white-space:pre-line;line-height:1.65;color:#475446}.recipe-view-actions{display:flex;flex-wrap:wrap;gap:10px}.recipe-view-actions .danger{color:#9a4545!important}.recipe-view-actions .text-btn{border:0;background:transparent;padding:0;font:inherit;font-weight:700}.recipe-view-actions .outline,.recipe-view-actions .primary{padding:10px 13px}.recipe-photo-preview{width:100%;max-height:280px;object-fit:cover;border-radius:16px}.recipe-favourite-check{display:flex!important;grid-template-columns:auto 1fr!important;align-items:center;justify-content:flex-start}.recipe-favourite-check input{width:auto}.recipe-tags-picker{display:grid;gap:8px}.recipe-tag-grid{display:flex;flex-wrap:wrap;gap:8px}.recipe-tag-chip{border:1px solid rgba(61,73,58,.2);background:#f6f4ed;border-radius:999px;padding:9px 12px;font:inherit;color:inherit}.recipe-tag-chip.active{background:#6f846b;color:#fff;border-color:#6f846b}.recipe-save{width:100%;padding:14px}.recipe-card-shell{display:grid;gap:16px}.recipe-view-photo{width:100%;max-height:320px;object-fit:cover;border-radius:18px;margin-bottom:0}.recipe-view-photo-placeholder{min-height:220px;display:grid;place-items:center;background:linear-gradient(145deg,#edf3e8,#dfe9d8);font-size:3rem}.recipe-meta,.recipe-tags{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.recipe-meta span{background:#eef2eb;border-radius:999px;padding:7px 10px;font-size:13px}.recipe-macro-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0}.recipe-macro-grid div{background:#f5efe6;border:1px solid rgba(61,73,58,.08);padding:10px;border-radius:14px;text-align:center}.recipe-macro-grid b{display:block;font-size:1rem}.recipe-macro-grid small{display:block;margin-top:3px;color:var(--muted);font-size:.72rem}.recipe-section h3{margin:0 0 6px}.recipe-ingredient-list{padding-left:22px;line-height:1.7}.recipe-method-full{line-height:1.65;white-space:pre-wrap}.recipe-view-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}.recipe-view-actions .danger{color:#9a3f45!important}.recipe-import-modal{display:grid;gap:12px}.recipe-import-field{display:grid;gap:8px;font-weight:700;color:#475346}.recipe-import-field input{width:100%;box-sizing:border-box;padding:12px 13px;border:1px solid rgba(76,91,71,.2);border-radius:14px;background:#fff}.recipe-import-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;align-items:center}.recipe-import-status,.recipe-import-error{min-height:22px;font-size:.95rem}.recipe-import-error{color:#8c4d4d;font-weight:700}@media(max-width:650px){.recipe-form .form-four{grid-template-columns:1fr 1fr}.recipe-tools{flex-direction:column}.my-recipes-grid{grid-template-columns:1fr}.saved-recipe{display:grid;grid-template-columns:110px 1fr}.saved-recipe-photo{height:100%;min-height:145px}.saved-recipe-actions{align-items:flex-start;flex-direction:column}.recipe-form .form-two{grid-template-columns:1fr}.recipe-macro-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Flourish & Bloom 3.5 — Cloud Garden visual refresh */
+:root{
+  --fb-sky:#dfeff3;
+  --fb-sky-deep:#c8e2e8;
+  --fb-cream:#fffaf2;
+  --fb-paper:rgba(255,253,248,.88);
+  --fb-sage:#70866d;
+  --fb-sage-deep:#405843;
+  --fb-moss:#536a50;
+  --fb-peach:#efc9b5;
+  --fb-gold:#e9c776;
+  --fb-blue:#789fa9;
+  --fb-ink:#33443b;
+  --fb-muted:#718078;
+  --fb-shadow:0 18px 48px rgba(55,78,68,.11);
+  --fb-soft-shadow:0 10px 30px rgba(55,78,68,.075);
+}
+html{background:#e8f2f1}
+body{background:linear-gradient(180deg,#dceef2 0,#edf5f1 22%,#fffaf2 56%,#f8f1e6 100%);color:var(--fb-ink);min-height:100vh}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-2;background:radial-gradient(circle at 82% 5%,rgba(255,255,255,.85),transparent 23%),radial-gradient(circle at 8% 27%,rgba(255,255,255,.52),transparent 20%)}
+.app{position:relative;z-index:1;isolation:isolate}
+.ambient-sky{position:fixed;inset:0 0 auto;height:270px;overflow:hidden;pointer-events:none;z-index:-1;opacity:.9}
+.ambient-cloud,.splash-cloud,.hero-cloud{position:absolute;width:110px;height:36px;border-radius:999px;background:rgba(255,255,255,.72);filter:drop-shadow(0 8px 14px rgba(87,116,122,.08))}
+.ambient-cloud::before,.ambient-cloud::after,.splash-cloud::before,.splash-cloud::after,.hero-cloud::before,.hero-cloud::after{content:"";position:absolute;border-radius:50%;background:inherit}
+.ambient-cloud::before,.splash-cloud::before,.hero-cloud::before{width:52px;height:52px;left:20px;bottom:8px}
+.ambient-cloud::after,.splash-cloud::after,.hero-cloud::after{width:66px;height:66px;right:13px;bottom:4px}
+.cloud-a{top:78px;left:-28px;transform:scale(.78);animation:fbDrift 26s linear infinite}
+.cloud-b{top:138px;right:-52px;transform:scale(.55);animation:fbDriftReverse 34s linear infinite}
+.cloud-c{top:22px;left:48%;transform:scale(.42);opacity:.6;animation:fbFloat 8s ease-in-out infinite}
+@keyframes fbDrift{50%{transform:translateX(42px) scale(.78)}}
+@keyframes fbDriftReverse{50%{transform:translateX(-46px) scale(.55)}}
+@keyframes fbFloat{50%{transform:translateY(-7px) scale(.42)}}
+
+.top{position:sticky;top:0;z-index:3000;margin:0;padding:max(12px,env(safe-area-inset-top)) 18px 10px;background:linear-gradient(180deg,rgba(221,239,243,.96),rgba(232,244,241,.78) 72%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:0!important;box-shadow:none!important}
+.flourishBloom-brand-lockup{min-width:0}
+.flourishBloom-logo-mark{width:min(250px,68vw);filter:drop-shadow(0 5px 12px rgba(53,80,67,.08))}
+.flourishBloom-logo-mark svg path{stroke:var(--fb-sage-deep)!important}
+.flourishBloom-logo-mark svg text{fill:var(--fb-sage-deep)!important;font-family:Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:.4px}
+.flourishBloom-logo-date{color:var(--fb-muted)!important;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.66rem!important;margin-top:-4px}
+.avatar{width:44px!important;height:44px!important;border-radius:16px!important;background:rgba(255,255,255,.74)!important;color:var(--fb-sage-deep)!important;border:1px solid rgba(79,106,83,.1)!important;box-shadow:var(--fb-soft-shadow)!important;backdrop-filter:blur(12px)}
+main{padding-top:4px}
+.page{animation:fbPageIn .34s ease both}
+@keyframes fbPageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+.card,.progress-row,.focus-tile,.saved-recipe{border:1px solid rgba(68,94,72,.075)!important;background:var(--fb-paper)!important;box-shadow:var(--fb-soft-shadow)!important;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
+.card{border-radius:25px!important}
+.eyebrow{color:var(--fb-sage)!important;letter-spacing:.12em!important;font-size:.66rem!important;font-weight:850!important}
+h1,h2,h3{color:var(--fb-ink)}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:active{transform:scale(.98)}
+.primary{background:linear-gradient(135deg,var(--fb-sage),var(--fb-moss))!important;border:0!important;color:#fff!important;box-shadow:0 10px 24px rgba(73,102,76,.2)!important;border-radius:15px!important}
+.outline{background:rgba(255,255,255,.6)!important;border:1px solid rgba(70,96,74,.15)!important;color:var(--fb-sage-deep)!important;border-radius:15px!important}
+
+.home-hero-card{position:relative;min-height:190px;padding:25px 24px!important;border-radius:31px!important;overflow:hidden;background:linear-gradient(145deg,#bcdde2 0%,#d9ece7 52%,#f6ead8 100%)!important;box-shadow:0 22px 50px rgba(66,100,96,.14)!important;border:1px solid rgba(255,255,255,.55)!important}
+.home-hero-card::after{content:"";position:absolute;inset:auto -9% -72px 34%;height:150px;border-radius:50% 50% 0 0;background:linear-gradient(180deg,rgba(132,157,116,.29),rgba(109,137,93,.48));transform:rotate(-5deg)}
+.home-hero-copy{position:relative;z-index:4;max-width:63%}
+.home-hero-copy h2{font-family:Georgia,"Times New Roman",serif!important;font-size:clamp(1.65rem,6vw,2.2rem)!important;line-height:1.04!important;letter-spacing:-.025em;margin:6px 0 9px!important;color:#30483e!important}
+.home-hero-copy p{color:#567068!important;line-height:1.45!important}
+.journey-note{display:inline-flex!important;align-items:center;gap:5px;margin-top:17px;padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.6)!important;color:#496257!important;font-size:.72rem!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.45)}
+.home-garden-art{z-index:3!important;right:15px!important;bottom:8px!important;filter:drop-shadow(0 12px 20px rgba(61,82,56,.14))}
+.home-plant{font-size:4.7rem!important;animation:plantFloat 4.8s ease-in-out infinite}
+.home-flowers{font-size:1.5rem!important}
+.home-sun{filter:drop-shadow(0 5px 10px rgba(220,180,75,.23));animation:fbSun 7s ease-in-out infinite}
+@keyframes fbSun{50%{transform:translateY(-4px) rotate(7deg)}}
+.home-mini-cloud{position:absolute;right:74px;top:5px;font-size:1.45rem;opacity:.85;animation:fbMiniCloud 7s ease-in-out infinite}
+@keyframes fbMiniCloud{50%{transform:translateX(10px)}}
+.hero-cloud{z-index:1;opacity:.52}
+.hero-cloud-one{right:-28px;top:20px;transform:scale(.5)}
+.hero-cloud-two{left:42%;bottom:13px;transform:scale(.28);opacity:.32}
+
+.flourishBloom-daily-strip{margin-top:13px!important;padding:14px 16px!important;border-radius:21px!important;display:grid!important;grid-template-columns:auto 1fr!important;gap:14px!important}
+.daily-streak{padding-right:15px;border-right:1px solid rgba(65,90,69,.1)}
+.streak-flame{width:39px;height:39px;border-radius:14px;background:#fff0d4;display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(205,158,70,.09)}
+.mood-picker.compact button{background:rgba(255,255,255,.7)!important;border:1px solid rgba(65,90,69,.08)!important;border-radius:13px!important;transition:.2s ease!important}
+.mood-picker.compact button.selected{background:#dfead9!important;transform:translateY(-2px) scale(1.07);box-shadow:0 8px 15px rgba(81,110,81,.13)}
+
+.home-living-garden{position:relative!important;border-radius:29px!important;overflow:hidden!important;background:linear-gradient(145deg,rgba(250,246,230,.96),rgba(224,239,226,.96))!important;box-shadow:var(--fb-shadow)!important;padding:0!important;min-height:220px!important}
+.home-living-garden::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(185,219,226,.75) 0%,rgba(230,241,230,.65) 49%,rgba(191,206,158,.35) 50%,rgba(151,176,119,.24) 100%);z-index:0}
+.home-living-garden-scene,.home-living-garden-copy,.home-living-garden-arrow{position:relative;z-index:2}
+.home-living-garden-scene{min-height:205px!important}
+.home-garden-main-plant{font-size:5rem!important;filter:drop-shadow(0 12px 16px rgba(58,87,52,.16));animation:plantFloat 5s ease-in-out infinite}
+.garden-cloud{position:absolute;font-size:1.6rem;opacity:.78;filter:drop-shadow(0 5px 8px rgba(74,105,108,.09))}
+.garden-cloud-one{left:15%;top:12%;animation:fbMiniCloud 9s ease-in-out infinite}
+.garden-cloud-two{right:17%;top:20%;font-size:1.05rem;animation:fbMiniCloud 11s ease-in-out infinite reverse}
+.home-garden-meter{height:8px!important;background:rgba(71,101,74,.11)!important}
+.home-garden-meter span{background:linear-gradient(90deg,var(--fb-sage),#9db47d,var(--fb-peach))!important}
+.home-garden-link{color:var(--fb-sage-deep)!important;font-weight:800!important}
+
+.home-progress-section{margin-top:25px!important}
+.home-section-heading h2{font-family:Georgia,"Times New Roman",serif!important;font-weight:600!important;letter-spacing:-.02em}
+.progress-list{gap:10px!important}
+.progress-row{border-radius:20px!important;padding:13px 14px!important;transition:transform .18s ease,box-shadow .18s ease!important}
+.progress-row:active{transform:scale(.985)!important}
+.progress-icon{border-radius:14px!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+.linear-track{height:7px!important;background:rgba(67,90,70,.1)!important}
+.linear-track em{background:linear-gradient(90deg,var(--fb-sage),#96af83)!important}
+
+nav{left:12px!important;right:12px!important;bottom:max(10px,env(safe-area-inset-bottom))!important;width:auto!important;height:70px!important;padding:7px!important;border:1px solid rgba(67,92,74,.09)!important;border-radius:25px!important;background:rgba(255,253,248,.88)!important;box-shadow:0 18px 45px rgba(45,67,56,.16)!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;gap:3px!important}
+nav .nav{border:0!important;background:transparent!important;color:#839087!important;border-radius:18px!important;padding:5px 2px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;font-weight:750!important;min-width:0!important}
+nav .nav small{font-size:.61rem!important;line-height:1!important}
+nav .nav-icon{width:31px;height:31px;display:grid!important;place-items:center;border-radius:12px;font-family:Arial,sans-serif;font-size:1.18rem!important;line-height:1!important;transition:.22s ease}
+nav .nav.active{color:var(--fb-sage-deep)!important}
+nav .nav.active .nav-icon{background:linear-gradient(145deg,#dce9d6,#eef4ea);box-shadow:inset 0 0 0 1px rgba(81,108,79,.08),0 5px 12px rgba(76,104,76,.1);transform:translateY(-1px)}
+
+.flourishBloom-splash{background:linear-gradient(180deg,#d5eaf0,#edf5ee 58%,#f9eedf)!important;overflow:hidden}
+.flourishBloom-splash::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-70px;height:210px;border-radius:50% 50% 0 0;background:linear-gradient(180deg,#b8cf9d,#8fae7c);opacity:.55}
+.flourishBloom-splash>*:not(.splash-cloud){position:relative;z-index:3}
+.splash-cloud{z-index:1;opacity:.72}
+.splash-cloud.cloud-one{left:-20px;top:15%;transform:scale(.8);animation:fbDrift 8s ease-in-out infinite}
+.splash-cloud.cloud-two{right:-24px;top:27%;transform:scale(.55);animation:fbDriftReverse 9s ease-in-out infinite}
+.splash-cloud.cloud-three{left:58%;top:8%;transform:scale(.35);opacity:.5;animation:fbFloat 7s ease-in-out infinite}
+.splash-mark{background:rgba(255,255,255,.58)!important;box-shadow:0 18px 45px rgba(66,95,79,.12)!important;backdrop-filter:blur(10px)}
+.flourishBloom-splash h1{font-family:Georgia,"Times New Roman",serif!important;color:var(--fb-sage-deep)!important;letter-spacing:-.025em}
+.flourishBloom-splash p{color:#667b70!important}
+
+input,select,textarea{border-radius:15px!important;border-color:rgba(64,88,68,.14)!important;background:rgba(255,255,255,.8)!important;box-shadow:inset 0 1px 2px rgba(49,66,53,.035)}
+dialog{border-radius:27px!important;border:1px solid rgba(66,91,70,.09)!important;box-shadow:0 30px 80px rgba(43,63,52,.23)!important;background:#fffdf8!important}
+
+@media(max-width:620px){
+  main{padding-left:13px!important;padding-right:13px!important;padding-bottom:104px!important}
+  .top{padding-left:15px;padding-right:15px}
+  .home-hero-card{min-height:178px;padding:22px 19px!important}
+  .home-hero-copy{max-width:67%}
+  .home-hero-copy p{font-size:.82rem!important}
+  .home-garden-art{right:5px!important}
+  .home-plant{font-size:4.05rem!important}
+  .flourishBloom-daily-strip{grid-template-columns:1fr!important}
+  .daily-streak{border-right:0;border-bottom:1px solid rgba(65,90,69,.09);padding:0 0 11px}
+  .home-living-garden{grid-template-columns:42% 1fr!important;min-height:206px!important}
+  .home-living-garden-scene{min-height:206px!important}
+  .home-garden-main-plant{font-size:4.1rem!important}
+  nav{left:8px!important;right:8px!important;border-radius:22px!important}
+}
+@media(prefers-reduced-motion:reduce){.ambient-cloud,.splash-cloud,.hero-cloud,.home-plant,.home-sun,.home-mini-cloud,.garden-cloud{animation:none!important}.page{animation:none!important}}
