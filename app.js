@@ -253,7 +253,15 @@ function openLeftovers(){leftoverMealType.value='Dinner';leftoverChoices.innerHT
 function openTakeaway(){takeawayChoices.innerHTML=takeawayOptions.map((x,i)=>`<button class="takeaway-choice" data-takeaway="${i}"><span>${x.icon}</span><b>${x.name}</b></button>`).join('');document.querySelectorAll('[data-takeaway]').forEach(x=>x.onclick=()=>saveTakeaway(takeawayOptions[+x.dataset.takeaway]));customTakeaway.value='';takeawayModal.showModal()}
 function saveTakeaway(choice,forceNoTrack=false){let name=choice?.name||customTakeaway.value.trim();if(!name)return;let noTrack=forceNoTrack||choice?.name.includes('don’t track');setMeal(takeawayMealType.value,{id:'takeaway',name,icon:choice?.icon||'🛍️',cal:noTrack?0:(choice?.cal||700),protein:noTrack?0:(choice?.protein||25),ingredients:[],method:'Enjoy it. Tomorrow continues normally—no punishment workout and no skipping meals to make up for it.',isTakeaway:true,noTrack});takeawayModal.close()}
 function tooTired(){if(state.leftovers.length){openLeftovers();return}setMeal('Dinner',createFallbackMeal('Dinner','A simple dinner','🍽️',480,24,[],'A gentle low-effort dinner is planned for tonight.'));alert('Tonight is sorted with a simple dinner.')}
-function skipBreakfast(){setMeal('Breakfast',createFallbackMeal('Breakfast','A simple breakfast','☕',0,0,[],'Breakfast is optional. Keep it simple and stay kind to yourself.'))}
+function skipBreakfast(){
+ const skipped=createFallbackMeal('Breakfast','Breakfast skipped','☕',0,0,[],'No breakfast planned today. You can add one back at any time.');
+ skipped.id='skip';
+ skipped.isSkipped=true;
+ setMeal('Breakfast',skipped);
+ const button=document.getElementById('skipBreakfastBtn');
+ if(button){button.classList.add('selected');button.innerHTML='<span>✓</span>Breakfast skipped';}
+}
+window.FlourishBloomSkipBreakfast=skipBreakfast;
 function planForDay(dd){let k=`w${w}d${dd}`;return state.dayMeals[k]?Object.values(state.dayMeals[k]):Object.values(defaultDayMeals(dd,w))}
 function weeklyIngredients(){let set=new Set;for(let dd=0;dd<7;dd++)planForDay(dd).forEach(m=>{if(!m.isTakeaway&&!m.isLeftover)(m.ingredients||[]).forEach(x=>set.add(x))});return[...set].sort()}
 function renderShop(){const manualItems=(state.shoppingList||[]).filter(Boolean);const groups={'Weekly groceries':[...new Set([...weeklyIngredients(),...manualItems])],'Your equipment':['Dumbbells','Walking pad','Yoga mat']};shoppingList.innerHTML=Object.entries(groups).map(([g,items])=>`<section class="shop-group"><h3>${g}</h3>${items.map(x=>`<label class="shop-row"><input class="shop-check" type="checkbox" data-shop="${x}" ${state.shopping[x]?'checked':''}><span>${x}</span></label>`).join('')}</section>`).join('');document.querySelectorAll('[data-shop]').forEach(x=>x.onchange=()=>{state.shopping[x.dataset.shop]=x.checked;persist()})}
@@ -276,10 +284,17 @@ function go(id){
   scrollTo(0,0);
 }
 document.querySelectorAll('[data-go]').forEach(x=>x.onclick=()=>go(x.dataset.go));document.querySelectorAll('.modal-close').forEach(x=>x.onclick=()=>x.closest('dialog').close());
-swapAll.onclick=()=>{state.dayMeals[dk]=defaultDayMeals(d,w);save()};clearShop.onclick=()=>{state.shopping={};save()};chooseMealBtn.onclick=()=>openMealPicker('Dinner');leftoversBtn.onclick=openLeftovers;takeawayBtn.onclick=openTakeaway;tooTiredBtn.onclick=tooTired;skipBreakfastBtn.onclick=skipBreakfast;pickerMealType.onchange=()=>buildCravings('all');pickerEffort.onchange=()=>buildCravings('all');takeawaySave.onclick=()=>saveTakeaway(null,false);takeawayNoTrack.onclick=()=>saveTakeaway(null,true);
+swapAll.onclick=()=>{state.dayMeals[dk]=defaultDayMeals(d,w);save()};clearShop.onclick=()=>{state.shopping={};save()};chooseMealBtn.onclick=()=>openMealPicker('Dinner');leftoversBtn.onclick=openLeftovers;takeawayBtn.onclick=openTakeaway;tooTiredBtn.onclick=tooTired;
+const skipBreakfastButton=document.getElementById('skipBreakfastBtn');
+if(skipBreakfastButton){
+ skipBreakfastButton.addEventListener('click',event=>{
+  event.preventDefault();
+  skipBreakfast();
+ });
+}pickerMealType.onchange=()=>buildCravings('all');pickerEffort.onchange=()=>buildCravings('all');takeawaySave.onclick=()=>saveTakeaway(null,false);takeawayNoTrack.onclick=()=>saveTakeaway(null,true);
 saveCheckin.onclick=()=>{state.checkins[w]={weight:weight.value,waist:waist.value,hips:hips.value,energy:energy.value,win:win.value};save();alert('Week '+w+' saved')};exportBtn.onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='flourish-and-bloom-backup-v5.json';a.click()};importFile.onchange=async()=>{try{state=JSON.parse(await importFile.files[0].text());save()}catch{alert('That file could not be read')}};resetBtn.onclick=()=>{if(confirm('Reset all progress?')){localStorage.removeItem(KEY);location.reload()}};
 timerToggle.onclick=()=>{if(timerInt){clearInterval(timerInt);timerInt=null;timerToggle.textContent='Start'}else{timerInt=setInterval(timerTick,1000);timerToggle.textContent='Pause'}};timerMinus.onclick=()=>{timer=Math.max(0,timer-15);timerValue.textContent=timer};timerPlus.onclick=()=>{timer+=15;timerValue.textContent=timer};
-if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=813').catch(()=>{}));render();
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=364').catch(()=>{}));render();
 
 
 // --- Version 6.2 practical upgrades ---

@@ -1,0 +1,6 @@
+Flourish & Bloom v3.6.4
+
+- Fixed the Skip breakfast button.
+- Breakfast now visibly changes to “Breakfast skipped” with zero calories.
+- The button gives immediate selected feedback and remains saved after refresh.
+- Updated app cache version.

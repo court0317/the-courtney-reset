@@ -699,3 +699,11 @@ dialog.recipe-import-modal[open]{
   inset:0!important;
   margin:auto!important;
 }
+
+/* v3.6.4 breakfast skip feedback */
+#skipBreakfastBtn.selected {
+  background: rgba(95, 113, 90, .14);
+  border-color: rgba(95, 113, 90, .45);
+  color: #40513d;
+}
+.meal-card:has([data-mealdone="Breakfast"]) {}
