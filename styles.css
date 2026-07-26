@@ -28,6 +28,12 @@ dialog select,dialog input{width:100%;border:1px solid #d7d4cc;border-radius:14p
 .walk-log-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .walk-log-grid label{font-size:.75rem;color:var(--muted);display:flex;flex-direction:column;gap:6px}
 .walk-log-grid input,.leftover-form input,.weight-log-row input{border:1px solid var(--line);background:var(--input);color:var(--text);border-radius:12px;padding:11px;min-width:0}
+.walk-summary{margin-top:12px}
+.walk-log-list{display:grid;gap:8px;margin-top:10px}
+.walk-log-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);background:var(--soft);padding:10px 12px;border-radius:14px}
+.walk-log-item b{display:block}
+.walk-log-item small{display:block;color:var(--muted);margin-top:4px}
+.walk-delete-btn{padding:8px 11px;font-size:.82rem;white-space:nowrap}
 .leftover-form{display:grid;grid-template-columns:2fr .8fr 1.3fr auto;gap:8px}
 .leftover-list{display:grid;gap:10px;margin-top:14px}
 .leftover-card{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);background:var(--soft);padding:12px;border-radius:16px}

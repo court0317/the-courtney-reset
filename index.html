@@ -233,7 +233,6 @@
    <p class="sub">Save your own meals, photos, ingredients and method. They stay private on this device and sync to your Flourish & Bloom cloud account when you’re signed in.</p>
    <div class="recipe-cta-row">
      <button class="primary recipe-cta" id="addRecipeBtn" type="button">➕ Add Recipe</button>
-     <button class="outline recipe-cta" id="importRecipeBtn" type="button">🔗 Import from URL</button>
    </div>
    <div class="recipe-tools">
      <input id="recipeSearch" type="search" placeholder="Search by name, ingredient, tag or meal type" aria-label="Search recipes">
@@ -298,7 +297,7 @@
     <label>Distance km<input id="walkDistance" type="number" min="0" step="0.1" placeholder="2.0"></label>
   </div>
   <button id="saveWalkBtn" class="primary">Save walk</button>
-  <p id="walkSummary" class="subtle"></p>
+  <div id="walkSummary" class="walk-summary subtle"></div>
 </section>
 
 <section class="smart-panel" id="fridgePanel">
@@ -757,6 +756,7 @@
     </div>
     <div class="recipe-step-panel" data-step-panel="3">
       <label>Method<textarea id="recipeMethod" required rows="8" placeholder="1. Dice the pumpkin…&#10;2. Cook the chicken…"></textarea></label>
+      <label>Notes <small>Optional</small><textarea id="recipeNotes" rows="4" placeholder="Any optional notes, swaps, or serving tips"></textarea></label>
       <div class="recipe-preview-card">
         <div class="recipe-preview-head"><span class="eyebrow">Auto-numbered preview</span></div>
         <div id="recipeMethodPreview" class="recipe-preview-list"></div>
@@ -808,32 +808,6 @@
   <button class="modal-close" type="button" aria-label="Close">×</button>
   <div id="recipeViewContent"></div>
 </dialog>
-
-<dialog id="recipeImportModal" class="recipe-modal recipe-import-modal" hidden aria-hidden="true">
-  <button class="modal-close" type="button" aria-label="Close">×</button>
-  <span class="eyebrow">Import recipe</span>
-  <h2>Bring in a recipe from a website</h2>
-  <p class="sub">This works best with sites that publish structured recipe data. Imports may need a quick review before you save them.</p>
-  <label class="recipe-import-field">Recipe URL<input id="recipeImportUrl" type="url" placeholder="https://example.com/recipe"></label>
-  <div class="recipe-import-actions">
-    <span id="recipeImportDraftStatus" class="recipe-draft-status" aria-live="polite"></span>
-    <button class="outline" id="recipeImportClearBtn" type="button">Clear draft</button>
-    <button class="outline" id="recipeImportCancelBtn" type="button">Cancel</button>
-    <button class="primary" id="recipeImportSubmitBtn" type="button">Import</button>
-  </div>
-  <div id="recipeImportStatus" class="recipe-import-status" aria-live="polite"></div>
-  <div id="recipeImportError" class="recipe-import-error" aria-live="polite"></div>
-</dialog>
-<script>
-  // Recipe importer is opt-in only. Keep it out of the page until its button is tapped.
-  (() => {
-    const modal = document.getElementById("recipeImportModal");
-    if (!modal) return;
-    modal.removeAttribute("open");
-    modal.hidden = true;
-    modal.setAttribute("aria-hidden", "true");
-  })();
-</script>
 
 <dialog id="mealPickerModal"><button class="modal-close">×</button><span class="eyebrow">Choose a meal</span><h2>Choose a meal</h2>
  <div class="picker-row"><label>Meal<select id="pickerMealType"><option>Lunch</option><option>Dinner</option><option>Breakfast</option><option>Snack</option></select></label><label>Effort<select id="pickerEffort"><option value="barely">Barely any</option><option value="easy" selected>Easy</option><option value="cook">Happy to cook</option></select></label></div>
