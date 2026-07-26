@@ -29,33 +29,73 @@
   if (!section) return;
 
   const DRAFT_STORAGE_KEY = 'flourishBloom-recipe-draft-v1';
-    let parsedUrl;
-    try {
-      parsedUrl = new URL(safeUrl);
-      if (!['http:', 'https:'].includes(parsedUrl.protocol)) throw new Error('Unsupported protocol');
-    } catch (_) {
-      return { success: false, message: 'Please enter a full recipe link beginning with http:// or https://.' };
+  let recipes = [];
+  let favouritesOnly = false;
+  let pendingImportedRecipe = null;
+  let importingRecipe = false;
+  let currentFolder = 'all';
+  let pendingPhoto = '';
+  let selectedTags = [];
+  let currentStep = 1;
+  let recipeToastTimer = null;
+  let draftRestoreTimer = null;
+
+  function closeRecipeModal(id) {
+    const modal = $(id);
+    if (!modal) return;
+    if (modal.open) modal.close();
+    modal.removeAttribute('open');
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  function closeAllRecipeModals() {
+    closeRecipeModal('recipeImportModal');
+    closeRecipeModal('recipeEditorModal');
+    closeRecipeModal('recipeViewModal');
+  }
+
+  // Defensive reset: no recipe dialog should appear until its button is tapped.
+  closeAllRecipeModals();
+
+  function loadRecipes() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch (_) { return []; }
+  }
+  function migrateRecipes(recipeList) {
+    if (!Array.isArray(recipeList)) return [];
+    const cleaned = recipeList.filter(recipe => {
+      const id = String(recipe?.id ?? '').trim();
+      const name = String(recipe?.name ?? '').trim();
+      if (id && BUNDLED_RECIPE_IDS.has(id)) return false;
+      if (name && BUNDLED_RECIPE_NAMES.has(name)) return false;
+      return true;
+    });
+    return cleaned;
+  }
+  function initialiseRecipes() {
+    const storedRecipes = loadRecipes();
+    const cleanedRecipes = migrateRecipes(storedRecipes);
+    const changed = JSON.stringify(storedRecipes) !== JSON.stringify(cleanedRecipes);
+    recipes = cleanedRecipes;
+    if (changed) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes));
+      if (window.FlourishBloomCloud?.user) window.FlourishBloomCloud.syncNow?.();
     }
-    if (importingRecipe) return { success: false, message: 'Recipe import is already running. Please wait a moment.' };
+  }
+  function saveRecipes() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes));
+    if (window.FlourishBloomCloud?.user) window.FlourishBloomCloud.syncNow?.();
+    renderRecipes();
+  }
+  const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const num = id => Math.max(0, Number($(id).value || 0));
 
-    const submitButton = $('recipeImportSubmitBtn');
-    try {
-      setImportFeedback('Reading the recipe...','');
-      importingRecipe = true;
-      if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.textContent = 'Importing...';
-      }
-
-      const html = await fetchRecipeHtml(parsedUrl.href);
-      const recipeData = extractRecipeFromHtml(html);
-      if (!recipeData) {
-        return { success: false, message: 'I could open the page, but it did not include readable recipe details. Add it manually and paste the ingredients and method.' };
-      }
-      const importedRecipe = prepareImportedRecipe(recipeData);
-      if (!importedRecipe || !importedRecipe.name || (!importedRecipe.ingredients.length && !importedRecipe.method)) {
-        return { success: false, message: 'The page did not provide enough recipe information to import. Add it manually instead.' };
-      }
+  function showRecipeToast(message) {
+    let toast = $('recipeToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'recipeToast';
       toast.className = 'recipe-toast';
       document.body.appendChild(toast);
     }
@@ -64,15 +104,23 @@
     clearTimeout(recipeToastTimer);
     recipeToastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
   }
+
   function setImportFeedback(statusMessage = '', errorMessage = '') {
+    const status = $('recipeImportStatus');
+    const error = $('recipeImportError');
+    if (status) status.textContent = statusMessage;
+    if (error) error.textContent = errorMessage;
+  }
+
+  function setEditorFeedback(message = '') {
+    const status = $('recipeEditorDraftStatus');
+    if (status) status.textContent = message;
   }
 
   function loadRecipeDraft() {
-      $('recipeImportStatus').textContent = '';
-      if (submitButton) {
-        submitButton.disabled = false;
-        submitButton.textContent = 'Import';
-      }
+    try { return JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || 'null'); }
+    catch (_) { return null; }
+  }
 
   function hasRecipeDraftContent(draft) {
     if (!draft || typeof draft !== 'object') return false;
@@ -324,7 +372,7 @@
     const restored = restoreRecipeDraftIntoImport();
     if (!restored) {
       $('recipeImportUrl').value = '';
-      setImportFeedback('','');
+      setImportFeedback('', '');
     }
     const modal = $('recipeImportModal');
     modal.hidden = false;
@@ -510,6 +558,7 @@
   async function importRecipeFromUrl(url) {
     const safeUrl = String(url || '').trim();
     if (!safeUrl) return { success: false, message: 'Please enter a recipe URL.' };
+
     let parsedUrl;
     try {
       parsedUrl = new URL(safeUrl);
@@ -521,7 +570,7 @@
 
     const submitButton = $('recipeImportSubmitBtn');
     try {
-      setImportFeedback('Reading the recipe...','');
+      setImportFeedback('Reading the recipe...', '');
       importingRecipe = true;
       if (submitButton) {
         submitButton.disabled = true;
@@ -549,7 +598,8 @@
       return { success: false, message: 'This link could not be imported right now. Some websites block imports. You can still paste details manually.' };
     } finally {
       importingRecipe = false;
-      $('recipeImportStatus').textContent = '';
+      const status = $('recipeImportStatus');
+      if (status && status.textContent === 'Reading the recipe...') status.textContent = '';
       if (submitButton) {
         submitButton.disabled = false;
         submitButton.textContent = 'Import';
@@ -619,13 +669,13 @@
     const url = $('recipeImportUrl').value;
     const result = await importRecipeFromUrl(url);
     if (result.success) {
-      setImportFeedback(result.message,'');
+      setImportFeedback(result.message, '');
       showRecipeToast(result.message);
     } else {
       setImportFeedback('', result.message);
     }
   });
-  $('recipeImportUrl')?.addEventListener('keydown', async event => {
+  $('recipeImportUrl')?.addEventListener('keydown', event => {
     if (event.key !== 'Enter') return;
     event.preventDefault();
     $('recipeImportSubmitBtn')?.click();
@@ -634,7 +684,7 @@
   $('recipeImportClearBtn').addEventListener('click', () => {
     clearRecipeDraft();
     $('recipeImportUrl').value = '';
-    setImportFeedback('','');
+    setImportFeedback('', '');
     resetForm();
   });
   $('recipeSearch').addEventListener('input', renderRecipes);
