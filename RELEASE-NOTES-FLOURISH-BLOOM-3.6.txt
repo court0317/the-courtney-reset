@@ -1,0 +1,9 @@
+Flourish & Bloom 3.6 — Daily Reset & Home Brand
+
+Changes
+- Removed the unused “days into your journey” message from the home hero.
+- Water, daily workout ticks, meal completion ticks and daily check-in values reset when the local calendar day changes.
+- Long-term information such as recipes, weight, notes, garden growth and history is preserved.
+- The Flourish & Bloom heading and logo now return to the Today/home page when tapped.
+- Added an overnight date-change check for PWAs left open across midnight.
+- Updated the service-worker cache to v3.6.

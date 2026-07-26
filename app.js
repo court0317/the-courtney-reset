@@ -57,6 +57,53 @@ const takeawayOptions=[
 function dayNum(x){return Math.floor(new Date(x.getFullYear(),x.getMonth(),x.getDate(),12).getTime()/86400000)}
 function status(){let e=dayNum(new Date())-dayNum(START);if(e<0)return{stage:'countdown',left:-e,week:1,day:0,n:0};if(e>=DAYS)return{stage:'complete',week:8,day:6,n:56};return{stage:'active',week:Math.floor(e/7)+1,day:e%7,n:e+1}}
 const s=status(),w=s.week,d=s.day,work=workouts[d],dk=`w${w}d${d}`,weekday=d<5;
+
+// Daily values are intentionally temporary. Keep long-term history, recipes,
+// garden growth and profile data, but start water and daily completion items
+// fresh whenever the local calendar date changes.
+const DAILY_RESET_KEY='flourishBloom-last-daily-reset-v1';
+function localCalendarKey(date=new Date()){
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+function resetDailyItemsWhenNeeded(){
+  const today=localCalendarKey();
+  const previousDay=localStorage.getItem(DAILY_RESET_KEY);
+  if(!previousDay){
+    localStorage.setItem(DAILY_RESET_KEY,today);
+    return false;
+  }
+  if(previousDay===today)return false;
+
+  // Only clear the active day's temporary values. Historical days remain
+  // untouched because they use their own day keys.
+  if(state.hydration)delete state.hydration[dk];
+  if(state.water){
+    Object.keys(state.water).forEach(key=>{if(key.startsWith(`${dk}-`))delete state.water[key]});
+  }
+  if(state.checks){
+    Object.keys(state.checks).forEach(key=>{if(key.startsWith(`${dk}-`))delete state.checks[key]});
+  }
+  if(state.mealDone){
+    Object.keys(state.mealDone).forEach(key=>{if(key.startsWith(`${dk}-`))delete state.mealDone[key]});
+  }
+  if(state.checkins)delete state.checkins[dk];
+
+  localStorage.setItem(DAILY_RESET_KEY,today);
+  localStorage.setItem(KEY,JSON.stringify(state));
+  return true;
+}
+resetDailyItemsWhenNeeded();
+
+// A PWA can remain open overnight. Reload just after the date changes so all
+// date-based keys, greetings and daily goals are recalculated correctly.
+let flourishBloomOpenDate=localCalendarKey();
+setInterval(()=>{
+  const nowKey=localCalendarKey();
+  if(nowKey!==flourishBloomOpenDate){
+    flourishBloomOpenDate=nowKey;
+    location.reload();
+  }
+},60000);
 function persist(){window.FlourishBloomAppState=state;localStorage.setItem(KEY,JSON.stringify(state))}
 window.FlourishBloomAppStateSave=()=>{persist();render();};
 function save(){persist();render()}
