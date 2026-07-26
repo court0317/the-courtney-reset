@@ -1,0 +1,8 @@
+Flourish & Bloom 3.6.3 — Recipe Import Isolation
+
+- Removed the recipe import dialog from normal document flow.
+- The importer now carries a native hidden state until Import from URL is deliberately tapped.
+- Opening explicitly removes hidden before showModal().
+- Closing restores hidden and aria-hidden.
+- Added immediate pre-JavaScript startup protection.
+- Updated service worker cache to v3.6.3.

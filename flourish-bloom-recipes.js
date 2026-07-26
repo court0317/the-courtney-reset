@@ -45,6 +45,8 @@
     if (!modal) return;
     if (modal.open) modal.close();
     modal.removeAttribute('open');
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
   }
 
   function closeAllRecipeModals() {
@@ -360,11 +362,19 @@
       $('recipeImportStatus').textContent = '';
       $('recipeImportError').textContent = '';
     }
-    $('recipeImportModal').showModal();
+    const modal = $('recipeImportModal');
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+    modal.showModal();
   }
 
   function closeImportModal() {
-    $('recipeImportModal')?.close?.();
+    const modal = $('recipeImportModal');
+    if (!modal) return;
+    if (modal.open) modal.close();
+    modal.removeAttribute('open');
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
   }
 
   function parseDuration(value) {
