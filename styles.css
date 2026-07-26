@@ -661,3 +661,20 @@ button.flourishBloom-brand-lockup:focus-visible{
 }
 button.flourishBloom-brand-lockup:active{transform:translateX(22px) scale(.985)}
 @media(max-width:430px){button.flourishBloom-brand-lockup:active{transform:translateX(19px) scale(.985)}}
+
+/* Flourish & Bloom 3.6.1 — keep navigation out of open dialogs */
+html:has(dialog[open]) nav,
+body:has(dialog[open]) nav{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transform:translateY(24px)!important;
+}
+dialog[open]{
+  z-index:10000!important;
+}
+@media(min-width:651px){
+  dialog.recipe-modal[open]{
+    max-height:min(82vh,760px);
+  }
+}
